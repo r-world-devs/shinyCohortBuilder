@@ -1,0 +1,71 @@
+Package: shinyCohortBuilder
+Type: Package
+Title: Modular Cohort-Building Framework for Analytical Dashboards
+Version: 0.0.0.9037
+Authors@R: 
+    c(person('Krystian', 'Igras', 
+             email = 'krystian8207@gmail.com', 
+             role = c('cre', 'aut')),
+      person('Kamil', 'Wais', 
+             email = 'kamil.wais@gmail.com', 
+             role = c('aut')),
+      person('Adam', 'Foryś',
+             role = "ctb"))
+Maintainer: The package maintainer <krystian8207@gmail.com>
+Description: You can easily add advanced cohort-building component 
+    to your analytical dashboard or simple shiny app. 
+    Then you can instantly start building cohorts using multiple 
+    filters of different types, filtering datasets, and filtering steps. 
+    Filters can be complex and data-specific, and together 
+    with multiple filtering steps you can use complex filtering rules. 
+    The cohort-building sidebar panel allows you to easily 
+    work with filters, add and remove filtering steps. 
+    It helps you with handling missing values during filtering, 
+    and provides instant filtering feedback with filter feedback plots. 
+    The CohortBuilder module is not only 
+    compatible with native shiny bookmarking, 
+    but also provides reproducible R code.
+License: MIT + file LICENSE
+Depends: 
+    R (>= 3.5.0)
+Imports: 
+    magrittr,
+    glue,
+    bslib,
+    jsonlite,
+    purrr,
+    ggplot2,
+    ggiraph,
+    shiny,
+    shinyWidgets (>= 0.6.4.9100),
+    dplyr,
+    cohortBuilder (>= 0.0.0.9037),
+    tryCatchLog,
+    highr,
+    shinyGizmo
+Suggests:
+    pkgload,
+    packer,
+    sass,
+    knitr,
+    rmarkdown
+Remotes:
+    github::dreamRs/shinyvs
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.2
+VignetteBuilder: knitr
+Collate:
+    'shinyCohortBuilder-package.R'
+    'ui_utils.R'
+    'actions.R'
+    'renders.R'
+    'filter_discrete.R'
+    'filter_range.R'
+    'filter_date_range.R'
+    'filter_discrete_text.R'
+    'filter_multi_discrete.R'
+    'app.R'
+    'cb_layer.R'
+    'source.R'
+    'source_tblist.R'

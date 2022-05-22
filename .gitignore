@@ -1,0 +1,9 @@
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+shiny_bookmarks
+node_modules
+docs
+inst/doc
+inst/www/.sass_cache_keys

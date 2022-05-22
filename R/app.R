@@ -1,0 +1,282 @@
+#' Run demo application
+#'
+#' The demo presents available filters and toolbox features.
+#'
+#' @param steps Set to TRUE (default) if multiple steps should be available.
+#' @param stats Choose which statistics should be displayed for data (and some filters).
+#'   Possible options are: "pre" - previous step stat, "post" - current step stats,
+#'   `c("pre", "post")` - for both and NULL for no stats.
+#' @param run_button Should Run button be displayed? If so, the current step computations are run only when clicked.
+#' @param feedback Set to TRUE (default) if feedback plots should be displayed at each filter.
+#' @param state Set to TRUE (default) to enable get/set state panel.
+#' @param bootstrap Boostrap version to be used for filtering panel.
+#'   See \link[bslib]{bs_theme} version argument.
+#' @param enable_bookmarking Set to TRUE (default) if panel should be compatible with native shiny bookmarking.
+#' @param code Set to TRUE (default) to enable reproducible code panel.
+#' @param attrition Set to TRUE (default) to enable attrition plot panel.
+#' @param show_help Set to TRUE (default) to enable help buttons.
+#'
+#' @export
+demo_app <- function(
+  steps = TRUE, stats = c("pre", "post"), run_button = FALSE, feedback = TRUE, state = TRUE,
+  bootstrap = 3, enable_bookmarking = TRUE, code = TRUE, attrition = TRUE, show_help = TRUE) {
+  options("shiny.minified" = FALSE)
+  options("cb_active_filter" = FALSE)
+  if (isTRUE(enable_bookmarking)) {
+    shiny::enableBookmarking(store = "url")
+  } else {
+    shiny::enableBookmarking(store = "disable")
+  }
+  set.seed(123)
+  gender_mapping <- function(values, cohort) {
+    unname(c("F" = "Female", "M" = "Male")[values])
+  }
+  datasets <- list(
+    "01" = cohortBuilder::tblist(
+      patients = data.frame(
+        id = 1:10,
+        group = c("A", "B", "C", "B", "B", "C", "A", "B", "C", "B"),
+        gender = c("F", "M", "F", "F", "F", "M", "M", "F", "F", "M"),
+        age = c(sample(30:50, 9), NA),
+        visit = sample(seq.Date(as.Date("1989-01-01"), as.Date("1991-01-01"), by = "month"), 10),
+        biom1 = c("A", "B", "A", "A", "B", "B", "B", "A", "A", "A"),
+        biom2 = c("C", "D", "C", "D", "E", "E", "C", "C", "E", "C")
+      ),
+      therapy = data.frame(
+        id = 1:10,
+        treatment = c("Atezo", "Chemo", "Nebul", "Atezo", "Chemo", "Nebul", "Atezo", "Chemo", "Atezo", "Atezo")
+      )
+    ),
+    "02" = cohortBuilder::tblist(
+      patients = data.frame(
+        id = 1:15,
+        group = c("A", "B", "C", "A", "B", "C", "A", "B", "C", "B", "D", "D", "D", "D", "D"),
+        gender = c("F", "M", "F", "F", "F", "M", "M", "F", "F", "M", "F", "M", "F", "M", "F"),
+        age = sample(30:50, 15),
+        visit = sample(seq.Date(as.Date("1989-01-01"), as.Date("1991-01-01"), by = "month"), 15),
+        biom1 = c("A", "B", "A", "A", "B", "B", "B", "A", "A", "A", "B", "A", "A", "B", "B"),
+        biom2 = c("C", "D", "C", "D", "E", "E", "C", "C", "E", "C", "C", "D", "C", "D", "E"),
+        biom3 = c("A", "B", "A", "B", "A", "B", "A", "B", "A", "B", "A", "B", "A", "B", "B")
+      ),
+      therapy = data.frame(
+        patient_id = c(1:15, 1:5),
+        line_id = c(rep(1, 15), rep(2, 5)),
+        treatment = c(
+          "Atezo", "Chemo", "Nebul", "Atezo", "Chemo", "Nebul", "Atezo", "Chemo", "Atezo", "Atezo",
+          "Nebul", "Atezo", "Chemo", "Atezo", "Atezo", "Nebul", "Atezo", "Chemo", "Nebul", "Atezo"
+        )
+      ) %>%
+        dplyr::mutate(id = paste(patient_id, line_id, sep = "_")) %>%
+        dplyr::relocate(id, .before = "patient_id")
+    )
+  )
+
+  shiny::runApp(list(
+    ui = function(req) {
+      shiny::fluidPage(
+        theme = bslib::bs_theme(version = bootstrap),
+        if (isTRUE(enable_bookmarking)) bookmarkButton() else NULL,
+        shiny::actionButton("debug", "debug"),
+        shiny::radioButtons("dataset", "Source", c("No binding keys" = "01", "Binding keys" = "02")),
+        cb_ui(
+          id = "ptnts", style = "width: 300px; float: left;", steps = steps,
+          state = state, code = code, attrition = attrition
+        ),
+        shiny::div(style = "float: right; width: calc(100% - 300px);",
+          shiny::verbatimTextOutput("datasets")
+        )
+      )
+    }, server = function(input, output, session) {
+      # Adam's idea: create in global and just clone in session
+
+      #group_filter <- cohortBuilder::filter(type = "discrete", id = "group", name = "Group", variable = "group", dataset = "patients")
+      group_filter <- cohortBuilder::filter(
+        type = "discrete_text", id = "group", name = "Group", variable = "group", dataset = "patients"
+      )
+      gender_filter <- cohortBuilder::filter(
+        type = "discrete", id = "gender", name = "Gender", variable = "gender",
+        dataset = "patients", value = "M", value_mapping = "gender_mapping",
+        description = "The Gender field denotes the biological sex at birth."
+      )
+      age_filter <- cohortBuilder::filter(
+        type = "range", id = "age", name = "Age", variable = "age", dataset = "patients", range = NA,
+        description = "The Age field is an length of time that a person has lived or a thing has existed."
+      )
+      treatment_filter <- cohortBuilder::filter(
+        type = "discrete", id = "treatment", name = "Treatment", variable = "treatment",
+        dataset = "therapy", value = "Atezo", gui_input = "vs"
+      )
+      visit_filter <- cohortBuilder::filter(
+        "date_range", name = "Visit", variable = "visit", dataset = "patients"
+      )
+      biom_filter <- cohortBuilder::filter(
+        type = "multi_discrete", id = "bioms", name = "Biomarkers", dataset = "patients",
+        values = list(biom1 = c("A"), biom2 = c("C")), variables = c("biom1", "biom2")
+      )
+
+      binding_keys <- list(
+        "01" = NULL,
+        "02" = cohortBuilder::bind_keys(
+          cohortBuilder::bind_key(
+            update = cohortBuilder::data_key("therapy", "patient_id"),
+            cohortBuilder::data_key("patients", "id"),
+            post = FALSE
+          ),
+          cohortBuilder::bind_key(
+            update = cohortBuilder::data_key("patients", "id"),
+            cohortBuilder::data_key("therapy", "patient_id"),
+            post = FALSE
+          )
+        )
+      )
+
+      patients_source <- cohortBuilder::set_source(
+        datasets[["01"]],
+        value_mappings = list(
+          gender_mapping = gender_mapping
+        ),
+        description = list(
+          patients = "Contains demographic information about patients."
+        ),
+        primary_keys = cohortBuilder::primary_keys(
+          cohortBuilder::data_key("patients", "id"),
+          cohortBuilder::data_key("therapy", "id")
+        ),
+        source_code = substitute({
+            source <- list(attributes = list(datasets = datasets_value))
+          },
+          list(
+            datasets_value = dput(datasets[["01"]], file = tempfile())
+          )
+        )
+      )
+
+      url_state <- isolate(parseQueryString(session$clientData$url_search)$state)
+
+      if (!is.null(url_state)) {
+        coh <- cohortBuilder::cohort(
+          patients_source
+        )
+        coh$restore(url_state)
+      } else {
+        coh <- cohortBuilder::cohort(
+          patients_source,
+          cohortBuilder::step(
+            group_filter,
+            gender_filter,
+            age_filter,
+            treatment_filter,
+            visit_filter#,
+            #biom_filter
+          )
+        )
+      }
+
+      cb_server(
+        id = "ptnts", coh, run_button = run_button, stats = stats, feedback = feedback,
+        enable_bookmarking = enable_bookmarking, show_help = show_help
+      ) # todo stats = NULL (no stats and maybe? no prots, then some optimization)
+
+      shiny::observeEvent(input$debug, {
+        browser()
+      }, ignoreInit = TRUE)
+
+      shiny::observeEvent(input$dataset, {
+        data_source <- cohortBuilder::set_source(
+          datasets[[input$dataset]],
+          value_mappings = list(
+            gender_mapping = gender_mapping
+          ),
+          binding_keys = binding_keys[[input$dataset]],
+          primary_keys = cohortBuilder::primary_keys(
+            cohortBuilder::data_key("patients", "id"),
+            cohortBuilder::data_key("therapy", "id")
+          ),
+          source_code = substitute({
+              source <- list(attributes = list(datasets = datasets_value))
+            },
+            list(
+              datasets_value = datasets[[input$dataset]]
+            )
+          )
+        ) %>%
+          cohortBuilder::add_step(
+            cohortBuilder::step(
+              group_filter,
+              gender_filter,
+              age_filter,
+              treatment_filter,
+              visit_filter
+            )
+          )
+        # three options available
+        # 1. keep_steps = TRUE preserves all the steps with the selected values.
+        # 2. keep_steps = c(1L) or more, the only defined are preserved but also cleared (preferred option when only data changes and we want to keep first step definition)
+        # 3. keep_step = FALSE - the logic assumes the source have steps provided and renders them.
+        coh$update_source(data_source)
+      }, ignoreInit = TRUE)
+
+      returned_data <- shiny::eventReactive(input[["ptnts-cb_data_updated"]], {
+        coh$get_data(step_id = coh$last_step_id(), state = "post")
+      }, ignoreInit = FALSE, ignoreNULL = FALSE)
+
+      output$datasets <- shiny::renderPrint({
+        print(returned_data())
+      })
+    }
+  ))
+}
+
+# todo Make queue of actions and with delay execute them.
+
+#' Run filtering panel locally
+#'
+#' @inheritParams demo_app
+#' @param cohort Cohort object with configured filters.
+#'
+#' @examples
+#' if (interactive()) {
+#'   mtcars_source <- set_source(tblist(mtcars = mtcars))
+#'   mtcars_cohort <- cohort(
+#'     mtcars_source,
+#'     filter("discrete", id = "am", dataset = "mtcars", variable = "am", value = 1)
+#'   )
+#'   gui(mtcars_cohort)
+#' }
+#'
+#' @export
+gui <- function(
+  cohort,
+  steps = TRUE, stats = c("pre", "post"), run_button = FALSE, feedback = TRUE, state = TRUE,
+  bootstrap = 3, enable_bookmarking = TRUE, code = TRUE, attrition = TRUE, show_help = TRUE) {
+  if (!interactive()) {
+    stop("Message - gui can be used in interactive mode only.")
+  }
+
+  shiny::runApp(list(
+    ui = function(req) {
+      shiny::fluidPage(
+        tags$style("body {font-size: 12px;};"),
+        cb_ui(
+          id = "coh", style = "width: 300px; float: left;",
+          steps = steps, state = state, code = code, attrition = attrition
+        ),
+        shiny::div(
+          style = "float: right; width: calc(100% - 300px);",
+          shiny::verbatimTextOutput("datasets")
+        )
+      )
+    }, server = function(input, output, session) {
+      cb_server(
+        id = "coh", cohort, run_button = run_button, stats = stats, feedback = feedback,
+        enable_bookmarking = enable_bookmarking, show_help = show_help
+      )
+      returned_data <- shiny::eventReactive(input[["coh-cb_data_updated"]], {
+        cohort$get_data(state = "post")
+      }, ignoreInit = FALSE, ignoreNULL = FALSE)
+      output$datasets <- shiny::renderPrint({
+        print(returned_data())
+      })
+    }
+  ))
+}

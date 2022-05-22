@@ -1,0 +1,31 @@
+title: shinyCohortBuilder
+template:
+  bootstrap: 5
+url: https://github.com/r-world-devs/shinyCohortBuilder/
+home:
+  strip_header: true
+navbar:
+  left:
+    - icon: fa fa-thumbs-o-up
+      text: "Get started"
+      href: articles/shinyCohortBuilder.html
+    - icon: fa fa-file-code-o
+      text: "Functions"
+      href: reference/index.html
+    - icon: fa fa-thumbs-o-up
+      text: "Articles"
+      menu:
+      - text: "shinyCohortBuilder options"
+        href: articles/package-options.html
+      - text: "Updating Source in Shiny"
+        href: articles/updating-source.html
+      - text: "Implementing custom GUI filter layer"
+        href: articles/gui-filter-layer.html
+      - text: "Creating custom source extension"
+        href: articles/custom-gui-layer.html
+    - icon: fa fa-newspaper-o
+      text: "News"
+      href: news/index.html
+    - icon: fa fa-ambulance
+      text: "Issues"
+      href: https://github.com/r-world-devs/shinyCohortBuilder/issues

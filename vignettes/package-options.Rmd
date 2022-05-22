@@ -1,0 +1,46 @@
+---
+title: "shinyCohortBuilder options"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{shinyCohortBuilder options}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(shinyCohortBuilder)
+```
+
+The goal of this document is to present what options can be specified while using `sinyCohortBuilder` and what effect do they have on the package operations.
+
+## cb_verbose
+
+Default value: `FALSE`.
+
+When the option is enabled (`options("cb_verbose" = TRUE)`) operations taken in the filtering panel result with printing readable log about the operation state.
+
+## scb_verbose
+
+Default value: `FALSE`.
+
+Similar to `cb_vebose`, enabling the option (`options("scb_verbose" = TRUE)`) results with printing readable logs. Logs are visible as popups in the Shiny application where filtering panel is used.
+
+## scb_render_all
+
+Default value: `FALSE`.
+
+Having the option enabled, results with rendering filter related controllers only when the filter becomes active (enrolled in the filtering panel). This way when having large amount of filters configured you can improve performance of rendering the filtering panel (i.e. when initializing the app).
+
+If you prefer to render all the filters when filtering panel is generated, just set `options("scb_render_all" = TRUE)`.
+With such configuration, you can realize a slight delay when filter controllers are enrolled for the first time. 
+
+## scb_minified
+
+Default value: `TRUE`.
+
+Having the options enabled results with using minified version of css and js files used for filtering panel.
+If you want to use original source (i.e. for debugging) please set `options("scb_minified" = FALSE)`.

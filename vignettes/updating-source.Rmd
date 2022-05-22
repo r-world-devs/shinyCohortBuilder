@@ -1,0 +1,157 @@
+---
+title: "Updating Source in Shiny"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Updating Source in Shiny}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(shinyCohortBuilder)
+```
+
+A common scenario when using `shinyCohortBuilder` in custom Shiny application is to allow a user to switch between multiple data sources.
+
+Such scenario takes place when you:
+
+1. Use different version of your data:
+
+<!-- foto -->
+
+2. Use different types of data that may differ in structure:
+
+<!-- foto -->
+
+The goal of this document is to explain how `shinyCohortBuilder` can be used in the two scenarios.
+
+Whenever you use different data in your Shiny application you should use `cohortBuilder::update_source` method to update underlying data.
+
+The method not only replaces Source in the Cohort object, but also triggers set of specific operations in filtering panel.
+
+The operations depends on the way you store filters configuration and extra options passed to the method.
+
+Below we describe two most common solutions when dealing with the above scenarios.
+
+## Consistent data 
+
+When working with consistent datasets you usually want to keep filtering panel unchanged for each data version.
+In this situation:
+
+1. Configure filtering steps only once when initializing cohort.
+2. When updating source, use `update_source(cohort_object, keep_steps = TRUE)`.
+
+As a result: 
+
+- configured filtering steps will remain unchanged,
+- no additional rendering in filtering panel will take place in Shiny what results faster update,
+- all the filters in panel will be updated having new data filtering options (choices, ranges etc.).
+
+Below application presents the described approach:
+
+```{r, eval = FALSE}
+library(shiny)
+library(cohortBuilder)
+library(shinyCohortBuilder)
+
+mtcars_list = list(
+  "0" = dplyr::filter(mtcars, am == 0),
+  "1" = dplyr::filter(mtcars, am == 1)
+)
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      radioButtons("version", "Version", choices = c("0", "1")),
+      cb_ui("mtcars")
+    ),
+    mainPanel(
+      verbatimTextOutput("cohort_data")
+    )
+  )  
+)
+
+server <- function(input, output, session) {
+  init_source <- set_source(tblist(mtcars = mtcars_list[["0"]]))
+  mt_cohort <- cohort(
+    init_source,
+    filter("range", id = "mpg", dataset = "mtcars", variable = "mpg", active = FALSE),
+    filter("range", id = "qsec", dataset = "mtcars", variable = "qsec", active = FALSE)
+  )
+  
+  cb_server("mtcars", mt_cohort)
+  
+  observeEvent(input$version, {
+    new_source <- set_source(tblist(mtcars = mtcars_list[[input$version]]))
+    update_source(mt_cohort, new_source, keep_steps = TRUE)
+  })
+}
+
+shinyApp(ui, server)
+```
+
+## Inconsistent data
+
+When filters configuration is different across multiple data sources you want to render the filtering panel from scratch everytime the source is updated.
+In this scenario:
+
+1. Keep filtering steps configuration within a source.
+2. When updating source, use `update_source(cohort_object, keep_steps = FALSE)`.
+
+As a result: 
+
+- configured filtering steps in Source will be used to update Cohort configuration,
+- the previous filtering panel will be removed,
+- the new filtering panel will be rendered based on the new configuration.
+
+Below application presents the described approach:
+
+```{r, eval = FALSE}
+library(shiny)
+library(cohortBuilder)
+library(shinyCohortBuilder)
+
+source_mtcars <- set_source(
+  tblist(mtcars = mtcars),
+  filter("range", id = "mpg", dataset = "mtcars", variable = "mpg", active = FALSE),
+  filter("range", id = "qsec", dataset = "mtcars", variable = "qsec", active = FALSE)
+)
+
+source_iris <- set_source(
+  tblist(iris = iris),
+  filter("discrete", id = "species", dataset = "iris", variable = "Species", active = FALSE),
+  filter("range", id = "petal_length", dataset = "iris", variable = "Petal.length", active = FALSE)
+)
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      radioButtons("dataset", "Dataset", choices = c("mtcars", "iris")),
+      cb_ui("data_panel")
+    ),
+    mainPanel(
+      verbatimTextOutput("cohort_data")
+    )
+  )  
+)
+
+server <- function(input, output, session) {
+  cohort_object <- cohort(source_mtcars)
+  cb_server("data_panel", cohort_object)
+  
+  observeEvent(input$dataset, {
+    if (input$dataset = "mtcars") {
+      update_source(cohort_object, source_mtcars, keep_steps = FALSE)  
+    }
+    if (input$dataset = "iris") {
+      update_source(cohort_object, source_iris, keep_steps = FALSE)  
+    }
+  })
+}
+
+shinyApp(ui, server)
+```

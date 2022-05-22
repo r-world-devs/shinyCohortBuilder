@@ -1,0 +1,271 @@
+---
+title: "Creating custom source extension"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Creating custom source extension}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+library(shinyCohortBuilder)
+```
+
+If you want to use `shinyCohortBuilder` with a custom source type, a set of methods needs to be defined.
+
+Currently there exists one official extension `cohortBuilder.db` package that allows you to use `shinyCohortBuilder` (and `cohortBuilder`) with database connections.
+
+The goal of this document is to explain how to create custom extensions to `shinyCohortBuilder`.
+
+In general to create the custom layer you need to create an R package where:
+ 
+1. The custom Source extension for `cohortBuilder` methods is implemented (see. `vignettes("custom-extensions", package = "cohortBuilder")`).
+1. A set of integration S3 methods for `shinyCohortBuilder` are implemented.
+2. Extra filters (added in the extension) GUI layers are implemented (see [custom GUI filters](gui-filter-layer.html)).
+
+If you have `cohortBuilder` integration ready for the selected source `type` (a new package named `cohortBuilder.<type>`), the next step is to add `shinyCohortBuilder` integration.
+
+Below we describe all the required and optional methods you need to define within the created package.
+
+1. **`.render_filters` - method used to define structure for filters rendering in a selected step**
+
+Required parameters:
+
+- `source` - Source object.
+- `cohort` - Cohort object.
+- `step_id` - Id of the filtering step.
+- `ns` - Namespace function.
+- `...` - Unused, added for S3 integration only.
+
+Details:
+
+- The method should return HTML structure including statistics output placeholder and a list of filter renderings.
+- In order to get all the filters included in the selected step use `cohort$get_step(step_id)$filters`.
+- Data statistics outputs should be consistent with `.update_data_stats` method described below.
+- Each filter should be rendered with usage of `.render_filter` method.
+- List of filters rendering should be wrapped into ```shiny::div(class = "cb_filters", `data-step_id` = step_id)```.
+
+Examples:
+
+- `shinyCohortBuilder` - default method
+
+```{r, eval = FALSE}
+.render_filters.default <- function(source, cohort, step_id, ns, ...) {
+  step <- cohort$get_step(step_id)
+  shiny::tagList(
+    shiny::htmlOutput(ns(paste0(step_id, "-stats")), class = "scb_data_stats"),
+    step$filters %>%
+      purrr::map(~ .render_filter(.x, step_id, cohort, ns = ns)) %>%
+      shiny::div(class = "cb_filters", `data-step_id` = step_id)
+  )
+}
+```
+
+- `shinyCohortBuilder` - tblist data class
+
+```{r, eval = FALSE}
+.render_filters.tblist <- function(source, cohort, step_id, ns, ...) {
+  step <- cohort$get_step(step_id)
+
+  group_filters(cohort$get_source(), step$filters) %>%
+    purrr::imap(~ dataset_filters(.x, .y, step_id, cohort, ns = ns)) %>%
+    shiny::div(class = "cb_filters", `data-step_id` = step_id)
+}
+```
+
+In this example we group all the defined filters by related datasets from source (`group_filters`), 
+and attach a separate statistics placeholder for each dataset (dataset_filters).
+
+- `cohortBuilder.db` - db data class
+
+```{r, eval = FALSE}
+render_filters.db <- function(source, cohort, step_id, ns) {
+  step <- cohort$get_step(step_id)
+
+  group_filters_db(cohort$get_source(), step$filters) %>%
+    purrr::imap(~ dataset_filters_db(.x, .y, step_id, cohort, ns = ns)) %>%
+    div(class = "cb_filters", `data-step_id` = step_id)
+}
+```
+
+2. **`.update_data_stats` - logic for updating data statistics**
+
+Required parameters:
+
+- `source` - Source object.
+- `step_id` - Id of the filtering step.
+- `cohort` - Cohort object.
+- `session` - Shiny session object.
+- `...` - Unused, added for S3 integration only.
+
+Details:
+
+- The function should define rendering output for consistent with the output placeholder stated within `.render_filters`.
+- It's recommended the statistics are taken from the Cohort cache `cohort$get_cache(step_id, state = "pre")`.
+- It's recommended the output performs previous step data validation (in terms of data existance) and returns descriptive message to the user.
+- Use `cohort$attributes$stats` to get displayed statstics state chosen by the user ("pre", "post", both or NULL).
+- For printing the statistics use `.pre_post_stats` which returns formatted statistics output.
+- You may directly assign the rendering to the output or use `.sendOutput` method (useful when sending output in loop see "tblist" source example below).
+
+Examples:
+
+- `shinyCohortBuilder` - default method
+
+```{r, eval = FALSE}
+.update_data_stats.default <- function(source, step_id, cohort, session, ...) {
+  ns <- session$ns
+  stats <- cohort$attributes$stats
+
+  session$output[[paste0(step_id, "-stats")]] <- shiny::renderUI({
+    previous <- cohort$get_cache(step_id, state = "pre")$n_rows
+    if (!previous > 0) {
+      return("No data selected in previous step.")
+    }
+    current <- cohort$get_cache(step_id, state = "post")$n_rows
+    .pre_post_stats(current, previous, percent = TRUE, stats = stats)
+  })
+}
+```
+
+- `shinyCohortBuilder` - tblist data class
+
+```{r, eval = FALSE}
+.update_data_stats.tblist <- function(source, step_id, cohort, session, ...) {
+  stats <- cohort$attributes$stats
+  step <- cohort$get_step(step_id)
+
+  dataset_names <- names(cohort$get_source()$attributes$datasets)
+  data_filters <- purrr::map_chr(step$filters, get_filter_dataset)
+  dataset_names <- intersect(dataset_names, data_filters)
+
+  dataset_names %>% purrr::walk(
+    ~ .sendOutput(
+      paste0(step_id, "-stats_", .x),
+      shiny::renderUI({
+        previous <- cohort$get_cache(step_id, state = "pre")[[.x]]$n_rows
+        if (!previous > 0) {
+          return("No data selected in previous step.")
+        }
+        current <- cohort$get_cache(step_id, state = "post")[[.x]]$n_rows
+        .pre_post_stats(current, previous, percent = TRUE, stats = stats)
+      }),
+      session
+    )
+  )
+}
+```
+
+- `cohortBuilder.db`
+
+```{r, eval = FALSE}
+update_data_stats.db <- function(source, step_id, cohort, session) {
+  stats <- cohort$attributes$stats
+
+  dataset_names <- source$attributes$tables
+  dataset_names %>% purrr::walk(
+    ~ shinyCohortBuilder::sendOutput(
+      paste0(step_id, "-stats_", .x),
+      shiny::renderUI({
+        previous <- cohort$get_cache(step_id, state = "pre")[[.x]]$n_rows
+        if (!previous > 0) {
+          return("No data selected in previous step.")
+        }
+        current <- cohort$get_cache(step_id, state = "post")[[.x]]$n_rows
+        shinyCohortBuilder::pre_post_stats(current, previous, percent = TRUE, stats = stats)
+      })
+    )
+  )
+}
+```
+
+3. **`autofilter` (optional) - automatically generate filters configuration based on Source data**
+
+Required parameters:
+
+- `source` - Source object, 
+- `...` - Unused, added for S3 integration only.
+
+Details:
+
+- Generate filters based on Source data (i.e. column types) using `cohortBuilder::filter` and wrap them with `cohortBuilder::step`.
+- Attach the filters to the Source using `add_step` method.
+- The method should return source with configured filters.
+
+Examples:
+
+- `shinyCohortBuilder` - tblist data class
+
+```{r, eval = FALSE}
+autofilter.tblist <- function(source, ...) {
+  step_rule <- source$attributes$datasets %>%
+    purrr::imap(~filter_rules(.x, .y)) %>%
+    unlist(recursive = FALSE) %>%
+    purrr::map(~do.call(cohortBuilder::filter, .)) %>%
+    unname()
+  source %>%
+    add_step(do.call(cohortBuilder::step, step_rule))
+}
+```
+
+4. **`.step_attrition` - define how step attrition plot should be rendered**
+
+Required parameters:
+
+- `source` - Source object.
+- `id` - Id of the attrition plot output.
+- `cohort` - Cohort object.
+- `session` - Shiny session object.
+- `...` - Unused, added for S3 integration only.
+
+Details:
+
+- The method should return list of two objects, output - returning UI output placeholder (having optional user input controllers affecting the output, see "tblist" example below) and render - rendering function defining the plot generating expression.
+- Within rendering function use `cohort$show_attrition` method to generate the plot (and pass required parameters to it when needed, see "tblist" class example where `dataset` is needed).
+- Use provided `id` parameter to as an id of plot output placeholder.
+
+Examples:
+
+- `shinyCohortBuilder` - default method
+
+```{r, eval = FALSE}
+.step_attrition.default <- function(source, id, cohort, session, ...) {
+  ns <- session$ns
+
+  list(
+    render = shiny::renderPlot({
+      cohort$show_attrition()
+    }),
+    output = shiny::plotOutput(id)
+  )
+}
+```
+
+- `shinyCohortBuilder` - tblist data class
+
+```{r, eval = FALSE}
+.step_attrition.tblist <- function(source, id, cohort, session, ...) {
+  ns <- session$ns
+  choices <- names(source$attributes$datasets)
+
+  list(
+    render = shiny::renderPlot({
+      cohort$show_attrition(dataset = session$input$attrition_input)
+    }),
+    output = shiny::tagList(
+      shiny::selectInput(ns("attrition_input"), "Choose dataset", choices),
+      shiny::plotOutput(id)
+    )
+  )
+}
+```
+
+5. **`.custom_attrition` - (optional) a custom method used for your own version of attrition plot**
+
+The parameters and output structure is the same as for `.step_attrition`.
+The main difference is that you should put your custom logic for generating attrition (i.e. using a specific package meant for this).
+
+When the method is defined, the attrition will be printed inside an extra tab of attrition modal.

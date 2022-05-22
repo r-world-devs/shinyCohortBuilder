@@ -1,0 +1,344 @@
+extend_stats <- function(current, parent) {
+  missing_stats <- setdiff(names(parent), names(current))
+  for (missing_stat in missing_stats) {
+    current[[missing_stat]] <- 0
+  }
+  current[names(parent)]
+}
+
+extract_selected_value <- function(value, parent_filter_stats, reset) {
+
+  if (reset || identical(value, NA)) {
+    return(names(parent_filter_stats))
+  }
+  if (is.null(value)) {
+    return(value)
+  }
+  if (!all(value %in% names(parent_filter_stats))) {
+    return(intersect(value, names(parent_filter_stats)))
+  }
+  return(value)
+}
+
+choice_name <- function(name, parent_stat, current_stat, stats) {
+  .pre_post_stats(current_stat, parent_stat, name, brackets = TRUE, stats = stats)
+}
+
+#' @export
+.choice_names <- function(current, previous, name, brackets = TRUE, percent = FALSE, stats = c("pre", "post")) {
+  glue::glue(
+    "<span>",
+    "{name}{open_bracket}{post_stat}{slash}{pre_stat}{close_bracket}",
+    "{percent_open_bracket}{percent}{percent_close_bracket}",
+    "</span>",
+    .envir = list(
+      name = empty_if_false(!missing(name), paste0(name, " "), FALSE, ""),
+      open_bracket = empty_if_false(brackets && length(stats), "(", FALSE, ""),
+      post_stat = empty_if_false(
+        "post" %in% stats,
+        glue::glue("<span class = 'cb_delayed'>{current}</span>"),
+        FALSE, ""
+      ),
+      slash = empty_if_false(length(stats) == 2, " / ", FALSE, ""),
+      pre_stat = empty_if_false("pre" %in% stats, previous, FALSE, ""),
+      close_bracket = empty_if_false(brackets && length(stats), ")", FALSE, ""),
+      percent_open_bracket = empty_if_false(percent && length(stats) == 2, " (", FALSE, ""),
+      percent = empty_if_false(
+        percent && length(stats) == 2,
+        glue::glue("<span class = 'cb_delayed'>{round(100 * current / previous, 0)}%</span>"),
+        FALSE, ""
+      ),
+      percent_close_bracket = empty_if_false(percent && length(stats) == 2, ")", FALSE, "")
+    )
+  )
+}
+
+is_vs <- function(filter) {
+  !is.null(filter$get_params("gui_input")) && filter$get_params("gui_input") == "vs"
+}
+
+#' @export
+.keep_na_input <- function(input_id, filter, cohort) {
+
+  filter_id <- filter$id
+  step_id <- filter$step_id
+  na_count <- cohort$get_cache(step_id, filter_id, state = "pre")$n_missing
+
+  shiny::tagList(
+    shiny::checkboxInput(
+      paste0(input_id, "-keep_na"),
+      label = glue::glue("Keep missing values ({na_count})"),
+      filter$get_params("keep_na")
+    ) %>%
+      shiny::tagAppendAttributes(class = "cb_na_input")
+  )
+}
+
+#' @export
+.update_keep_na_input <- function(session, input_id, filter, cohort) {
+
+  filter_id <- filter$id
+  step_id <- filter$step_id
+  na_count <- cohort$get_cache(step_id, filter_id, state = "pre")$n_missing
+  shiny::updateCheckboxInput(
+    session,
+    inputId = paste0(input_id, "-keep_na"),
+    value = filter$get_params("keep_na"),
+    label = glue::glue("Keep missing values ({na_count})")
+  )
+}
+
+discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
+  step_id <- filter$step_id
+  filter_id <- filter$id
+  filter_params <- filter$get_params()
+
+  if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
+    return(
+      list(inputId = input_id, choices = character(0), selected = character(0), label = NULL)
+    )
+  }
+
+  parent_filter_stats <- cohort$get_cache(step_id, filter_id, state = "pre")$choices
+  filter_stats <- extend_stats(
+    cohort$get_cache(step_id, filter_id, state = "post")$choices,
+    parent_filter_stats
+  )
+  selected_value <- extract_selected_value(
+    filter$get_params("value"),
+    parent_filter_stats, reset
+  )
+  value_mapping <- function(x, cohort) x
+  if (!is.null(filter_params$value_mapping)) {
+    value_mapping <- cohort$get_source()$attributes$value_mappings[[filter_params$value_mapping]]
+  }
+
+  params <- list(
+    inputId = input_id,
+    choiceValues = names(parent_filter_stats),
+    choiceNames = .choice_names(
+      name = value_mapping(names(parent_filter_stats), cohort),
+      current = filter_stats,
+      previous = parent_filter_stats,
+      stats = cohort$attributes$stats
+    ),
+    selected = selected_value,
+    inline = TRUE,
+    label = if (update) character(0) else NULL,
+    ...
+  )
+
+  if(is_vs(filter)) {
+    params$choices <- params$choiceValues %>%
+      stats::setNames(params$choiceNames)
+    params$choiceValues <- NULL
+    params$choiceNames <- NULL
+    params$inline <- FALSE
+  } else {
+    params$choiceNames <- params$choiceNames %>% purrr::map(shiny::HTML)
+  }
+
+  return(params)
+}
+
+scb_color_palette <- list(
+  bootstrap = c(primary = '#3c8dbc'),
+  primary = c(blue = "#0066CC", white = "#FFFFFF", grey = "#B1B3B3", black = "#000000"),
+  secondary = c(
+    blue = "#0066CC", red = "#E40046", violet = "#A05EB5", green = "#00965E",
+    yellow = "#FFC72C", orange = "#ED8B00", cyan = "#00E5EF"
+  ),
+  shades = list(
+    blues = c("#00346a", "#004c9e", "#51a2e5", "#c9dff6"),
+    reds = c("#7d0020", "#ba0031", "#ff6696", "#ffa6c1"),
+    violets = c("#552b5e", "#80428b", "#d1a4d9", "#e4c7e8"),
+    greens = c("#004d2a", "#007342", "#4cc8a4", "#9ddec6"),
+    yellows = c("#856200", "#c49300", "#ffde7e", "#ffebb1"),
+    oranges = c("#7f4400", "#bd6400", "#ffbc62", "#fed6a4"),
+    grayscale = c(
+      "#000000", "#161616", "#2d2d2d", "#464646", "#5d5d5d", "#747474",
+      "#8a8a8a", "#a1a1a1", "#b8b8b8", "#d1d1d1", "#e8e8e8", "#ffffff"
+    )
+  )
+)
+
+format_number <- function(number) {
+  format(number, nsmall = 0, big.mark = " ")
+}
+
+plot_feedback_bar <- function(plot_data, n_missing) {
+
+  feedback_data <- data.frame(
+    level = factor(names(plot_data)),
+    n = unlist(plot_data)
+  )
+
+  if (n_missing > 0) {
+    feedback_data <- rbind(
+      feedback_data,
+      data.frame(level = "(missing)", n = n_missing)
+    )
+  }
+
+  if (NROW(feedback_data) == 0) {
+    gg_object <- ggplot2::ggplot()
+  } else {
+
+    color_palette <- scb_color_palette
+    colors_selected <-
+      color_palette$shades["grayscale" != names(color_palette$shades)]
+    colors_selected <- colors_selected %>% unlist
+    colors_selected <- colors_selected[seq(3, 6 * 4, by = 4)]
+    colors_selected <- colors_selected[c(1, 2, 6, 4, 5)]
+    colors_selected <- rev(colors_selected)
+    colors_selected <- rep(colors_selected, 1000)
+    colors_selected <- colors_selected[(NROW(colors_selected) - NROW(feedback_data) + 1):NROW(colors_selected)]
+    colors_selected <- unname(colors_selected)
+
+    if ("(missing)" %in% feedback_data$level) {
+      colors_selected <- c(colors_selected[-1], "grey40")
+    }
+
+    gg_object <-
+      feedback_data %>%
+      ggplot2::ggplot(
+        ggplot2::aes(x = "I",
+                     y = n,
+                     fill = level,
+                     tooltip = paste0(level, " (", format_number(n), ")"),
+                     data_id = level)) +
+      ggplot2::geom_col(position = ggplot2::position_stack(reverse = TRUE)) +
+      ggplot2::coord_flip() +
+      ggplot2::scale_x_discrete(expand = c(0, 0)) +
+      ggplot2::scale_y_continuous(expand = c(0, 0)) +
+      ggplot2::theme(
+        axis.title = ggplot2::element_blank(),
+        axis.text  = ggplot2::element_blank(),
+        axis.ticks.length = ggplot2::unit(0, "pt"),
+        panel.background = ggplot2::element_blank(),
+        panel.grid.major = ggplot2::element_blank(),
+        panel.grid.minor = ggplot2::element_blank(),
+        plot.background  = ggplot2::element_blank(),
+        legend.position = "none",
+        plot.margin = ggplot2::unit(c(0, 0, 0, 0),"mm"),
+        panel.border = ggplot2::element_rect(colour = "grey50",
+                                             fill = NA,
+                                             size = 1),
+        panel.spacing = ggplot2::unit(c(0, 0, 0, 0), "mm")) +
+      ggplot2::scale_fill_manual(name = NULL, values = colors_selected) +
+      ggiraph::geom_col_interactive(
+        position = ggplot2::position_stack(reverse = TRUE)
+      )
+  }
+
+  ggiraph::girafe(
+    ggobj      = gg_object,
+    width_svg  = 10,
+    height_svg = 1.5,
+    options = list(
+      ggiraph::opts_hover_inv(css = "opacity: 0.2;"),
+      ggiraph::opts_tooltip(offx = 10, offy = 10, opacity = 0.5, zindex = 1100),
+      ggiraph::opts_selection(type = "single", only_shiny = FALSE),
+      ggiraph::opts_toolbar(saveaspng = FALSE)
+    )
+  )
+}
+
+#' @rdname gui-filter-layer
+#' @export
+.gui_filter.discrete <- function(filter, ...) {
+  list(
+    input = function(input_id, cohort) {
+      input_fun <- shiny::checkboxGroupInput
+      extra_params <- NULL
+      if (is_vs(filter)) {
+        input_fun <- shinyWidgets::virtualSelectInput
+        extra_params <- list(
+          multiple = TRUE,
+          html = TRUE,
+          search =  TRUE,
+          selectAllOnlyVisible = TRUE,
+          zIndex = 9999
+        )
+      }
+      shiny::tagList(
+        .cb_input(
+          do.call(
+            input_fun,
+            append(
+              extra_params,
+              discrete_input_params(filter, input_id, cohort, ...)
+            )
+          ),
+          filter$input_param
+        ),
+        .cb_input(
+          .keep_na_input(input_id, filter, cohort),
+          "keep_na"
+        )
+      )
+    },
+    feedback = function(input_id, cohort, empty = FALSE) {
+      list(
+        plot_id = shiny::NS(input_id, "feedback_plot") ,
+        output_fun = ggiraph::girafeOutput,
+        render_fun = if (!is.null(empty)) {
+          ggiraph::renderGirafe({
+            if(empty) { # when no data in parent step
+              return(
+                ggiraph::girafe(
+                  ggobj      = ggplot2::ggplot(),
+                  width_svg  = 10,
+                  height_svg = 0.1
+                )
+              )
+            }
+            step_id <- filter$step_id
+            filter_id <- filter$id
+
+            filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
+            filter_value <- extract_selected_value(filter$get_params("value"), filter_cache$choices, FALSE)
+            plot_data <- filter_cache$choices[filter_value]
+            n_missing <- filter_cache$n_missing
+            if (identical(filter$get_params("keep_na"), FALSE)) {
+              n_missing <- 0
+            }
+
+            plot_feedback_bar(plot_data, n_missing)
+          })
+        }
+      )
+    },
+    server = function(input_id, input, output, session, cohort) {
+      shiny::observeEvent(input[[shiny::NS(input_id, "feedback_plot_selected")]], {
+        value <- input[[shiny::NS(input_id, "feedback_plot_selected")]]
+
+        if (!is.na(value)) {
+          .trigger_action(session, "update_filter", params = list(
+            step_id = filter$step_id, filter_id = filter$id,
+            input_name = filter$input_param, input_value = value,
+            run_flow = FALSE
+          ))
+        }
+      }, ignoreInit = TRUE) %>% .save_observer(input_id, session)
+    },
+    update = function(session, input_id, cohort, reset = FALSE, ...) {
+      input_fun <- shiny::updateCheckboxGroupInput
+      update_params <- discrete_input_params(filter, input_id, cohort, reset, TRUE, ...)
+      if (is_vs(filter)) {
+        input_fun <- shinyWidgets::updateVirtualSelect
+        update_params$inline <- NULL
+      }
+      do.call(
+        input_fun,
+        append(
+          list(session = session),
+          update_params
+        )
+      )
+      .update_keep_na_input(session, input_id, filter, cohort)
+    },
+    post_stats = TRUE,
+    multi_input = FALSE
+  )
+}
