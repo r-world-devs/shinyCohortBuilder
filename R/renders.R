@@ -184,6 +184,14 @@ cat_nl <- function(...) {
   cat(sep = "\n")
 }
 
+warning_nl <- function(...) {
+  cat_nl("\033[38;5;203m", ..., "\033[39m")
+}
+
+error_nl <- function(...) {
+  cat_nl("\033[31m", ..., "\033[39m")
+}
+
 print_state <- function(action, params) {
   if (!getOption("cb_verbose", default = FALSE)) {
     return(invisible(TRUE))
@@ -233,6 +241,8 @@ render_steps <- function(cohort, session, init = TRUE) {
         action$id,
         update_filter = gui_update_filter,
         add_step = gui_add_step,
+        add_step_modal = gui_show_step_filter_modal,
+        add_step_configure = gui_add_step_configured,
         rm_step = gui_rm_step,
         clear_step = gui_clear_step,
         update_step = gui_update_step,
@@ -396,12 +406,18 @@ restore_attribute <- function(cohort, attribute, value) {
 #' @param id Id of the module used to render the panel.
 #' @param ... Extra attributes passed to the panel div container.
 #' @export
-cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition = TRUE) {
+cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition = TRUE, new_step = c("clone", "configure")) {
   ns <- shiny::NS(id)
   no_steps_class <- if (steps) "" else "cb_no_steps"
   no_state_class <- if (state) "" else "cb_no_state"
   no_code_class <- if (code) "" else "cb_no_code"
   no_attrition_class <- if (attrition) "" else "cb_no_attrition"
+
+  new_step <- rlang::arg_match(new_step)
+  add_step_action <- switch (new_step,
+    "clone" = "add_step",
+    "configure" = "add_step_modal"
+  )
 
   shiny::addResourcePath(
     "shinyCohortBuilder",
@@ -460,7 +476,7 @@ cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition =
         ),
         button(
           "Add Step", class = "cb_add_step", icon = shiny::icon("plus"),
-          onclick = .trigger_action_js("add_step", ns = ns)
+          onclick = .trigger_action_js(add_step_action, ns = ns)
         )
       ),
       shinyGizmo::accordion(

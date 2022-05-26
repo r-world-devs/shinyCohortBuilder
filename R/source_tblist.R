@@ -193,12 +193,20 @@ filter_rules <- function(dataset, dataset_name) {
 
 #' @rdname autofilter
 #' @export
-autofilter.tblist <- function(source, ...) {
+autofilter.tblist <- function(source, attach_as = c("step", "meta"), ...) {
+  attach_as <- rlang::arg_match(attach_as)
   step_rule <- source$dtconn %>%
     purrr::imap(~filter_rules(.x, .y)) %>%
     unlist(recursive = FALSE) %>%
     purrr::map(~do.call(cohortBuilder::filter, .)) %>%
     unname()
-  source %>%
-    add_step(do.call(cohortBuilder::step, step_rule))
+
+  if (identical(attach_as, "meta")) {
+    source$attributes$available_filters <- step_rule
+  } else {
+    source %>%
+      cohortBuilder::add_step(do.call(cohortBuilder::step, step_rule))
+  }
+
+  return(source)
 }

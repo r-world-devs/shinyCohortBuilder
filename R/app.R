@@ -15,11 +15,15 @@
 #' @param code Set to TRUE (default) to enable reproducible code panel.
 #' @param attrition Set to TRUE (default) to enable attrition plot panel.
 #' @param show_help Set to TRUE (default) to enable help buttons.
+#' @param new_step Choose which add step method should be used for creating new step.
+#'   Possible options are: "clone" - copy filters from last step,
+#'   "configure" - opening modal and allow to chose filters from available filters.
 #'
 #' @export
 demo_app <- function(
   steps = TRUE, stats = c("pre", "post"), run_button = FALSE, feedback = TRUE, state = TRUE,
-  bootstrap = 3, enable_bookmarking = TRUE, code = TRUE, attrition = TRUE, show_help = TRUE) {
+  bootstrap = 3, enable_bookmarking = TRUE, code = TRUE, attrition = TRUE, show_help = TRUE,
+  new_step = c("clone", "configure")) {
   options("shiny.minified" = FALSE)
   options("cb_active_filter" = FALSE)
   if (isTRUE(enable_bookmarking)) {
@@ -80,7 +84,7 @@ demo_app <- function(
         shiny::radioButtons("dataset", "Source", c("No binding keys" = "01", "Binding keys" = "02")),
         cb_ui(
           id = "ptnts", style = "width: 300px; float: left;", steps = steps,
-          state = state, code = code, attrition = attrition
+          state = state, code = code, attrition = attrition, new_step = new_step
         ),
         shiny::div(style = "float: right; width: calc(100% - 300px);",
           shiny::verbatimTextOutput("datasets")
@@ -138,6 +142,11 @@ demo_app <- function(
         description = list(
           patients = "Contains demographic information about patients."
         ),
+        available_filters = list(
+          gender_filter,
+          age_filter,
+          treatment_filter
+        ),
         primary_keys = cohortBuilder::primary_keys(
           cohortBuilder::data_key("patients", "id"),
           cohortBuilder::data_key("therapy", "id")
@@ -184,6 +193,11 @@ demo_app <- function(
       shiny::observeEvent(input$dataset, {
         data_source <- cohortBuilder::set_source(
           datasets[[input$dataset]],
+          available_filters = list(
+            gender_filter,
+            age_filter,
+            treatment_filter
+          ),
           value_mappings = list(
             gender_mapping = gender_mapping
           ),
@@ -248,9 +262,14 @@ demo_app <- function(
 gui <- function(
   cohort,
   steps = TRUE, stats = c("pre", "post"), run_button = FALSE, feedback = TRUE, state = TRUE,
-  bootstrap = 3, enable_bookmarking = TRUE, code = TRUE, attrition = TRUE, show_help = TRUE) {
+  bootstrap = 3, enable_bookmarking = TRUE, code = TRUE, attrition = TRUE, show_help = TRUE,
+  new_step = c("clone", "configure")) {
   if (!interactive()) {
     stop("Message - gui can be used in interactive mode only.")
+  }
+  new_step <- rlang::arg_match(new_step)
+  if (identical(new_step, "configure") && length(cohort$get_source()$get("available_filters")) == 0) {
+    stop("The `available_filters` in the cohort source wasn't defined.")
   }
 
   shiny::runApp(list(
@@ -259,7 +278,8 @@ gui <- function(
         tags$style("body {font-size: 12px;};"),
         cb_ui(
           id = "coh", style = "width: 300px; float: left;",
-          steps = steps, state = state, code = code, attrition = attrition
+          steps = steps, state = state, code = code, attrition = attrition,
+          new_step = new_step
         ),
         shiny::div(
           style = "float: right; width: calc(100% - 300px);",
