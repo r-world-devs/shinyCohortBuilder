@@ -540,23 +540,24 @@ gui_show_step_filter_modal <- function(cohort, changed_input, session) {
     return(gui_add_step(cohort, changed_input, session))
   }
 
-  choices <- structure(
-    list(
-      choices = list(),
-      type = "transpose"
-    ),
-    class = c("list", "vs_choices")
-  )
+  choices <- purrr::map(available_filters, function(x) {
+    env <- environment(x)
+    tibble::tibble(
+      name = as.character(
+        div(
+          `data-tooltip-z-index` = 9999,
+          `data-tooltip` = env$args$description,
+          `data-tooltip-position` = "top right",
+          env$name
+        )
+      ),
+      id = env$id,
+      dataset = env$args$dataset,
+      description = env$args$description
+    )
+  }) %>% dplyr::bind_rows()
 
-  choices$choices$label <- lapply(available_filters, function(x) {
-    x <- environment(x)
-    x$name
-  }) %>% unlist()
-
-  choices$choices$value <- lapply(available_filters, function(x) {
-    x <- environment(x)
-    x$id
-  }) %>% unlist()
+  choices <- shinyWidgets::prepare_choices(choices, name, id, dataset, description)
 
   shiny::showModal(
     shiny::modalDialog(
