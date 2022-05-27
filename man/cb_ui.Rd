@@ -5,7 +5,15 @@
 \alias{cb_server}
 \title{Include filtering panel in Shiny}
 \usage{
-cb_ui(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition = TRUE)
+cb_ui(
+  id,
+  ...,
+  state = FALSE,
+  steps = TRUE,
+  code = TRUE,
+  attrition = TRUE,
+  new_step = c("clone", "configure")
+)
 
 cb_server(
   id,
@@ -29,6 +37,10 @@ cb_server(
 \item{code}{Set to TRUE (default) to enable reproducible code panel.}
 
 \item{attrition}{Set to TRUE (default) to enable attrition plot panel.}
+
+\item{new_step}{Choose which add step method should be used for creating new step.
+Possible options are: "clone" - copy filters from last step,
+"configure" - opening modal and allow to chose filters from available filters.}
 
 \item{cohort}{Cohort object storing filtering steps configuration.}
 

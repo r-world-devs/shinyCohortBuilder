@@ -6,14 +6,16 @@
 \alias{autofilter.tblist}
 \title{Generate filters definition based on the Source data}
 \usage{
-autofilter(source, ...)
+autofilter(source, attach_as = c("step", "meta"), ...)
 
 \method{autofilter}{default}(source, ...)
 
-\method{autofilter}{tblist}(source, ...)
+\method{autofilter}{tblist}(source, attach_as = c("step", "meta"), ...)
 }
 \arguments{
 \item{source}{Source object.}
+
+\item{attach_as}{Chose where the filters should be stored. By default in \code{step}}
 
 \item{...}{Extra arguments passed to a specific method.}
 }

@@ -15,7 +15,8 @@ gui(
   enable_bookmarking = TRUE,
   code = TRUE,
   attrition = TRUE,
-  show_help = TRUE
+  show_help = TRUE,
+  new_step = c("clone", "configure")
 )
 }
 \arguments{
@@ -43,6 +44,10 @@ See \link[bslib]{bs_theme} version argument.}
 \item{attrition}{Set to TRUE (default) to enable attrition plot panel.}
 
 \item{show_help}{Set to TRUE (default) to enable help buttons.}
+
+\item{new_step}{Choose which add step method should be used for creating new step.
+Possible options are: "clone" - copy filters from last step,
+"configure" - opening modal and allow to chose filters from available filters.}
 }
 \description{
 Run filtering panel locally

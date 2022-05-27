@@ -17,3 +17,22 @@ autofilter <- function(source, attach_as = c("step", "meta"), ...) {
 autofilter.default <- function(source, ...) {
   return(source)
 }
+
+
+#' Generate available filters choices based on the Source data
+#'
+#' The method should return the available choices for
+#' virtualSelect input.
+#'
+#' @param source Source object.
+#' @param ... Extra arguments passed to a specific method.
+#' @export
+available_filters_choices <- function(source, ...) {
+  UseMethod("available_filters_choices", source)
+}
+
+#' @rdname available_filters_choices
+#' @export
+available_filters_choises.default <- function(source, ...) {
+  stop("Method for available filters is missing, the source layer to do support `available_filters`")
+}
