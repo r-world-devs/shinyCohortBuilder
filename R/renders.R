@@ -414,7 +414,7 @@ cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition =
   no_attrition_class <- if (attrition) "" else "cb_no_attrition"
 
   new_step <- rlang::arg_match(new_step)
-  add_step_action <- switch (new_step,
+  add_step_action <- switch(new_step,
     "clone" = "add_step",
     "configure" = "add_step_modal"
   )

@@ -124,7 +124,6 @@ post_cohort_hook <- function(public, private, ...) {
     available_filters <- source$get("available_filters")
     if (!is.null(available_filters)) {
       public$attributes$available_filters <- purrr::map(available_filters, ~ .x(source))
-
     }
   }
 }
