@@ -213,24 +213,23 @@ autofilter.tblist <- function(source, attach_as = c("step", "meta"), ...) {
 
 #' @rdname available_filters_choices
 #' @export
-available_filters_choices.tblist <- function(source, ...) {
+available_filters_choices.tblist <- function(source, cohort, ...) {
 
-  available_filters <- source$get("available_filters")
+  available_filters <- cohort$attributes$available_filters
 
   choices <- purrr::map(available_filters, function(x) {
-    env <- environment(x)
     tibble::tibble(
       name = as.character(
         div(
           `data-tooltip-z-index` = 9999,
-          `data-tooltip` = env$args$description,
+          `data-tooltip` = x$get_params("description"),
           `data-tooltip-position` = "top right",
-          env$name
+          x$name
         )
       ),
-      id = env$id,
-      dataset = env$args$dataset,
-      description = env$args$description
+      id = x$id,
+      dataset = x$get_params("dataset"),
+      description = x$get_params("description")
     )
   }) %>% dplyr::bind_rows()
 

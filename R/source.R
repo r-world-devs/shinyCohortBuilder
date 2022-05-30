@@ -25,14 +25,15 @@ autofilter.default <- function(source, ...) {
 #' virtualSelect input.
 #'
 #' @param source Source object.
+#' @param cohort cohortBuilder cohort object
 #' @param ... Extra arguments passed to a specific method.
 #' @export
-available_filters_choices <- function(source, ...) {
+available_filters_choices <- function(source, cohort, ...) {
   UseMethod("available_filters_choices", source)
 }
 
 #' @rdname available_filters_choices
 #' @export
-available_filters_choises.default <- function(source, ...) {
+available_filters_choises.default <- function(source, cohort, ...) {
   stop("Method for available filters is missing, the source layer to do support `available_filters`")
 }

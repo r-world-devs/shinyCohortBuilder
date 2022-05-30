@@ -468,13 +468,13 @@ gui_add_step <- function(cohort, changed_input, session) {
 
   print_state("add_step", changed_input)
   input_state("add_step", changed_input)
-  available_filters <- cohort$get_source()$get("available_filters")
+  available_filters <- cohort$attributes$available_filters
 
   if (length(cohort$get_step()) == 0 && length(available_filters) > 0) {
-    cohort$add_step(
-      do.call(cohortBuilder::step, available_filters)
+    cohort$copy_step(
+      filters = available_filters,
+      run_flow = TRUE
     )
-    cohort$run_flow()
   } else {
     cohort$copy_step(run_flow = TRUE)
   }
@@ -499,7 +499,7 @@ gui_add_step_configured <- function(cohort, changed_input, session) {
   input_state("gui_add_step_configured", changed_input)
 
   chosed_filters <- session$input[["configure_step"]]
-  available_filters <- cohort$get_source()$get("available_filters")
+  available_filters <- cohort$attributes$available_filters
 
   if (length(available_filters) == 0) {
     warning_nl("`available_filters` was not defined, configure step will not be working. Cloning last step.")
@@ -507,13 +507,12 @@ gui_add_step_configured <- function(cohort, changed_input, session) {
   }
 
   filters <- available_filters %>%
-    purrr::keep(function(x) {environment(x)$id %in% chosed_filters})
+    purrr::keep(function(x) {x$id %in% chosed_filters})
 
-  cohort$add_step(
-    do.call(cohortBuilder::step, filters)
+  cohort$copy_step(
+    filters = filters,
+    run_flow = TRUE
   )
-
-  cohort$run_flow()
 
   last_step_id <- cohort$last_step_id()
   session$sendCustomMessage("pre_add_step_action", list(id = last_step_id, ns_prefix = ns("")))
@@ -533,14 +532,14 @@ gui_show_step_filter_modal <- function(cohort, changed_input, session) {
   print_state("add_step_modal", changed_input)
   input_state("add_step_modal", changed_input)
 
-  available_filters <- cohort$get_source()$get("available_filters")
+  available_filters <- cohort$attributes$available_filters
 
   if (length(available_filters) == 0) {
     warning_nl("`available_filters` was not defined, configure step will not be working. Cloning last step.")
     return(gui_add_step(cohort, changed_input, session))
   }
 
-  choices <- available_filters_choices(cohort$get_source())
+  choices <- available_filters_choices(cohort$get_source(), cohort)
 
   shiny::showModal(
     shiny::modalDialog(
@@ -554,13 +553,22 @@ gui_show_step_filter_modal <- function(cohort, changed_input, session) {
         selectAllOnlyVisible = TRUE,
         zIndex = 9999
       ),
+      shiny::tags$script(
+        shiny::HTML(
+          glue::glue(
+            "$('#{ns('configure_step')}').change(function() {{",
+            "$('#{ns('add_step_configured')}').attr('disabled', !(this.value.length > 0))}})"
+          )
+        )
+      ),
       footer = shiny::tagList(
         shinyGizmo::valueButton(
           inputId = ns("add_step_configured"),
           label = "Accept",
           selector = paste0("#", ns("configure_step")),
           onclick = .trigger_action_js("add_step_configure", ns = ns),
-          `data-dismiss` = "modal", `data-bs-dismiss` = "modal"
+          `data-dismiss` = "modal", `data-bs-dismiss` = "modal",
+          disabled = NA
         ),
         shiny::modalButton("Dismiss")
       ),
