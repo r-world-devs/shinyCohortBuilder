@@ -224,14 +224,14 @@ available_filters_choices.tblist <- function(source, cohort, ...) {
           `data-tooltip-z-index` = 9999,
           `data-tooltip` = x$get_params("description"),
           `data-tooltip-position` = "top right",
+          `data-tooltip-allow-html` = TRUE,
           x$name
         )
       ),
       id = x$id,
-      dataset = x$get_params("dataset"),
-      description = x$get_params("description")
+      dataset = x$get_params("dataset")
     )
   }) %>% dplyr::bind_rows()
 
-  choices <- shinyWidgets::prepare_choices(choices, name, id, dataset, description)
+  choices <- shinyWidgets::prepare_choices(choices, name, id, dataset)
 }
