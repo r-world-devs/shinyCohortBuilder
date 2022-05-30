@@ -6,14 +6,16 @@
 \alias{available_filters_choices.tblist}
 \title{Generate available filters choices based on the Source data}
 \usage{
-available_filters_choices(source, ...)
+available_filters_choices(source, cohort, ...)
 
-available_filters_choises.default(source, ...)
+available_filters_choises.default(source, cohort, ...)
 
-\method{available_filters_choices}{tblist}(source, ...)
+\method{available_filters_choices}{tblist}(source, cohort, ...)
 }
 \arguments{
 \item{source}{Source object.}
+
+\item{cohort}{cohortBuilder cohort object}
 
 \item{...}{Extra arguments passed to a specific method.}
 }
