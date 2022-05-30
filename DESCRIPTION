@@ -1,7 +1,7 @@
 Package: shinyCohortBuilder
 Type: Package
 Title: Modular Cohort-Building Framework for Analytical Dashboards
-Version: 0.0.0.9037
+Version: 0.0.0.9038
 Authors@R: 
     c(person('Krystian', 'Igras', 
              email = 'krystian8207@gmail.com', 
@@ -39,7 +39,7 @@ Imports:
     shiny,
     shinyWidgets (>= 0.6.4.9100),
     dplyr,
-    cohortBuilder (>= 0.0.0.9037),
+    cohortBuilder (>= 0.0.0.9038),
     tryCatchLog,
     highr,
     shinyGizmo
@@ -53,7 +53,7 @@ Remotes:
     github::dreamRs/shinyvs
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 VignetteBuilder: knitr
 Collate:
     'shinyCohortBuilder-package.R'
