@@ -3,6 +3,7 @@
 #' @name shinyCohortBuilder-package
 #' @importFrom magrittr %>%
 #' @importFrom dplyr sym
+#' @importFrom cohortBuilder .if_value
 
 globalVariables(c(":=", "!!", ".data"))
 
