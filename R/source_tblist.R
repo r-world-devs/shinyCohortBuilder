@@ -193,12 +193,45 @@ filter_rules <- function(dataset, dataset_name) {
 
 #' @rdname autofilter
 #' @export
-autofilter.tblist <- function(source, ...) {
+autofilter.tblist <- function(source, attach_as = c("step", "meta"), ...) {
+  attach_as <- rlang::arg_match(attach_as)
   step_rule <- source$dtconn %>%
     purrr::imap(~filter_rules(.x, .y)) %>%
     unlist(recursive = FALSE) %>%
     purrr::map(~do.call(cohortBuilder::filter, .)) %>%
     unname()
-  source %>%
-    add_step(do.call(cohortBuilder::step, step_rule))
+
+  if (identical(attach_as, "meta")) {
+    source$attributes$available_filters <- step_rule
+  } else {
+    source %>%
+      cohortBuilder::add_step(do.call(cohortBuilder::step, step_rule))
+  }
+
+  return(source)
+}
+
+#' @rdname available_filters_choices
+#' @export
+available_filters_choices.tblist <- function(source, cohort, ...) {
+
+  available_filters <- cohort$attributes$available_filters
+
+  choices <- purrr::map(available_filters, function(x) {
+    tibble::tibble(
+      name = as.character(
+        div(
+          `data-tooltip-z-index` = 9999,
+          `data-tooltip` = x$get_params("description"),
+          `data-tooltip-position` = "top right",
+          x$name
+        )
+      ),
+      id = x$id,
+      dataset = x$get_params("dataset"),
+      description = x$get_params("description")
+    )
+  }) %>% dplyr::bind_rows()
+
+  choices <- shinyWidgets::prepare_choices(choices, name, id, dataset, description)
 }

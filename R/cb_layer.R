@@ -118,6 +118,17 @@ enable_panel <- function(cohort, session) {
   }
 }
 
+post_cohort_hook <- function(public, private, ...) {
+  source <- public$get_source()
+  if (!is.null(source)) {
+    available_filters <- source$get("available_filters")
+    if (!is.null(available_filters)) {
+      public$attributes$available_filters <- purrr::map(available_filters, ~ .x(source))
+    }
+  }
+}
+
+
 .onLoad <- function(libname, pkgname){
 
   cohortBuilder::add_hook("pre_update_source_hook", pre_update_source_hook)
@@ -126,5 +137,7 @@ enable_panel <- function(cohort, session) {
   cohortBuilder::add_hook("post_rm_step_hook", post_rm_step_hook)
   cohortBuilder::add_hook("pre_restore_hook", pre_restore_hook)
   cohortBuilder::add_hook("post_restore_hook", post_restore_hook)
+  cohortBuilder::add_hook("post_cohort_hook", post_cohort_hook)
+  cohortBuilder::add_hook("post_update_source_hook", post_cohort_hook)
 
 }
