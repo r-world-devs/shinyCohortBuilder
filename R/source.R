@@ -4,7 +4,7 @@
 #' the data (e.g. column types) and attach them to source.
 #'
 #' @param source Source object.
-#' @param attach_as Chose where the filters should be stored. By default in \code{step}
+#' @param attach_as Choose whether the filters should be attached as a new step, or list of available filters (used in filtering panel when `new_step = "configure"`). By default in \code{step}.
 #' @param ... Extra arguments passed to a specific method.
 #' @seealso \link{source-gui-layer}
 #' @export
@@ -35,5 +35,5 @@ available_filters_choices <- function(source, cohort, ...) {
 #' @rdname available_filters_choices
 #' @export
 available_filters_choises.default <- function(source, cohort, ...) {
-  stop("Method for available filters is missing, the source layer to do support `available_filters`")
+  stop("The `available_filters` method is missing for the used Source type.")
 }
