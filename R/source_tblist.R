@@ -224,7 +224,7 @@ available_filters_choices.tblist <- function(source, cohort, ...) {
           `data-tooltip-z-index` = 9999,
           `data-tooltip` = x$get_params("description"),
           `data-tooltip-position` = "top right",
-          `data-tooltip-allow-html` = TRUE,
+          `data-tooltip-allow-html` = "true",
           x$name
         )
       ),
