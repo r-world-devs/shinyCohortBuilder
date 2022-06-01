@@ -6,7 +6,7 @@ workflow to Shiny.
 
 ![](man/figures/doc_01.gif)
 
-[![version](https://img.shields.io/static/v1.svg?label=github.com&message=v.0.0.0.9037&color=ff69b4)](https://github.io/r-world-devs/shinyCohortBuilder/)
+[![version](https://img.shields.io/static/v1.svg?label=github.com&message=v.0.0.0.9038&color=ff69b4)](https://github.io/r-world-devs/shinyCohortBuilder/)
 [![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 
 ## Installation
@@ -133,4 +133,4 @@ In a case you found any bugs, have feature request or general question
 please file an issue at the package
 [Github](https://github.com/r-world-devs/shinyCohortBuilder/issues). You
 may also contact the package author directly via email at
-[krystian8207@gmail.com](krystian8207@gmail.com).
+<krystian8207@gmail.com>.
