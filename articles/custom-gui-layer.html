@@ -204,8 +204,8 @@
 <ul>
 <li>The function should define rendering output for consistent with the output placeholder stated within <code>.render_filters</code>.</li>
 <li>It’s recommended the statistics are taken from the Cohort cache <code>cohort$get_cache(step_id, state = "pre")</code>.</li>
-<li>It’s recommended the output performs previous step data validation (in terms of data existance) and returns descriptive message to the user.</li>
-<li>Use <code>cohort$attributes$stats</code> to get displayed statstics state chosen by the user (“pre”, “post”, both or NULL).</li>
+<li>It’s recommended the output performs previous step data validation (in terms of data existence) and returns descriptive message to the user.</li>
+<li>Use <code>cohort$attributes$stats</code> to get displayed statistics state chosen by the user (“pre”, “post”, both or NULL).</li>
 <li>For printing the statistics use <code>.pre_post_stats</code> which returns formatted statistics output.</li>
 <li>You may directly assign the rendering to the output or use <code>.sendOutput</code> method (useful when sending output in loop see “tblist” source example below).</li>
 </ul>
