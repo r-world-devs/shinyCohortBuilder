@@ -376,7 +376,7 @@ The method is called in the below scenarios:
 
 `update` function is strongly related to the `input` one.
 The parameters passed to related `update*` methods should follow the same assumptions as stated for `input`.
-More to that there is one extra rule regarding "Clear Step" scenario which we desrcibe below.
+More to that there is one extra rule regarding "Clear Step" scenario which we describe below.
 
 The update function should have the below parameters defined:
 

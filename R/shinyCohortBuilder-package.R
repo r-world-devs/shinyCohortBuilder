@@ -5,7 +5,12 @@
 #' @importFrom dplyr sym
 #' @importFrom cohortBuilder .if_value
 
-globalVariables(c(":=", "!!", ".data"))
+globalVariables(c(
+  ":=", "!!", ".data",
+  "action", "count", "dataset", "id",
+  "l_bound", "level", "line_id", "n", "name", "params",
+  "patient_id", "state", "value", "variable"
+))
 
 NULL
 

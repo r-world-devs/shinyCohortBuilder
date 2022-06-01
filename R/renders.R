@@ -339,7 +339,7 @@ restore_attribute <- function(cohort, attribute, value) {
 #' \itemize{
 #'   \item{input}{ UI structure defining filter input controllers.}
 #'   \item{feedback}{ List defining feedback plot output.}
-#'   \item{server}{ Optional serverside expression attached to filter panel (e.g. filter specific observers).}
+#'   \item{server}{ Optional server-side expression attached to filter panel (e.g. filter specific observers).}
 #'   \item{update}{ An expression used for updating filter panel based on its configuration.}
 #'   \item{post_stats}{ TRUE if post statistics are displayed in filter controller (e.g. for discrete filter).
 #'     If FALSE, some operations are skipped which results with better performance.}

@@ -6,7 +6,7 @@ workflow to Shiny.
 
 ![](man/figures/doc_01.gif)
 
-[![version](https://img.shields.io/static/v1.svg?label=github.com&message=v.0.0.0.9038&color=ff69b4)](https://github.io/r-world-devs/shinyCohortBuilder/)
+[![version](https://img.shields.io/static/v1.svg?label=github.com&message=v.0.1&color=ff69b4)](https://r-world-devs.github.io/shinyCohortBuilder/)
 [![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 
 ## Installation

@@ -15,5 +15,6 @@
 }
 \description{
 The method used to store created observers (used to implement extra filter logic).
-The saved observer are then destroyed when filtering step is removed which prevents duplicated execultion of accumulated observers.
+The saved observer are then destroyed when filtering step is removed which prevents
+duplicated execution of accumulated observers.
 }

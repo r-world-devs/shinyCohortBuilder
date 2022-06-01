@@ -49,9 +49,9 @@
             if (!is.null(filter$get_params("n_bins"))) {
               intervals <- seq.Date(plot_data$l_bound[1], rev(plot_data$u_bound)[1], length.out = filter$get_params("n_bins"))
               plot_data <- plot_data %>%
-                mutate(level = findInterval(l_bound, intervals)) %>%
-                group_by(level) %>%
-                summarise(count = sum(count))
+                dplyr::mutate(level = findInterval(l_bound, intervals)) %>%
+                dplyr::group_by(level) %>%
+                dplyr::summarise(count = sum(count))
             }
 
             # todo possibly add modifier to lower number of bars

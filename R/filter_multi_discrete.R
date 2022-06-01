@@ -4,7 +4,7 @@ extract_selected_values <- function(values, parent_filter_stats, reset) {
   if (reset) {
     return(all_choices)
   }
-  modifyList(
+  utils::modifyList(
     all_choices,
     values %>% purrr::keep(~!identical(., NA)),
     keep.null = TRUE
@@ -62,8 +62,8 @@ multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE,
     parent_filter_stats, reset
   )
   choices <- parent_filter_stats %>% purrr::map(names)
-  choices_names <- pickerCheckboxNames(choices)
-  choices_labels <- pickerCheckboxLabels(choices)
+  choices_names <- shinyGizmo::pickCheckboxNames(choices)
+  choices_labels <- shinyGizmo::pickCheckboxLabels(choices)
 
   choices_names <- purrr::pmap(
     list(

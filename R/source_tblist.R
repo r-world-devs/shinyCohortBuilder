@@ -37,7 +37,7 @@ dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
     shiny::tags$strong(dataset_name),
     dataset_help_icon(cohort, dataset_name, ns),
     shiny::htmlOutput(stats_id, inline = TRUE, style = "float: right;"),
-    hr(style = "margin-top: 0.3rem;"),
+    shiny::hr(style = "margin-top: 0.3rem;"),
     filters %>%
       purrr::map(
         ~ .render_filter(.x, step_id, cohort, ns = ns)
@@ -220,7 +220,7 @@ available_filters_choices.tblist <- function(source, cohort, ...) {
   choices <- purrr::map(available_filters, function(x) {
     tibble::tibble(
       name = as.character(
-        div(
+        shiny::div(
           `data-tooltip-z-index` = 9999,
           `data-tooltip` = x$get_params("description"),
           `data-tooltip-position` = "top right",

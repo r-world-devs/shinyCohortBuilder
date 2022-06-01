@@ -56,12 +56,6 @@ sf_id <- function(step_id, filter_id) {
   paste(step_id, filter_id, sep = "-")
 }
 
-trigger_disable <- function() {
-  session$sendCustomMessage("disable_actions", {
-    list(id = action, params = params, ns_prefix = session$ns(""))
-  })
-}
-
 input_state <- function(action, params, gui = TRUE, session = shiny::getDefaultReactiveDomain()) {
   if (!getOption("scb_verbose", default = FALSE)) {
     return(invisible(TRUE))
@@ -89,7 +83,8 @@ input_state <- function(action, params, gui = TRUE, session = shiny::getDefaultR
 #' Save observer to user session
 #'
 #' The method used to store created observers (used to implement extra filter logic).
-#' The saved observer are then destroyed when filtering step is removed which prevents duplicated execultion of accumulated observers.
+#' The saved observer are then destroyed when filtering step is removed which prevents
+#' duplicated execution of accumulated observers.
 #'
 #' @param observer An `observe` or `observeEvent` to be saved.
 #' @param id Of the observer. Preferably prefixed with step_id.
@@ -232,10 +227,10 @@ gui_update_filters_loop <- function(cohort, step_id, reset, update, exclude = ch
 }
 
 empty_plot <- function() {
-  png(tempfile(fileext = ".png"), height = 1)
-  par(mar = rep(0, 4))
-  plot.new()
-  dev.off()
+  grDevices::png(tempfile(fileext = ".png"), height = 1)
+  graphics::par(mar = rep(0, 4))
+  graphics::plot.new()
+  grDevices::dev.off()
 }
 
 gui_update_plot <- function(step_id, filter_id, cohort, session) {

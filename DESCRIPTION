@@ -1,7 +1,7 @@
 Package: shinyCohortBuilder
 Type: Package
 Title: Modular Cohort-Building Framework for Analytical Dashboards
-Version: 0.0.0.9038
+Version: 0.1
 Authors@R: 
     c(person('Krystian', 'Igras', 
              email = 'krystian8207@gmail.com', 
@@ -11,9 +11,9 @@ Authors@R:
              role = c('aut')),
       person('Adam', 'Foryś',
              role = "ctb"))
-Maintainer: The package maintainer <krystian8207@gmail.com>
+Maintainer: Krystian Igras <krystian8207@gmail.com>
 Description: You can easily add advanced cohort-building component 
-    to your analytical dashboard or simple shiny app. 
+    to your analytical dashboard or simple Shiny app. 
     Then you can instantly start building cohorts using multiple 
     filters of different types, filtering datasets, and filtering steps. 
     Filters can be complex and data-specific, and together 
@@ -22,9 +22,8 @@ Description: You can easily add advanced cohort-building component
     work with filters, add and remove filtering steps. 
     It helps you with handling missing values during filtering, 
     and provides instant filtering feedback with filter feedback plots. 
-    The CohortBuilder module is not only 
-    compatible with native shiny bookmarking, 
-    but also provides reproducible R code.
+    The GUI panel is not only compatible with native shiny 
+    bookmarking, but also provides reproducible R code.
 License: MIT + file LICENSE
 Depends: 
     R (>= 3.5.0)
@@ -37,22 +36,21 @@ Imports:
     ggplot2,
     ggiraph,
     shiny,
-    shinyWidgets (>= 0.6.4.9100),
+    shinyWidgets (>= 0.7.0),
     dplyr,
-    cohortBuilder (>= 0.0.0.9038),
+    cohortBuilder (>= 0.1),
     tryCatchLog,
     highr,
-    shinyGizmo
+    shinyGizmo,
+    rlang (>= 1.0),
+    tibble
 Suggests:
     pkgload,
     packer,
     sass,
     knitr,
     rmarkdown
-Remotes:
-    github::dreamRs/shinyvs
 Encoding: UTF-8
-LazyData: true
 RoxygenNote: 7.2.0
 VignetteBuilder: knitr
 Collate:

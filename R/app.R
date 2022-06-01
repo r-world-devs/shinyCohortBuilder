@@ -79,7 +79,7 @@ demo_app <- function(
     ui = function(req) {
       shiny::fluidPage(
         theme = bslib::bs_theme(version = bootstrap),
-        if (isTRUE(enable_bookmarking)) bookmarkButton() else NULL,
+        if (isTRUE(enable_bookmarking)) shiny::bookmarkButton() else NULL,
         shiny::actionButton("debug", "debug"),
         shiny::radioButtons("dataset", "Source", c("No binding keys" = "01", "Binding keys" = "02")),
         cb_ui(
@@ -160,7 +160,9 @@ demo_app <- function(
         )
       )
 
-      url_state <- isolate(parseQueryString(session$clientData$url_search)$state)
+      url_state <- shiny::isolate(
+        shiny::parseQueryString(session$clientData$url_search)$state
+      )
 
       if (!is.null(url_state)) {
         coh <- cohortBuilder::cohort(
@@ -275,7 +277,7 @@ gui <- function(
   shiny::runApp(list(
     ui = function(req) {
       shiny::fluidPage(
-        tags$style("body {font-size: 12px;};"),
+        shiny::tags$style("body {font-size: 12px;};"),
         cb_ui(
           id = "coh", style = "width: 300px; float: left;",
           steps = steps, state = state, code = code, attrition = attrition,
