@@ -100,7 +100,7 @@ You may achieve this by setting `options("cb_active_filter" = FALSE)` before you
 3. Dropdown or checkbox group for discrete filter
 
 By default, discrete filters are transformed for checkbox group input controller.
-When having multiple options to choose, the approach may be become inconvenient.
+When having multiple options to choose, the approach may become inconvenient.
 
 You may switch from checkbox group to search dropdown (`shinyWidgets::virtualSelectInput`) with providing
 `gui_input = "vs"` parameter to discrete filter.
@@ -168,7 +168,7 @@ gui(librarian_cohort)
 If you want to skip configuring filters for all of the tables and columns in the source, you may use `shinyCohortBuilder::autofilter` method.
 
 The method applied on Source, will scan all the columns included in Source and automatically configure proper filters to them.
-The filters will be stored within a Source, so it's enought to pass such object to Cohort:
+The filters will be stored within a Source, so it's enough to pass such object to Cohort:
 
 ```{r}
 iris_source <- set_source(tblist(iris = iris)) %>% 
@@ -185,11 +185,15 @@ The `autofilter` method checks column type and count of levels to apply the prop
 - factor or character with less than 4 levels, or logical column - discrete filter with checkbox group input,
 - factor or character with more than 4 levels and more - discrete filter with virtual select input.
 
-Providing custom rules will be added in the future released of `shinyCohortBuilder`.
+Providing custom rules will be added in the future releases of `shinyCohortBuilder`.
+
+**Note.** You can use `autofilter` to attach the generated filters configuration to Source as
+`available_filters` attribute. Just use `autofilter(..., attach_as = "meta")`.
+See [Multiple-steps filters](#multiple-steps-filtering).
 
 ## cohortBuilder to GUI features
 
-Now we're gonna highlight what features available in cohortBuilder can be also enabled in GUI panel.
+Now we're gonna highlight what features available in `cohortBuilder` can be also enabled in GUI panel.
 
 ### Multiple-steps filtering
 
@@ -198,12 +202,32 @@ Available with `cb_ui(..., steps = TRUE)`.
 The options adds `Add Step` button to filtering panel and attaches `Delete` buttons to each filtering step.
 With the functionality you can perform filtering operations in multiple steps.
 
-There is a one assumption regarding `Add Step` feature - newly added filtering step is replicated based on the last available step in the Cohort (with choices and statistics related to the previous step).
+By default - newly added filtering step is replicated based on the last available step in the Cohort (with choices and statistics related to the previous step).
 
-In the future releases we plan to allow adding customized steps. 
-Currently you can provide different steps in the panel only by defining them directly in the Cohort (before rendering GUI).
+![](doc_03_a.gif)
 
-![](doc_03.gif)
+The second option allows users to configure newly added steps.
+
+In order to enable this option:
+
+1. Attach list of available filters as `available_filters` argument while creating source:
+
+```{r, eval = FALSE}
+set_source(
+  ..., 
+  available_filters = list(
+    filter("discrete", ...),
+    filter("range", ...),
+    ...
+  )
+)
+```
+
+2. Specify `cb_ui(..., new_step = "configure")` or `gui(..., new_step = "configure")` to enable configuration panel.
+
+The available filters can be then chosen in step configuration panel. 
+
+![](doc_03_b.gif)
 
 ### Reproducible code
 

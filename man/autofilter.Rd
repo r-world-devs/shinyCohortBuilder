@@ -15,7 +15,7 @@ autofilter(source, attach_as = c("step", "meta"), ...)
 \arguments{
 \item{source}{Source object.}
 
-\item{attach_as}{Chose where the filters should be stored. By default in \code{step}}
+\item{attach_as}{Choose whether the filters should be attached as a new step, or list of available filters (used in filtering panel when `new_step = "configure"`). By default in \code{step}.}
 
 \item{...}{Extra arguments passed to a specific method.}
 }

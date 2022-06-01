@@ -353,6 +353,8 @@ restore_attribute <- function(cohort, attribute, value) {
 #'
 #' @param filter Filter object.
 #' @param ... Extra arguments passed to a specific method.
+#' @return List consisting filter metadata and methods that allow to perform filter based operations.
+#'     See `vignette("custom-filters")`.
 #'
 #' @name gui-filter-layer
 #'

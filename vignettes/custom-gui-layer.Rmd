@@ -187,31 +187,83 @@ update_data_stats.db <- function(source, step_id, cohort, session) {
 Required parameters:
 
 - `source` - Source object, 
+- `attach_as` - Should filters be added as the first step (`"step"`) or as available filters for configuration panel (`"meta"`),
 - `...` - Unused, added for S3 integration only.
 
 Details:
 
-- Generate filters based on Source data (i.e. column types) using `cohortBuilder::filter` and wrap them with `cohortBuilder::step`.
-- Attach the filters to the Source using `add_step` method.
-- The method should return source with configured filters.
+- Generate filters based on Source data (i.e. column types) using `cohortBuilder::filter`.
+- When `attach_as = "step"` wrap them with `cohortBuilder::step` and attach to the Source using `add_step` method.
+- When `attach_as = "meta"` attach filters to the `available_filters` Source attribute (`source$attributes$available_filters`).
+- The method should return Source object.
 
 Examples:
 
 - `shinyCohortBuilder` - tblist data class
 
 ```{r, eval = FALSE}
-autofilter.tblist <- function(source, ...) {
-  step_rule <- source$attributes$datasets %>%
+autofilter.tblist <- function(source, attach_as = c("step", "meta"), ...) {
+  attach_as <- rlang::arg_match(attach_as)
+  step_rule <- source$dtconn %>%
     purrr::imap(~filter_rules(.x, .y)) %>%
     unlist(recursive = FALSE) %>%
     purrr::map(~do.call(cohortBuilder::filter, .)) %>%
     unname()
-  source %>%
-    add_step(do.call(cohortBuilder::step, step_rule))
+
+  if (identical(attach_as, "meta")) {
+    source$attributes$available_filters <- step_rule
+  } else {
+    source %>%
+      cohortBuilder::add_step(do.call(cohortBuilder::step, step_rule))
+  }
+
+  return(source)
 }
 ```
 
-4. **`.step_attrition` - define how step attrition plot should be rendered**
+4. **`.available_filters_choices` - define choices for new step configuration panel**
+
+Required parameters:
+
+- `source` - Source object, 
+- `cohort` - Cohort object,
+- `...` - Unused, added for S3 integration only.
+
+Details:
+
+- The function should return `shinyWidgets::prepare_choices` output.
+- The argument `value` of `prepare_choices` should point to filter ids.
+
+Examples:
+
+- `shinyCohortBuilder` - tblist data class
+
+```{r, eval = FALSE}
+available_filters_choices.tblist <- function(source, cohort, ...) {
+
+  available_filters <- cohort$attributes$available_filters
+
+  choices <- purrr::map(available_filters, function(x) {
+    tibble::tibble(
+      name = as.character(
+        div(
+          `data-tooltip-z-index` = 9999,
+          `data-tooltip` = x$get_params("description"),
+          `data-tooltip-position` = "top right",
+          `data-tooltip-allow-html` = "true",
+          x$name
+        )
+      ),
+      id = x$id,
+      dataset = x$get_params("dataset")
+    )
+  }) %>% dplyr::bind_rows()
+
+  choices <- shinyWidgets::prepare_choices(choices, name, id, dataset)
+}
+```
+
+5. **`.step_attrition` - define how step attrition plot should be rendered**
 
 Required parameters:
 
@@ -263,7 +315,7 @@ Examples:
 }
 ```
 
-5. **`.custom_attrition` - (optional) a custom method used for your own version of attrition plot**
+6. **`.custom_attrition` - (optional) a custom method used for your own version of attrition plot**
 
 The parameters and output structure is the same as for `.step_attrition`.
 The main difference is that you should put your custom logic for generating attrition (i.e. using a specific package meant for this).

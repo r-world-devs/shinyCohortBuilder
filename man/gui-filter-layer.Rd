@@ -29,6 +29,10 @@
 
 \item{...}{Extra arguments passed to a specific method.}
 }
+\value{
+List consisting filter metadata and methods that allow to perform filter based operations.
+    See `vignette("custom-filters")`.
+}
 \description{
 For each filter type `.gui_filter` method should return a list of the below objects:
 
