@@ -15,6 +15,9 @@
 
 \item{ns}{Namespace function.}
 }
+\value{
+A `shiny.tag` class `div` object defining html structure of filter input panel.
+}
 \description{
 The method exported only for custom extensions use.
 }

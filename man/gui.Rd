@@ -49,6 +49,9 @@ See \link[bslib]{bs_theme} version argument.}
 Possible options are: "clone" - copy filters from last step,
 "configure" - opening modal and allow to chose filters from available filters.}
 }
+\value{
+No return value, used for side effect which is running a Shiny application.
+}
 \description{
 Run filtering panel locally
 }

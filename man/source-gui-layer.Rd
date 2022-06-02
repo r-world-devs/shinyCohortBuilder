@@ -3,6 +3,10 @@
 \name{source-gui-layer}
 \alias{source-gui-layer}
 \title{Source compatibility methods.}
+\value{
+Various type outputs dependent on the selected method.
+  See each method documentation for details.
+}
 \description{
 List of methods that allow compatibility of different source types.
 Most of the methods should be defined in order to make new source layer functioning.
@@ -19,6 +23,7 @@ should be defined:
   \item{.update_data_stats}{ }
   \item{.step_attrition}{ }
   \item{.custom_attrition}{ }
+  \item{.available_filter_choices}
   \item{autofilter}{ }
 }
 Except from the above methods, you may extend the existing or new source with providing

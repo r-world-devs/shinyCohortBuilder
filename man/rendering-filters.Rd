@@ -24,6 +24,9 @@
 
 \item{ns}{Namespace function.}
 }
+\value{
+Nested list of `shiny.tag` objects storing html structure of filter input panels.
+}
 \description{
 The method exported only for custom extensions use.
 }

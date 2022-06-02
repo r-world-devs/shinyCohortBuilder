@@ -19,6 +19,10 @@
 
 \item{ns}{Namespace function (if used within Shiny modal).}
 }
+\value{
+No return value (`.trigger_action` - sends message to the browser) or
+  character string storing JS code for sending input value to Shiny server (`.trigger_action_js`).
+}
 \description{
 The two functions that allow to trigger a specific filtering panel action directly
 from Shiny server (.trigger_action) or application browser (.trigger_action_js)

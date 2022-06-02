@@ -56,6 +56,11 @@ Possible options are: "pre" - previous step stat, "post" - current step stats,
 
 \item{show_help}{Set to TRUE (default) to enable help buttons.}
 }
+\value{
+Nested list of `shiny.tag` objects - html structure of filtering panel module.
+
+`shiny::moduleServer` output providing server logic for filtering panel module.
+}
 \description{
 The function returns filtering panel placeholder, you may use in you custom Shiny application.
 Use in the UI part of your application.

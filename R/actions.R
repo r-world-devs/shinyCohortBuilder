@@ -33,6 +33,8 @@
 #' @param action Id of the action.
 #' @param params List of parameters passed to specific action method.
 #' @param ns Namespace function (if used within Shiny modal).
+#' @return No return value (`.trigger_action` - sends message to the browser) or
+#'   character string storing JS code for sending input value to Shiny server (`.trigger_action_js`).
 #'
 #' @name trigger-action
 #' @export
@@ -89,6 +91,9 @@ input_state <- function(action, params, gui = TRUE, session = shiny::getDefaultR
 #' @param observer An `observe` or `observeEvent` to be saved.
 #' @param id Of the observer. Preferably prefixed with step_id.
 #' @param session Shiny session object.
+#' @return No return value, used for side effect which is saving the observer to
+#'     `session$userData` object.
+#'
 #' @export
 .save_observer <- function(observer, id, session) {
   # todo save in key value storage for user session?
@@ -136,6 +141,7 @@ clear_step_data <- function(id, .session) {
 #' @param name Name of the output to be rendered
 #' @param rendering Rendering expression to be sent.
 #' @param session Shiny session object.
+#' @return No return value, used for side effect which is assigning rendering to the output object.
 #'
 #' @export
 .sendOutput <- function(name, rendering, session = shiny::getDefaultReactiveDomain()) {
@@ -534,7 +540,7 @@ gui_show_step_filter_modal <- function(cohort, changed_input, session) {
     return(gui_add_step(cohort, changed_input, session))
   }
 
-  choices <- available_filters_choices(cohort$get_source(), cohort)
+  choices <- .available_filters_choices(cohort$get_source(), cohort)
 
   shiny::showModal(
     shiny::modalDialog(
@@ -667,6 +673,8 @@ gui_show_repro_code <- function(cohort, changed_input, session) {
 #' @param cohort Cohort object.
 #' @param session Shiny session object.
 #' @param ... Extra arguments passed to specific method.
+#' @return List of two objects: `render` and `output` defining rendering and
+#'     output placeholder for step attrition plot feature.
 #'
 #' @name rendering-step-attrition
 #' @seealso \link{source-gui-layer}
@@ -697,6 +705,8 @@ gui_show_repro_code <- function(cohort, changed_input, session) {
 #'
 #' @param source Source object.
 #' @param ... Extra arguments passed to specific method.
+#' @return List of two objects: `render` and `output` defining rendering and
+#'    output placeholder for custom attrition plot feature.
 #'
 #' @name rendering-custom-attrition
 #' @seealso \link{source-gui-layer}
@@ -800,6 +810,8 @@ no_ws <- c("before", "after", "outside", "after-begin", "before-end", "inside")
 #' @param cohort Cohort object.
 #' @param session Shiny session object.
 #' @param ... Extra arguments passed to a specific method.
+#' @return No return value, used for side effect which assigning Cohort data
+#'     statistics to the `output` object.
 #'
 #' @name updating-data-statistics
 #' @seealso \link{source-gui-layer}

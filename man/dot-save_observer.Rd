@@ -13,6 +13,10 @@
 
 \item{session}{Shiny session object.}
 }
+\value{
+No return value, used for side effect which is saving the observer to
+    `session$userData` object.
+}
 \description{
 The method used to store created observers (used to implement extra filter logic).
 The saved observer are then destroyed when filtering step is removed which prevents

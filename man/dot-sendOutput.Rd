@@ -13,6 +13,9 @@
 
 \item{session}{Shiny session object.}
 }
+\value{
+No return value, used for side effect which is assigning rendering to the output object.
+}
 \description{
 Functional approach to rendering output.
 Equivalent of `output[[name]] <- rendering`.

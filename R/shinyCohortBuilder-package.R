@@ -33,12 +33,15 @@ NULL
 #'   \item{.update_data_stats}{ }
 #'   \item{.step_attrition}{ }
 #'   \item{.custom_attrition}{ }
+#'   \item{.available_filter_choices}
 #'   \item{autofilter}{ }
 #' }
 #' Except from the above methods, you may extend the existing or new source with providing
 #' custom gui filtering methods. See \link{gui-filter-layer}.
 #' In order to see more details about how to implement custom source check `vignette("custom-gui-layer")`.
 #'
+#' @return Various type outputs dependent on the selected method.
+#'   See each method documentation for details.
 #' @name source-gui-layer
 NULL
 

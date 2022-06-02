@@ -15,9 +15,14 @@ autofilter(source, attach_as = c("step", "meta"), ...)
 \arguments{
 \item{source}{Source object.}
 
-\item{attach_as}{Choose whether the filters should be attached as a new step, or list of available filters (used in filtering panel when `new_step = "configure"`). By default in \code{step}.}
+\item{attach_as}{Choose whether the filters should be attached as a new step,
+or list of available filters (used in filtering panel when `new_step = "configure"`).
+By default in \code{step}.}
 
 \item{...}{Extra arguments passed to a specific method.}
+}
+\value{
+Source object having step configuration attached.
 }
 \description{
 The method should analyze source data structure, generate proper filters based on

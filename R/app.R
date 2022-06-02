@@ -18,6 +18,7 @@
 #' @param new_step Choose which add step method should be used for creating new step.
 #'   Possible options are: "clone" - copy filters from last step,
 #'   "configure" - opening modal and allow to chose filters from available filters.
+#' @return No return value, used for side effect which is running a Shiny application.
 #'
 #' @export
 demo_app <- function(
@@ -249,6 +250,7 @@ demo_app <- function(
 #'
 #' @inheritParams demo_app
 #' @param cohort Cohort object with configured filters.
+#' @return No return value, used for side effect which is running a Shiny application.
 #'
 #' @examples
 #' if (interactive()) {

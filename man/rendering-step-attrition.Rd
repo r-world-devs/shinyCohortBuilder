@@ -24,6 +24,10 @@
 
 \item{session}{Shiny session object.}
 }
+\value{
+List of two objects: `render` and `output` defining rendering and
+    output placeholder for step attrition plot feature.
+}
 \description{
 The method should return list of two object:
 \itemize{

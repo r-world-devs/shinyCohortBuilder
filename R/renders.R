@@ -17,7 +17,7 @@ call_filters <- function(step_id, cohort, input, output, session) {
     purrr::walk(~call_filter(.x, step_id, cohort, input, output, session))
 }
 
-#' Create input controller insensitive to server updated
+#' Create input controller insensitive to server updates
 #'
 #' @description
 #' Input controllers created with `.cb_input` are sending its value to server only when
@@ -31,6 +31,7 @@ call_filters <- function(step_id, cohort, input, output, session) {
 #' @param data_param Name of the parameter that should be updated in filter whenever user change the input value.
 #' @param ... Extra attributes passed to the input div container.
 #' @param priority Set to 'event' to force sending value.
+#' @return A `shiny.tag` object defining html structure of filter input container.
 #'
 #' @export
 .cb_input <- function(ui, data_param, ..., priority = NULL) {
@@ -66,6 +67,7 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
 #' @param step_id Id of the step.
 #' @param cohort Cohort object.
 #' @param ns Namespace function.
+#' @return A `shiny.tag` class `div` object defining html structure of filter input panel.
 #'
 #' @export
 .render_filter <- function(filter, step_id, cohort, ns) {
@@ -304,6 +306,7 @@ empty_if_false <- function(condition, value, span = TRUE, empty = NULL) {
 #' @param percent Should current/previous ration in percentages be displayed?
 #' @param stats Vector of "pre" and "post" defining which statistics should be returned.
 #'   "pre" for previous, "post" for current and NULL for none.
+#' @return A `shiny.tag` class `span` object defining html structure of data/value statistics.
 #'
 #' @export
 .pre_post_stats <- function(current, previous, name, brackets = FALSE, percent = FALSE, stats = c("pre", "post")) {
@@ -379,6 +382,8 @@ restore_attribute <- function(cohort, attribute, value) {
 #'
 #' @name rendering-filters
 #' @param ... Extra arguments passed to a specific method.
+#' @return Nested list of `shiny.tag` objects storing html structure of filter input panels.
+#'
 #' @seealso \link{source-gui-layer}
 #' @export
 .render_filters <- function(source, ...) {
@@ -397,6 +402,27 @@ restore_attribute <- function(cohort, attribute, value) {
   )
 }
 
+#' Generate available filters choices based on the Source data
+#'
+#' The method should return the available choices for
+#' virtualSelect input.
+#'
+#' @param source Source object.
+#' @param cohort cohortBuilder cohort object
+#' @param ... Extra arguments passed to a specific method.
+#' @return `shinyWidgets::prepare_choices` output value.
+#' @name available-filters-choices
+#' @export
+.available_filters_choices <- function(source, cohort, ...) {
+  UseMethod(".available_filters_choices", source)
+}
+
+#' @rdname available-filters-choices
+#' @export
+.available_filters_choises.default <- function(source, cohort, ...) {
+  stop("The `available_filters` method is missing for the used Source type.")
+}
+
 #' Include filtering panel in Shiny
 #'
 #' @description
@@ -407,6 +433,7 @@ restore_attribute <- function(cohort, attribute, value) {
 #' @inheritParams demo_app
 #' @param id Id of the module used to render the panel.
 #' @param ... Extra attributes passed to the panel div container.
+#' @return Nested list of `shiny.tag` objects - html structure of filtering panel module.
 #' @export
 cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition = TRUE, new_step = c("clone", "configure")) {
   ns <- shiny::NS(id)
@@ -526,6 +553,7 @@ bookmark_restore <- function(cohort, enable_bookmarking) {
 #' @rdname cb_ui
 #' @inheritParams demo_app
 #' @param cohort Cohort object storing filtering steps configuration.
+#' @return `shiny::moduleServer` output providing server logic for filtering panel module.
 #' @export
 cb_server <- function(id, cohort, run_button = FALSE, stats = c("pre", "post"), feedback = FALSE,
                       enable_bookmarking = shiny::getShinyOption("bookmarkStore", default = "disable"),

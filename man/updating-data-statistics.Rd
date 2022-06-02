@@ -24,6 +24,10 @@
 
 \item{session}{Shiny session object.}
 }
+\value{
+No return value, used for side effect which assigning Cohort data
+    statistics to the `output` object.
+}
 \description{
 The function should assign rendering that displays data source statistics to the valid output.
 By default, the output is placed within \link{.render_filters} method.

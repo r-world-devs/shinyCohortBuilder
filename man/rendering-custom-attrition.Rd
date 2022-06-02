@@ -12,6 +12,10 @@
 
 \item{...}{Extra arguments passed to specific method.}
 }
+\value{
+List of two objects: `render` and `output` defining rendering and
+   output placeholder for custom attrition plot feature.
+}
 \description{
 When method is defined for selected source, the output is displayed in attrition modal tab.
 }

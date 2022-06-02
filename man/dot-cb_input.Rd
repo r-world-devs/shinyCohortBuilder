@@ -2,7 +2,7 @@
 % Please edit documentation in R/renders.R
 \name{.cb_input}
 \alias{.cb_input}
-\title{Create input controller insensitive to server updated}
+\title{Create input controller insensitive to server updates}
 \usage{
 .cb_input(ui, data_param, ..., priority = NULL)
 }
@@ -14,6 +14,9 @@
 \item{...}{Extra attributes passed to the input div container.}
 
 \item{priority}{Set to 'event' to force sending value.}
+}
+\value{
+A `shiny.tag` object defining html structure of filter input container.
 }
 \description{
 Input controllers created with `.cb_input` are sending its value to server only when

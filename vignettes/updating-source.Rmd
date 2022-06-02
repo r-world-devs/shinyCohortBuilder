@@ -96,7 +96,7 @@ shinyApp(ui, server)
 
 ## Inconsistent data
 
-When filters configuration is different across multiple data sources you want to render the filtering panel from scratch everytime the source is updated.
+When filters configuration is different across multiple data sources you want to render the filtering panel from scratch every time the source is updated.
 In this scenario:
 
 1. Keep filtering steps configuration within a source.

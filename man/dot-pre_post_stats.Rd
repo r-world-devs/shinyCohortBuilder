@@ -27,6 +27,9 @@
 \item{stats}{Vector of "pre" and "post" defining which statistics should be returned.
 "pre" for previous, "post" for current and NULL for none.}
 }
+\value{
+A `shiny.tag` class `span` object defining html structure of data/value statistics.
+}
 \description{
 The method exported only for custom extensions use.
 }

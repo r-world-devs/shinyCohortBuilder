@@ -211,9 +211,9 @@ autofilter.tblist <- function(source, attach_as = c("step", "meta"), ...) {
   return(source)
 }
 
-#' @rdname available_filters_choices
+#' @rdname available-filters-choices
 #' @export
-available_filters_choices.tblist <- function(source, cohort, ...) {
+.available_filters_choices.tblist <- function(source, cohort, ...) {
 
   available_filters <- cohort$attributes$available_filters
 
