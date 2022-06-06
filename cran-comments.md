@@ -4,7 +4,7 @@
 * win-builder
   R version 4.1.3 (2022-03-10)
   R version 4.2.0 (2022-04-22 ucrt)
-  R Under development (unstable) (2022-06-01 r82439 ucrt)
+  R Under development (unstable) (2022-06-05 r82452 ucrt)
 
 ## `R CMD check shinyCohortBuilder_0.1.tar.gz --as-cran` results
 
@@ -64,7 +64,7 @@ Status: 1 NOTE
 
 ```
 * using log directory 'd:/RCompile/CRANguest/R-devel/shinyCohortBuilder.Rcheck'
-* using R Under development (unstable) (2022-06-01 r82439 ucrt)
+* using R Under development (unstable) (2022-06-05 r82452 ucrt)
 * using platform: x86_64-w64-mingw32 (64-bit)
 ...
 * checking CRAN incoming feasibility ... NOTE
@@ -74,3 +74,4 @@ New submission
 ...
 Status: 1 NOTE
 ```
+Possibly mis-spelled words in DESCRIPTION NOTE mentions usage of word 'analytical' - two word was intentionally used.
