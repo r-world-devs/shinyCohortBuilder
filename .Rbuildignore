@@ -20,3 +20,5 @@ README.Rmd
 srcscss/*
 srcjs/*
 .Rprofile
+cran-comments.md
+
