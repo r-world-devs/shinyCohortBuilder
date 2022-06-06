@@ -22,7 +22,7 @@ remotes::install_github("https://github.com/r-world-devs/shinyCohortBuilder")
 ## Overview
 
 With `shinyCohortBuilder` you can use `cohortBuilder` features within
-you shiny application.
+your shiny application.
 
 Configure Source and Cohort filters with `cohortBuilder` (set
 `value/range` to `NA` to select all the options / the whole range, and
