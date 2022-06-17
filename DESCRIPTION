@@ -12,17 +12,17 @@ Authors@R:
       person('Adam', 'Foryś',
              role = "ctb"))
 Maintainer: Krystian Igras <krystian8207@gmail.com>
-Description: You can easily add advanced cohort-building component 
-    to your analytical dashboard or simple Shiny app. 
-    Then you can instantly start building cohorts using multiple 
-    filters of different types, filtering datasets, and filtering steps. 
-    Filters can be complex and data-specific, and together 
-    with multiple filtering steps you can use complex filtering rules. 
-    The cohort-building sidebar panel allows you to easily 
-    work with filters, add and remove filtering steps. 
-    It helps you with handling missing values during filtering, 
-    and provides instant filtering feedback with filter feedback plots. 
-    The GUI panel is not only compatible with native shiny 
+Description: You can easily add advanced cohort-building component
+    to your analytical dashboard or simple 'Shiny' app.
+    Then you can instantly start building cohorts using multiple
+    filters of different types, filtering datasets, and filtering steps.
+    Filters can be complex and data-specific, and together
+    with multiple filtering steps you can use complex filtering rules.
+    The cohort-building sidebar panel allows you to easily
+    work with filters, add and remove filtering steps.
+    It helps you with handling missing values during filtering,
+    and provides instant filtering feedback with filter feedback plots.
+    The GUI panel is not only compatible with native shiny
     bookmarking, but also provides reproducible R code.
 License: MIT + file LICENSE
 Depends: 
@@ -49,7 +49,8 @@ Suggests:
     packer,
     sass,
     knitr,
-    rmarkdown
+    rmarkdown,
+    testthat (>= 3.0.0)
 Encoding: UTF-8
 RoxygenNote: 7.2.0
 VignetteBuilder: knitr
@@ -67,3 +68,4 @@ Collate:
     'cb_layer.R'
     'source.R'
     'source_tblist.R'
+Config/testthat/edition: 3

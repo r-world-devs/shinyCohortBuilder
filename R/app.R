@@ -32,7 +32,6 @@ demo_app <- function(
   } else {
     shiny::enableBookmarking(store = "disable")
   }
-  set.seed(123)
   gender_mapping <- function(values, cohort) {
     unname(c("F" = "Female", "M" = "Male")[values])
   }
@@ -42,8 +41,8 @@ demo_app <- function(
         id = 1:10,
         group = c("A", "B", "C", "B", "B", "C", "A", "B", "C", "B"),
         gender = c("F", "M", "F", "F", "F", "M", "M", "F", "F", "M"),
-        age = c(sample(30:50, 9), NA),
-        visit = sample(seq.Date(as.Date("1989-01-01"), as.Date("1991-01-01"), by = "month"), 10),
+        age = c(50L, 44L, 38L, 49L, 45L, 33L, 43L, 35L, 40L, NA),
+        visit = as.Date(c(7152, 7578, 7639, 7121, 7395, 7425, 7456, 7517, 6971, 7030), origin = "1970-01-01"),
         biom1 = c("A", "B", "A", "A", "B", "B", "B", "A", "A", "A"),
         biom2 = c("C", "D", "C", "D", "E", "E", "C", "C", "E", "C")
       ),
@@ -57,8 +56,8 @@ demo_app <- function(
         id = 1:15,
         group = c("A", "B", "C", "A", "B", "C", "A", "B", "C", "B", "D", "D", "D", "D", "D"),
         gender = c("F", "M", "F", "F", "F", "M", "M", "F", "F", "M", "F", "M", "F", "M", "F"),
-        age = sample(30:50, 15),
-        visit = sample(seq.Date(as.Date("1989-01-01"), as.Date("1991-01-01"), by = "month"), 15),
+        age = c(42L, 34L, 48L, 43L, 32L, 37L, 47L, 41L, 38L, 46L, 36L, 44L, 40L, 35L, 31L),
+        visit = as.Date(c(7364, 7548, 7060, 7152, 7486, 7213, 7456, 7517, 7274, 6971, 7639, 7091, 7425, 7030, 6940), origin = "1970-01-01"),
         biom1 = c("A", "B", "A", "A", "B", "B", "B", "A", "A", "A", "B", "A", "A", "B", "B"),
         biom2 = c("C", "D", "C", "D", "E", "E", "C", "C", "E", "C", "C", "D", "C", "D", "E"),
         biom3 = c("A", "B", "A", "B", "A", "B", "A", "B", "A", "B", "A", "B", "A", "B", "B")

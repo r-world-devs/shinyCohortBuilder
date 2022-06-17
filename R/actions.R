@@ -233,6 +233,8 @@ gui_update_filters_loop <- function(cohort, step_id, reset, update, exclude = ch
 }
 
 empty_plot <- function() {
+  old_par <- graphics::par(no.readonly = TRUE)
+  on.exit(graphics::par(old_par))
   grDevices::png(tempfile(fileext = ".png"), height = 1)
   graphics::par(mar = rep(0, 4))
   graphics::plot.new()
