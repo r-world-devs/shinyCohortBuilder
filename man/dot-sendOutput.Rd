@@ -20,3 +20,30 @@ No return value, used for side effect which is assigning rendering to the output
 Functional approach to rendering output.
 Equivalent of `output[[name]] <- rendering`.
 }
+\examples{
+if (interactive()) {
+  library(shiny)
+  library(shinyCohortBuilder)
+
+  rendering <- function(x_max) {
+    renderPlot({
+      x <- seq(0, x_max, by = 0.01)
+      plot(x, sin(x), type = "l")
+    })
+  }
+
+  ui <- fluidPage(
+    numericInput("xmax", "X Axis Limit", min = 0, max = 10, value = pi),
+    plotOutput("out")
+  )
+
+  server <- function(input, output, session) {
+    observeEvent(input$xmax, {
+      .sendOutput("out", rendering(input$xmax))
+    })
+  }
+
+  shinyApp(ui, server)
+}
+
+}

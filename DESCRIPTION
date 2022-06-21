@@ -35,6 +35,7 @@ Imports:
     purrr,
     ggplot2,
     ggiraph,
+    htmltools,
     shiny,
     shinyWidgets (>= 0.7.0),
     dplyr,

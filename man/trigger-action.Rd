@@ -50,3 +50,35 @@ The list of possible actions:
 
 Both `.trigger_action` and `.trigger_action_js` methods are exported for advanced use only.
 }
+\examples{
+if (interactive()) {
+  library(shiny)
+  library(shinyCohortBuilder)
+
+  shiny::addResourcePath(
+    "shinyCohortBuilder",
+    system.file("www", package = "shinyCohortBuilder")
+  )
+  ui <- fluidPage(
+    tags$head(
+      shiny::tags$script(type = "text/javascript", src = file.path("shinyCohortBuilder", "scb.js"))
+    ),
+    tags$button(
+      "Trigger action from UI", class = "btn btn-default",
+      onclick = .trigger_action_js("uiaction", params = list(a = 1))
+    ),
+    actionButton("send", "Trigger action from server")
+  )
+
+  server <- function(input, output, session) {
+    observeEvent(input$send, {
+      .trigger_action(session, "serveraction", params = list(a = 2))
+    })
+    observeEvent(input$action, {
+      print(input$action)
+    })
+  }
+
+  shinyApp(ui, server)
+}
+}

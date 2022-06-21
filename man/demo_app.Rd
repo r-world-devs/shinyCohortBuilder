@@ -52,3 +52,13 @@ No return value, used for side effect which is running a Shiny application.
 \description{
 The demo presents available filters and toolbox features.
 }
+\examples{
+if (interactive()) {
+  library(shinyCohortBuilder)
+  demo_app(steps = FALSE)
+}
+if (interactive()) {
+  library(shinyCohortBuilder)
+  demo_app(run_button = TRUE, state = FALSE)
+}
+}

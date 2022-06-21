@@ -9,7 +9,8 @@
 \arguments{
 \item{observer}{An `observe` or `observeEvent` to be saved.}
 
-\item{id}{Of the observer. Preferably prefixed with step_id.}
+\item{id}{Id of the observer. Preferably prefixed with step_id.
+The saved observer is saved as `session$userData$observers[['<id>-observer']]` object.}
 
 \item{session}{Shiny session object.}
 }
@@ -21,4 +22,37 @@ No return value, used for side effect which is saving the observer to
 The method used to store created observers (used to implement extra filter logic).
 The saved observer are then destroyed when filtering step is removed which prevents
 duplicated execution of accumulated observers.
+}
+\examples{
+if (interactive()) {
+  library(shiny)
+  library(shinyCohortBuilder)
+
+  ui <- fluidPage(
+    numericInput("power", "Power", min = 0, max = 10, value = 1, step = 1),
+    numericInput("value", "Value", min = 0, max = 100, value = 2, step = 0.1),
+    actionButton("add", "Observe the selected power"),
+    actionButton("rm", "Stop observing the selected power")
+  )
+
+  server <- function(input, output, session) {
+    observeEvent(input$add, {
+      .save_observer(
+        observeEvent(input$value, {
+           print(input$value ^ input$power)
+        }),
+        as.character(input$power),
+        session = session
+      )
+    }, ignoreInit = TRUE)
+
+    observeEvent(input$rm, {
+      id <- paste0(input$power, "-observer")
+      session$userData$observers[[id]]$destroy()
+      session$userData$observers[[id]] <- NULL
+    }, ignoreInit = TRUE)
+  }
+
+  shinyApp(ui, server)
+}
 }

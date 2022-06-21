@@ -3,13 +3,13 @@
 \name{available-filters-choices}
 \alias{available-filters-choices}
 \alias{.available_filters_choices}
-\alias{.available_filters_choises.default}
+\alias{.available_filters_choices.default}
 \alias{.available_filters_choices.tblist}
 \title{Generate available filters choices based on the Source data}
 \usage{
 .available_filters_choices(source, cohort, ...)
 
-.available_filters_choises.default(source, cohort, ...)
+\method{.available_filters_choices}{default}(source, cohort, ...)
 
 \method{.available_filters_choices}{tblist}(source, cohort, ...)
 }
@@ -26,4 +26,38 @@
 \description{
 The method should return the available choices for
 virtualSelect input.
+}
+\examples{
+if (interactive()) {
+  library(magrittr)
+  library(shiny)
+  library(cohortBuilder)
+  library(shinyCohortBuilder)
+  library(shinyWidgets)
+
+  coh <- cohort(
+    set_source(as.tblist(librarian), available_filters = list(
+      filter(
+        "range", id = "copies", name = "Copies", dataset = "books",
+        variable = "copies", range = c(5, 12)
+      ),
+      filter(
+        "date_range", id = "registered", name = "Registered",  dataset = "borrowers",
+        variable = "registered", range = c(as.Date("2010-01-01"), Inf)
+      )
+    ))
+  ) \%>\% run()
+  filter_choices <- .available_filters_choices(coh$get_source(), coh)
+
+  ui <- fluidPage(
+    virtualSelectInput("filters", "Filters", choices = filter_choices, html = TRUE)
+  )
+
+  server <- function(input, output, session) {
+
+  }
+
+  shinyApp(ui, server)
+}
+
 }

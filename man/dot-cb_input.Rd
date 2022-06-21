@@ -26,3 +26,49 @@ That means all the `update*` functions have only visible effect on application o
 The method should be used for each filter input controller and precise which
 filter value should be updated when the input selection is changes.
 }
+\examples{
+
+if (interactive()) {
+  library(shiny)
+  library(shinyCohortBuilder)
+
+  shiny::addResourcePath(
+    "shinyCohortBuilder",
+    system.file("www", package = "shinyCohortBuilder")
+  )
+  ui <- fluidPage(
+    tags$head(
+      shiny::tags$script(type = "text/javascript", src = file.path("shinyCohortBuilder", "scb.js"))
+    ),
+    actionButton("update", "Update with random value"),
+    div(
+      class = "cb_container",
+      `data-ns_prefix` = "",
+      div(
+        class = "cb_step",
+        `data-step_id` = "1",
+        div(
+          class = "cb_filter",
+          `data-filter_id` = "filid",
+          .cb_input(
+            numericInput("val", "Value", value = 1),
+            data_param = "range"
+          )
+        )
+      )
+    )
+  )
+
+  server <- function(input, output, session) {
+    observeEvent(input$action, {
+      # print should be avoided when value is changed due to update
+      print(input$action)
+    })
+    observeEvent(input$update, {
+      updateNumericInput(session, "val", value = rnorm(1))
+    })
+  }
+
+  shinyApp(ui, server)
+}
+}

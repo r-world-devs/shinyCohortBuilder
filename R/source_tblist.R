@@ -233,5 +233,5 @@ autofilter.tblist <- function(source, attach_as = c("step", "meta"), ...) {
     )
   }) %>% dplyr::bind_rows()
 
-  choices <- shinyWidgets::prepare_choices(choices, name, id, dataset)
+  shinyWidgets::prepare_choices(choices, name, id, dataset)
 }

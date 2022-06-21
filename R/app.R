@@ -20,6 +20,15 @@
 #'   "configure" - opening modal and allow to chose filters from available filters.
 #' @return No return value, used for side effect which is running a Shiny application.
 #'
+#' @examples
+#' if (interactive()) {
+#'   library(shinyCohortBuilder)
+#'   demo_app(steps = FALSE)
+#' }
+#' if (interactive()) {
+#'   library(shinyCohortBuilder)
+#'   demo_app(run_button = TRUE, state = FALSE)
+#' }
 #' @export
 demo_app <- function(
   steps = TRUE, stats = c("pre", "post"), run_button = FALSE, feedback = TRUE, state = TRUE,
@@ -80,7 +89,6 @@ demo_app <- function(
       shiny::fluidPage(
         theme = bslib::bs_theme(version = bootstrap),
         if (isTRUE(enable_bookmarking)) shiny::bookmarkButton() else NULL,
-        shiny::actionButton("debug", "debug"),
         shiny::radioButtons("dataset", "Source", c("No binding keys" = "01", "Binding keys" = "02")),
         cb_ui(
           id = "ptnts", style = "width: 300px; float: left;", steps = steps,
@@ -188,10 +196,6 @@ demo_app <- function(
         enable_bookmarking = enable_bookmarking, show_help = show_help
       ) # todo stats = NULL (no stats and maybe? no prots, then some optimization)
 
-      shiny::observeEvent(input$debug, {
-        browser()
-      }, ignoreInit = TRUE)
-
       shiny::observeEvent(input$dataset, {
         data_source <- cohortBuilder::set_source(
           datasets[[input$dataset]],
@@ -253,11 +257,14 @@ demo_app <- function(
 #'
 #' @examples
 #' if (interactive()) {
+#'   library(magrittr)
+#'   library(cohortBuilder)
+#'   library(shinyCohortBuilder)
 #'   mtcars_source <- set_source(tblist(mtcars = mtcars))
 #'   mtcars_cohort <- cohort(
 #'     mtcars_source,
 #'     filter("discrete", id = "am", dataset = "mtcars", variable = "am", value = 1)
-#'   )
+#'   ) %>% run()
 #'   gui(mtcars_cohort)
 #' }
 #'

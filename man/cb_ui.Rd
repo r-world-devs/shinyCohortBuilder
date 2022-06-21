@@ -65,3 +65,46 @@ Nested list of `shiny.tag` objects - html structure of filtering panel module.
 The function returns filtering panel placeholder, you may use in you custom Shiny application.
 Use in the UI part of your application.
 }
+\examples{
+if (interactive()) {
+  library(cohortBuilder)
+  library(shiny)
+  library(shinyCohortBuilder)
+
+  librarian_source <- set_source(as.tblist(librarian))
+  librarian_cohort <- cohort(
+    librarian_source,
+    filter(
+      "discrete", id = "author", dataset = "books",
+      variable = "author", value = "Dan Brown",
+      active = FALSE
+    ),
+    filter(
+      "range", id = "copies", dataset = "books",
+      variable = "copies", range = c(5, 10),
+      active = FALSE
+    ),
+    filter(
+      "date_range", id = "registered", dataset = "borrowers",
+      variable = "registered", range = c(as.Date("2010-01-01"), Inf),
+      active = FALSE
+    )
+  )
+
+  ui <- fluidPage(
+    sidebarLayout(
+      sidebarPanel(
+        cb_ui("librarian")
+      ),
+      mainPanel()
+    )
+  )
+
+  server <- function(input, output, session) {
+    cb_server("librarian", librarian_cohort)
+  }
+
+  shinyApp(ui, server)
+}
+
+}

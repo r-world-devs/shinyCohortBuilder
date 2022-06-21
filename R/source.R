@@ -10,6 +10,30 @@
 #' @param ... Extra arguments passed to a specific method.
 #' @return Source object having step configuration attached.
 #' @seealso \link{source-gui-layer}
+#'
+#' @examples
+#' library(magrittr)
+#' library(cohortBuilder)
+#' library(shinyCohortBuilder)
+#'
+#' iris_source <- set_source(tblist(iris = iris)) %>%
+#'   autofilter()
+#' iris_cohort <- cohort(iris_source)
+#' sum_up(iris_cohort)
+#'
+#' if (interactive()) {
+#'   library(shiny)
+#'
+#'   ui <- fluidPage(
+#'     cb_ui("mycoh")
+#'   )
+#'
+#'   server <- function(input, output, session) {
+#'     cb_server("mycoh", cohort = iris_cohort)
+#'   }
+#'
+#'   shinyApp(ui, server)
+#' }
 #' @export
 autofilter <- function(source, attach_as = c("step", "meta"), ...) {
   UseMethod("autofilter", source)
