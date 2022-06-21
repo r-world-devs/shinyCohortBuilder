@@ -51,6 +51,19 @@ For each filter type `.gui_filter` method should return a list of the below obje
 
 If you want to learn more about creating filter layers see `vignette("gui-filter-layer")`.
 }
+\examples{
+library(cohortBuilder)
+librarian_source <- set_source(as.tblist(librarian))
+copies_filter <- filter(
+  "range", id = "copies", name = "Copies", dataset = "books",
+  variable = "copies", range = c(5, 12)
+)
+copies_filter_evaled <- copies_filter(librarian_source)
+copies_filter_evaled$gui <- .gui_filter(copies_filter_evaled)
+
+str(copies_filter_evaled$gui)
+
+}
 \seealso{
 \link{source-gui-layer}
 }

@@ -227,10 +227,10 @@ cohort$get_source()$attributes$value_mappings[[filter_params$value_mapping]]
 
 5. When the filters displays pre/post statistics (i.e. discrete filter does) you should assure the ones are included in according filter labels.
 
-For this case you may use a helper `.choice_names` function:
+For this case you may use a helper `.pre_post_stats` (or `.pre_post_stats_text`) function:
 
 ```{r, eval = FALSE}
-.choice_names(
+.pre_post_stats_text(
   name = <choices labels names vector>,
   current = <current step statistics vector>,
   previous = <previous step statistics vector>,
@@ -244,7 +244,7 @@ The function returns labels in an HTML structure attaching proper classes to the
 Such (HTML) class is used to grey out the label when working with `Run Button` feature.
 
 ```{r}
-.choice_names(
+.pre_post_stats_text(
   name = c("A", "B"),
   current = 1:2,
   previous = 3:4,

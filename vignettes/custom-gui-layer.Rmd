@@ -108,7 +108,7 @@ Details:
 - It's recommended the statistics are taken from the Cohort cache `cohort$get_cache(step_id, state = "pre")`.
 - It's recommended the output performs previous step data validation (in terms of data existence) and returns descriptive message to the user.
 - Use `cohort$attributes$stats` to get displayed statistics state chosen by the user ("pre", "post", both or NULL).
-- For printing the statistics use `.pre_post_stats` which returns formatted statistics output.
+- For printing the statistics use `.pre_post_stats` (or `.pre_post_stats_text`)` which returns formatted statistics output.
 - You may directly assign the rendering to the output or use `.sendOutput` method (useful when sending output in loop see "tblist" source example below).
 
 Examples:
@@ -239,14 +239,14 @@ Examples:
 - `shinyCohortBuilder` - tblist data class
 
 ```{r, eval = FALSE}
-available_filters_choices.tblist <- function(source, cohort, ...) {
+.available_filters_choices.tblist <- function(source, cohort, ...) {
 
   available_filters <- cohort$attributes$available_filters
 
   choices <- purrr::map(available_filters, function(x) {
     tibble::tibble(
       name = as.character(
-        div(
+        shiny::div(
           `data-tooltip-z-index` = 9999,
           `data-tooltip` = x$get_params("description"),
           `data-tooltip-position` = "top right",
@@ -259,7 +259,7 @@ available_filters_choices.tblist <- function(source, cohort, ...) {
     )
   }) %>% dplyr::bind_rows()
 
-  choices <- shinyWidgets::prepare_choices(choices, name, id, dataset)
+  shinyWidgets::prepare_choices(choices, name, id, dataset)
 }
 ```
 

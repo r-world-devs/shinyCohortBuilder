@@ -29,6 +29,7 @@ divider <- function(label) {
 }
 
 filter_help_icon <- function(filter, ns, method, description, cohort) {
+  # todo move the check outside
   if (!isTRUE(cohort$attributes$show_help)) return(NULL)
   if (is.null(description)) return(NULL)
 

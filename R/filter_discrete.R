@@ -24,8 +24,10 @@ choice_name <- function(name, parent_stat, current_stat, stats) {
   .pre_post_stats(current_stat, parent_stat, name, brackets = TRUE, stats = stats)
 }
 
+#' @rdname pre_post_stats
 #' @export
-.choice_names <- function(current, previous, name, brackets = TRUE, percent = FALSE, stats = c("pre", "post")) {
+.pre_post_stats_text <- function(current, previous, name, brackets = TRUE,
+                                 percent = FALSE, stats = c("pre", "post")) {
   glue::glue(
     "<span>",
     "{name}{open_bracket}{post_stat}{slash}{pre_stat}{close_bracket}",
@@ -57,6 +59,37 @@ is_vs <- function(filter) {
   !is.null(filter$get_params("gui_input")) && filter$get_params("gui_input") == "vs"
 }
 
+#' Generate NA's filter selection GUI input
+#'
+#' @description
+#' When used within filter's GUI input method, the component is responsible for
+#' updating `keep_na` filter parameter.
+#'
+#' Use `.update_keep_na_input` inside filter's GUI update method to update the
+#' output based on the filter state.
+#'
+#' @examples
+#' library(magrittr)
+#' library(cohortBuilder)
+#'
+#' librarian_source <- set_source(as.tblist(librarian))
+#' coh <- cohort(
+#'   librarian_source,
+#'   filter(
+#'     "range", id = "copies", name = "Copies", dataset = "books",
+#'     variable = "copies", range = c(5, 12)
+#'   )
+#' ) %>% run()
+#' .keep_na_input("keep_na", coh$get_filter("1", "copies"), coh)
+#'
+#' @param input_id Id of the keep na input.
+#' @param filter Filter object.
+#' @param cohort Cohort object.
+#' @param session Shiny session object.
+#'
+#' @return Nested list of `shiny.tag` objects storing html structure of the input,
+#' or no value in case of usage 'update' method.
+#' @name keep_na_input
 #' @export
 .keep_na_input <- function(input_id, filter, cohort) {
 
@@ -74,6 +107,7 @@ is_vs <- function(filter) {
   )
 }
 
+#' @rdname keep_na_input
 #' @export
 .update_keep_na_input <- function(session, input_id, filter, cohort) {
 
@@ -116,7 +150,7 @@ discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, updat
   params <- list(
     inputId = input_id,
     choiceValues = names(parent_filter_stats),
-    choiceNames = .choice_names(
+    choiceNames = .pre_post_stats_text(
       name = value_mapping(names(parent_filter_stats), cohort),
       current = filter_stats,
       previous = parent_filter_stats,

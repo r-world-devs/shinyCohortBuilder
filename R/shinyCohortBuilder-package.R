@@ -3,7 +3,6 @@
 #' @name shinyCohortBuilder-package
 #' @importFrom magrittr %>%
 #' @importFrom dplyr sym
-#' @importFrom cohortBuilder .if_value
 
 globalVariables(c(
   ":=", "!!", ".data",
@@ -33,7 +32,7 @@ NULL
 #'   \item{.update_data_stats}{ }
 #'   \item{.step_attrition}{ }
 #'   \item{.custom_attrition}{ }
-#'   \item{.available_filter_choices}
+#'   \item{.available_filter_choices}{ }
 #'   \item{autofilter}{ }
 #' }
 #' Except from the above methods, you may extend the existing or new source with providing

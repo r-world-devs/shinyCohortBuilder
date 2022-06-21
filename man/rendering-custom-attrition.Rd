@@ -22,6 +22,60 @@ When method is defined for selected source, the output is displayed in attrition
 \details{
 Similar to \link{.step_attrition} the method should return list of `render` and `output` expressions.
 }
+\examples{
+if (interactive()) {
+  library(magrittr)
+  library(shiny)
+  library(cohortBuilder)
+  library(shinyCohortBuilder)
+
+  .custom_attrition.tblist <- function(source, id, cohort, session, ...) {
+    ns <- session$ns
+    choices <- names(source$dtconn)
+
+    list(
+      render = shiny::renderPlot({
+        cohort$show_attrition(dataset = session$input$attrition_input)
+      }),
+      output = shiny::tagList(
+        shiny::h3("Step-wise Attrition Plot"),
+        shiny::selectInput(ns("attrition_input"), "Choose dataset", choices),
+        shiny::plotOutput(id)
+      )
+    )
+  }
+  coh <- cohort(
+    set_source(as.tblist(librarian)),
+    step(
+      filter(
+        "range", id = "copies", dataset = "books",
+        variable = "copies", range = c(5, 12)
+      )
+    ),
+    step(
+      filter(
+        "range", id = "copies", dataset = "books",
+        variable = "copies", range = c(6, 8)
+      )
+    )
+  ) \%>\% run()
+
+  ui <- fluidPage(
+    div(id = "attrition")
+  )
+
+  server <- function(input, output, session) {
+    rendering <- .custom_attrition(
+      coh$get_source(), id = "attr", cohort = coh, session = session, dataset = "books"
+    )
+    insertUI("#attrition", ui = rendering$output)
+    output$attr <- rendering$render
+  }
+
+  shinyApp(ui, server)
+}
+
+}
 \seealso{
 \link{source-gui-layer}
 }

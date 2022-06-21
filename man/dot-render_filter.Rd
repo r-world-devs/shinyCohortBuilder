@@ -21,3 +21,47 @@ A `shiny.tag` class `div` object defining html structure of filter input panel.
 \description{
 The method exported only for custom extensions use.
 }
+\examples{
+if (interactive()) {
+  library(magrittr)
+  library(shiny)
+  library(cohortBuilder)
+  library(shinyCohortBuilder)
+
+  ui <- fluidPage(
+    actionButton("add_filter", "Add Filter"),
+    div(id = "filter_container")
+  )
+
+  server <- function(input, output, session) {
+    add_gui_filter_layer <- function(public, private, ...) {
+      private$steps[["1"]]$filters$copies$gui <- .gui_filter(
+        private$steps[["1"]]$filters$copies
+      )
+    }
+    add_hook("post_cohort_hook", add_gui_filter_layer)
+    coh <- cohort(
+      set_source(as.tblist(librarian)),
+      filter(
+        "range", id = "copies", name = "Copies", dataset = "books",
+        variable = "copies", range = c(5, 12)
+      )
+    ) \%>\% run()
+    coh$attributes$session <- session
+    coh$attributes$feedback <- TRUE
+
+    observeEvent(input$add_filter, {
+      insertUI(
+        "#filter_container",
+        ui = .render_filter(
+          coh$get_filter("1", "copies"),
+          step_id = "1",
+          cohort = coh,
+          ns = function(x) x
+        ))
+    }, ignoreInit = TRUE, once = TRUE)
+  }
+
+  shinyApp(ui, server)
+}
+}

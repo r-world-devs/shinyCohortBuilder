@@ -37,6 +37,37 @@
 #'   character string storing JS code for sending input value to Shiny server (`.trigger_action_js`).
 #'
 #' @name trigger-action
+#' @examples
+#' if (interactive()) {
+#'   library(shiny)
+#'   library(shinyCohortBuilder)
+#'
+#'   shiny::addResourcePath(
+#'     "shinyCohortBuilder",
+#'     system.file("www", package = "shinyCohortBuilder")
+#'   )
+#'   ui <- fluidPage(
+#'     tags$head(
+#'       shiny::tags$script(type = "text/javascript", src = file.path("shinyCohortBuilder", "scb.js"))
+#'     ),
+#'     tags$button(
+#'       "Trigger action from UI", class = "btn btn-default",
+#'       onclick = .trigger_action_js("uiaction", params = list(a = 1))
+#'     ),
+#'     actionButton("send", "Trigger action from server")
+#'   )
+#'
+#'   server <- function(input, output, session) {
+#'     observeEvent(input$send, {
+#'       .trigger_action(session, "serveraction", params = list(a = 2))
+#'     })
+#'     observeEvent(input$action, {
+#'       print(input$action)
+#'     })
+#'   }
+#'
+#'   shinyApp(ui, server)
+#' }
 #' @export
 .trigger_action <- function(session, action, params = NULL) {
   session$sendCustomMessage("up_state", {
@@ -89,11 +120,44 @@ input_state <- function(action, params, gui = TRUE, session = shiny::getDefaultR
 #' duplicated execution of accumulated observers.
 #'
 #' @param observer An `observe` or `observeEvent` to be saved.
-#' @param id Of the observer. Preferably prefixed with step_id.
+#' @param id Id of the observer. Preferably prefixed with step_id.
+#'    The saved observer is saved as `session$userData$observers[['<id>-observer']]` object.
 #' @param session Shiny session object.
 #' @return No return value, used for side effect which is saving the observer to
 #'     `session$userData` object.
 #'
+#' @examples
+#' if (interactive()) {
+#'   library(shiny)
+#'   library(shinyCohortBuilder)
+#'
+#'   ui <- fluidPage(
+#'     numericInput("power", "Power", min = 0, max = 10, value = 1, step = 1),
+#'     numericInput("value", "Value", min = 0, max = 100, value = 2, step = 0.1),
+#'     actionButton("add", "Observe the selected power"),
+#'     actionButton("rm", "Stop observing the selected power")
+#'   )
+#'
+#'   server <- function(input, output, session) {
+#'     observeEvent(input$add, {
+#'       .save_observer(
+#'         observeEvent(input$value, {
+#'            print(input$value ^ input$power)
+#'         }),
+#'         as.character(input$power),
+#'         session = session
+#'       )
+#'     }, ignoreInit = TRUE)
+#'
+#'     observeEvent(input$rm, {
+#'       id <- paste0(input$power, "-observer")
+#'       session$userData$observers[[id]]$destroy()
+#'       session$userData$observers[[id]] <- NULL
+#'     }, ignoreInit = TRUE)
+#'   }
+#'
+#'   shinyApp(ui, server)
+#' }
 #' @export
 .save_observer <- function(observer, id, session) {
   # todo save in key value storage for user session?
@@ -142,6 +206,32 @@ clear_step_data <- function(id, .session) {
 #' @param rendering Rendering expression to be sent.
 #' @param session Shiny session object.
 #' @return No return value, used for side effect which is assigning rendering to the output object.
+#'
+#' @examples
+#' if (interactive()) {
+#'   library(shiny)
+#'   library(shinyCohortBuilder)
+#'
+#'   rendering <- function(x_max) {
+#'     renderPlot({
+#'       x <- seq(0, x_max, by = 0.01)
+#'       plot(x, sin(x), type = "l")
+#'     })
+#'   }
+#'
+#'   ui <- fluidPage(
+#'     numericInput("xmax", "X Axis Limit", min = 0, max = 10, value = pi),
+#'     plotOutput("out")
+#'   )
+#'
+#'   server <- function(input, output, session) {
+#'     observeEvent(input$xmax, {
+#'       .sendOutput("out", rendering(input$xmax))
+#'     })
+#'   }
+#'
+#'   shinyApp(ui, server)
+#' }
 #'
 #' @export
 .sendOutput <- function(name, rendering, session = shiny::getDefaultReactiveDomain()) {
@@ -233,6 +323,8 @@ gui_update_filters_loop <- function(cohort, step_id, reset, update, exclude = ch
 }
 
 empty_plot <- function() {
+  old_par <- graphics::par(no.readonly = TRUE)
+  on.exit(graphics::par(old_par))
   grDevices::png(tempfile(fileext = ".png"), height = 1)
   graphics::par(mar = rep(0, 4))
   graphics::plot.new()
@@ -676,6 +768,44 @@ gui_show_repro_code <- function(cohort, changed_input, session) {
 #' @return List of two objects: `render` and `output` defining rendering and
 #'     output placeholder for step attrition plot feature.
 #'
+#' @examples
+#' if (interactive()) {
+#'   library(magrittr)
+#'   library(shiny)
+#'   library(cohortBuilder)
+#'   library(shinyCohortBuilder)
+#'
+#'   coh <- cohort(
+#'     set_source(as.tblist(librarian)),
+#'     step(
+#'       filter(
+#'         "range", id = "copies", dataset = "books",
+#'         variable = "copies", range = c(5, 12)
+#'       )
+#'     ),
+#'     step(
+#'       filter(
+#'         "range", id = "copies", dataset = "books",
+#'         variable = "copies", range = c(6, 8)
+#'       )
+#'     )
+#'   ) %>% run()
+#'
+#'   ui <- fluidPage(
+#'     div(id = "attrition")
+#'   )
+#'
+#'   server <- function(input, output, session) {
+#'     rendering <- .step_attrition(
+#'       coh$get_source(), id = "attr", cohort = coh, session = session, dataset = "books"
+#'     )
+#'     insertUI("#attrition", ui = rendering$output)
+#'     output$attr <- rendering$render
+#'   }
+#'
+#'   shinyApp(ui, server)
+#' }
+#'
 #' @name rendering-step-attrition
 #' @seealso \link{source-gui-layer}
 #' @export
@@ -707,6 +837,59 @@ gui_show_repro_code <- function(cohort, changed_input, session) {
 #' @param ... Extra arguments passed to specific method.
 #' @return List of two objects: `render` and `output` defining rendering and
 #'    output placeholder for custom attrition plot feature.
+#'
+#' @examples
+#' if (interactive()) {
+#'   library(magrittr)
+#'   library(shiny)
+#'   library(cohortBuilder)
+#'   library(shinyCohortBuilder)
+#'
+#'   .custom_attrition.tblist <- function(source, id, cohort, session, ...) {
+#'     ns <- session$ns
+#'     choices <- names(source$dtconn)
+#'
+#'     list(
+#'       render = shiny::renderPlot({
+#'         cohort$show_attrition(dataset = session$input$attrition_input)
+#'       }),
+#'       output = shiny::tagList(
+#'         shiny::h3("Step-wise Attrition Plot"),
+#'         shiny::selectInput(ns("attrition_input"), "Choose dataset", choices),
+#'         shiny::plotOutput(id)
+#'       )
+#'     )
+#'   }
+#'   coh <- cohort(
+#'     set_source(as.tblist(librarian)),
+#'     step(
+#'       filter(
+#'         "range", id = "copies", dataset = "books",
+#'         variable = "copies", range = c(5, 12)
+#'       )
+#'     ),
+#'     step(
+#'       filter(
+#'         "range", id = "copies", dataset = "books",
+#'         variable = "copies", range = c(6, 8)
+#'       )
+#'     )
+#'   ) %>% run()
+#'
+#'   ui <- fluidPage(
+#'     div(id = "attrition")
+#'   )
+#'
+#'   server <- function(input, output, session) {
+#'     rendering <- .custom_attrition(
+#'       coh$get_source(), id = "attr", cohort = coh, session = session, dataset = "books"
+#'     )
+#'     insertUI("#attrition", ui = rendering$output)
+#'     output$attr <- rendering$render
+#'   }
+#'
+#'   shinyApp(ui, server)
+#' }
 #'
 #' @name rendering-custom-attrition
 #' @seealso \link{source-gui-layer}
@@ -812,6 +995,45 @@ no_ws <- c("before", "after", "outside", "after-begin", "before-end", "inside")
 #' @param ... Extra arguments passed to a specific method.
 #' @return No return value, used for side effect which assigning Cohort data
 #'     statistics to the `output` object.
+#'
+#' @examples
+#' if (interactive()) {
+#'   library(magrittr)
+#'   library(shiny)
+#'   library(cohortBuilder)
+#'   library(shinyCohortBuilder)
+#'
+#'   ui <- fluidPage(
+#'     sliderInput("step_two_max", "Max step two copies", min = 6, max = 12, value = 8),
+#'     uiOutput("2-stats_books")
+#'   )
+#'
+#'   server <- function(input, output, session) {
+#'     coh <- cohort(
+#'       set_source(as.tblist(librarian)),
+#'       step(
+#'         filter(
+#'           "range", id = "copies", dataset = "books",
+#'           variable = "copies", range = c(5, 12)
+#'         )
+#'       ),
+#'       step(
+#'         filter(
+#'           "range", id = "copies", dataset = "books",
+#'           variable = "copies", range = c(6, 8)
+#'         )
+#'       )
+#'     ) %>% run()
+#'     coh$attributes$stats <- c("pre", "post")
+#'     observeEvent(input$step_two_max, {
+#'       coh$update_filter("copies", step_id = 2, range = c(6, input$step_two_max))
+#'       run(coh, min_step_id = "2")
+#'       .update_data_stats(coh$get_source(), step_id = "2", cohort = coh, session = session)
+#'     })
+#'   }
+#'
+#'   shinyApp(ui, server)
+#' }
 #'
 #' @name updating-data-statistics
 #' @seealso \link{source-gui-layer}

@@ -44,6 +44,45 @@ For example:
   )
 }
 }
+\examples{
+if (interactive()) {
+  library(magrittr)
+  library(shiny)
+  library(cohortBuilder)
+  library(shinyCohortBuilder)
+
+  coh <- cohort(
+    set_source(as.tblist(librarian)),
+    step(
+      filter(
+        "range", id = "copies", dataset = "books",
+        variable = "copies", range = c(5, 12)
+      )
+    ),
+    step(
+      filter(
+        "range", id = "copies", dataset = "books",
+        variable = "copies", range = c(6, 8)
+      )
+    )
+  ) \%>\% run()
+
+  ui <- fluidPage(
+    div(id = "attrition")
+  )
+
+  server <- function(input, output, session) {
+    rendering <- .step_attrition(
+      coh$get_source(), id = "attr", cohort = coh, session = session, dataset = "books"
+    )
+    insertUI("#attrition", ui = rendering$output)
+    output$attr <- rendering$render
+  }
+
+  shinyApp(ui, server)
+}
+
+}
 \seealso{
 \link{source-gui-layer}
 }

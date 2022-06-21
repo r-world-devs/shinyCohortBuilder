@@ -57,11 +57,14 @@ Run filtering panel locally
 }
 \examples{
 if (interactive()) {
+  library(magrittr)
+  library(cohortBuilder)
+  library(shinyCohortBuilder)
   mtcars_source <- set_source(tblist(mtcars = mtcars))
   mtcars_cohort <- cohort(
     mtcars_source,
     filter("discrete", id = "am", dataset = "mtcars", variable = "am", value = 1)
-  )
+  ) \%>\% run()
   gui(mtcars_cohort)
 }
 

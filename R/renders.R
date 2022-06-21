@@ -33,6 +33,51 @@ call_filters <- function(step_id, cohort, input, output, session) {
 #' @param priority Set to 'event' to force sending value.
 #' @return A `shiny.tag` object defining html structure of filter input container.
 #'
+#' @examples
+#'
+#' if (interactive()) {
+#'   library(shiny)
+#'   library(shinyCohortBuilder)
+#'
+#'   shiny::addResourcePath(
+#'     "shinyCohortBuilder",
+#'     system.file("www", package = "shinyCohortBuilder")
+#'   )
+#'   ui <- fluidPage(
+#'     tags$head(
+#'       shiny::tags$script(type = "text/javascript", src = file.path("shinyCohortBuilder", "scb.js"))
+#'     ),
+#'     actionButton("update", "Update with random value"),
+#'     div(
+#'       class = "cb_container",
+#'       `data-ns_prefix` = "",
+#'       div(
+#'         class = "cb_step",
+#'         `data-step_id` = "1",
+#'         div(
+#'           class = "cb_filter",
+#'           `data-filter_id` = "filid",
+#'           .cb_input(
+#'             numericInput("val", "Value", value = 1),
+#'             data_param = "range"
+#'           )
+#'         )
+#'       )
+#'     )
+#'   )
+#'
+#'   server <- function(input, output, session) {
+#'     observeEvent(input$action, {
+#'       # print should be avoided when value is changed due to update
+#'       print(input$action)
+#'     })
+#'     observeEvent(input$update, {
+#'       updateNumericInput(session, "val", value = rnorm(1))
+#'     })
+#'   }
+#'
+#'   shinyApp(ui, server)
+#' }
 #' @export
 .cb_input <- function(ui, data_param, ..., priority = NULL) {
   shiny::div(class = "cb_input", `data-param` = data_param, `data-exec_state` = "init", ui, priority = priority, ...)
@@ -69,6 +114,49 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
 #' @param ns Namespace function.
 #' @return A `shiny.tag` class `div` object defining html structure of filter input panel.
 #'
+#' @examples
+#' if (interactive()) {
+#'   library(magrittr)
+#'   library(shiny)
+#'   library(cohortBuilder)
+#'   library(shinyCohortBuilder)
+#'
+#'   ui <- fluidPage(
+#'     actionButton("add_filter", "Add Filter"),
+#'     div(id = "filter_container")
+#'   )
+#'
+#'   server <- function(input, output, session) {
+#'     add_gui_filter_layer <- function(public, private, ...) {
+#'       private$steps[["1"]]$filters$copies$gui <- .gui_filter(
+#'         private$steps[["1"]]$filters$copies
+#'       )
+#'     }
+#'     add_hook("post_cohort_hook", add_gui_filter_layer)
+#'     coh <- cohort(
+#'       set_source(as.tblist(librarian)),
+#'       filter(
+#'         "range", id = "copies", name = "Copies", dataset = "books",
+#'         variable = "copies", range = c(5, 12)
+#'       )
+#'     ) %>% run()
+#'     coh$attributes$session <- session
+#'     coh$attributes$feedback <- TRUE
+#'
+#'     observeEvent(input$add_filter, {
+#'       insertUI(
+#'         "#filter_container",
+#'         ui = .render_filter(
+#'           coh$get_filter("1", "copies"),
+#'           step_id = "1",
+#'           cohort = coh,
+#'           ns = function(x) x
+#'         ))
+#'     }, ignoreInit = TRUE, once = TRUE)
+#'   }
+#'
+#'   shinyApp(ui, server)
+#' }
 #' @export
 .render_filter <- function(filter, step_id, cohort, ns) {
   filter_id <- filter$id
@@ -297,7 +385,12 @@ empty_if_false <- function(condition, value, span = TRUE, empty = NULL) {
 
 #' Generate structure of pre/post statistics
 #'
+#' @description
 #' The method exported only for custom extensions use.
+#'
+#' `.pre_post_stats` returns the statistics having html tags structure.
+#' `.pre_post_stats_text` returns the same output but flatten to a single character object.
+#' The latter function works faster and supports vector arguments.
 #'
 #' @param current Current step statistic value.
 #' @param previous Previous step statistic value.
@@ -306,7 +399,18 @@ empty_if_false <- function(condition, value, span = TRUE, empty = NULL) {
 #' @param percent Should current/previous ration in percentages be displayed?
 #' @param stats Vector of "pre" and "post" defining which statistics should be returned.
 #'   "pre" for previous, "post" for current and NULL for none.
-#' @return A `shiny.tag` class `span` object defining html structure of data/value statistics.
+#' @return A `shiny.tag` class `span` object defining html structure of data/value
+#'   statistics, or character object.
+#'
+#' @name pre_post_stats
+#' @examples
+#' .pre_post_stats(5, 10, "books")
+#' .pre_post_stats_text(5, 10, "books")
+#' .pre_post_stats(5, 10, "books", brackets = TRUE)
+#' .pre_post_stats_text(5, 10, "books", brackets = TRUE)
+#' .pre_post_stats(5, 10, "books", percent = TRUE)
+#' .pre_post_stats_text(5, 10, "books", percent = TRUE)
+#' .pre_post_stats_text(5:6, 10:11, "books", percent = TRUE)
 #'
 #' @export
 .pre_post_stats <- function(current, previous, name, brackets = FALSE, percent = FALSE, stats = c("pre", "post")) {
@@ -360,6 +464,17 @@ restore_attribute <- function(cohort, attribute, value) {
 #'     See `vignette("custom-filters")`.
 #'
 #' @name gui-filter-layer
+#' @examples
+#' library(cohortBuilder)
+#' librarian_source <- set_source(as.tblist(librarian))
+#' copies_filter <- filter(
+#'   "range", id = "copies", name = "Copies", dataset = "books",
+#'   variable = "copies", range = c(5, 12)
+#' )
+#' copies_filter_evaled <- copies_filter(librarian_source)
+#' copies_filter_evaled$gui <- .gui_filter(copies_filter_evaled)
+#'
+#' str(copies_filter_evaled$gui)
 #'
 #' @seealso \link{source-gui-layer}
 #' @export
@@ -384,6 +499,56 @@ restore_attribute <- function(cohort, attribute, value) {
 #' @param ... Extra arguments passed to a specific method.
 #' @return Nested list of `shiny.tag` objects storing html structure of filter input panels.
 #'
+#' @examples
+#' if (interactive()) {
+#'   library(magrittr)
+#'   library(shiny)
+#'   library(cohortBuilder)
+#'   library(shinyCohortBuilder)
+#'
+#'   ui <- fluidPage(
+#'     actionButton("add_filter", "Add Filter"),
+#'     div(id = "filter_container")
+#'   )
+#'
+#'   server <- function(input, output, session) {
+#'     add_gui_filter_layer <- function(public, private, ...) {
+#'       private$steps[["1"]]$filters$copies$gui <- .gui_filter(
+#'         private$steps[["1"]]$filters$copies
+#'       )
+#'       private$steps[["1"]]$filters$registered$gui <- .gui_filter(
+#'         private$steps[["1"]]$filters$registered
+#'       )
+#'     }
+#'     add_hook("post_cohort_hook", add_gui_filter_layer)
+#'     coh <- cohort(
+#'       set_source(as.tblist(librarian)),
+#'       filter(
+#'         "range", id = "copies", name = "Copies", dataset = "books",
+#'         variable = "copies", range = c(5, 12)
+#'       ),
+#'       filter(
+#'         "date_range", id = "registered", name = "Registered",  dataset = "borrowers",
+#'         variable = "registered", range = c(as.Date("2010-01-01"), Inf)
+#'       )
+#'     ) %>% run()
+#'     coh$attributes$session <- session
+#'     coh$attributes$feedback <- TRUE
+#'
+#'     observeEvent(input$add_filter, {
+#'       insertUI(
+#'         "#filter_container",
+#'         ui = .render_filters(
+#'           coh$get_source(),
+#'           cohort = coh,
+#'           step_id = "1",
+#'           ns = function(x) x
+#'         ))
+#'     }, ignoreInit = TRUE, once = TRUE)
+#'   }
+#'
+#'   shinyApp(ui, server)
+#' }
 #' @seealso \link{source-gui-layer}
 #' @export
 .render_filters <- function(source, ...) {
@@ -412,6 +577,39 @@ restore_attribute <- function(cohort, attribute, value) {
 #' @param ... Extra arguments passed to a specific method.
 #' @return `shinyWidgets::prepare_choices` output value.
 #' @name available-filters-choices
+#' @examples
+#' if (interactive()) {
+#'   library(magrittr)
+#'   library(shiny)
+#'   library(cohortBuilder)
+#'   library(shinyCohortBuilder)
+#'   library(shinyWidgets)
+#'
+#'   coh <- cohort(
+#'     set_source(as.tblist(librarian), available_filters = list(
+#'       filter(
+#'         "range", id = "copies", name = "Copies", dataset = "books",
+#'         variable = "copies", range = c(5, 12)
+#'       ),
+#'       filter(
+#'         "date_range", id = "registered", name = "Registered",  dataset = "borrowers",
+#'         variable = "registered", range = c(as.Date("2010-01-01"), Inf)
+#'       )
+#'     ))
+#'   ) %>% run()
+#'   filter_choices <- .available_filters_choices(coh$get_source(), coh)
+#'
+#'   ui <- fluidPage(
+#'     virtualSelectInput("filters", "Filters", choices = filter_choices, html = TRUE)
+#'   )
+#'
+#'   server <- function(input, output, session) {
+#'
+#'   }
+#'
+#'   shinyApp(ui, server)
+#' }
+#'
 #' @export
 .available_filters_choices <- function(source, cohort, ...) {
   UseMethod(".available_filters_choices", source)
@@ -419,7 +617,7 @@ restore_attribute <- function(cohort, attribute, value) {
 
 #' @rdname available-filters-choices
 #' @export
-.available_filters_choises.default <- function(source, cohort, ...) {
+.available_filters_choices.default <- function(source, cohort, ...) {
   stop("The `available_filters` method is missing for the used Source type.")
 }
 
@@ -434,6 +632,49 @@ restore_attribute <- function(cohort, attribute, value) {
 #' @param id Id of the module used to render the panel.
 #' @param ... Extra attributes passed to the panel div container.
 #' @return Nested list of `shiny.tag` objects - html structure of filtering panel module.
+#'
+#' @examples
+#' if (interactive()) {
+#'   library(cohortBuilder)
+#'   library(shiny)
+#'   library(shinyCohortBuilder)
+#'
+#'   librarian_source <- set_source(as.tblist(librarian))
+#'   librarian_cohort <- cohort(
+#'     librarian_source,
+#'     filter(
+#'       "discrete", id = "author", dataset = "books",
+#'       variable = "author", value = "Dan Brown",
+#'       active = FALSE
+#'     ),
+#'     filter(
+#'       "range", id = "copies", dataset = "books",
+#'       variable = "copies", range = c(5, 10),
+#'       active = FALSE
+#'     ),
+#'     filter(
+#'       "date_range", id = "registered", dataset = "borrowers",
+#'       variable = "registered", range = c(as.Date("2010-01-01"), Inf),
+#'       active = FALSE
+#'     )
+#'   )
+#'
+#'   ui <- fluidPage(
+#'     sidebarLayout(
+#'       sidebarPanel(
+#'         cb_ui("librarian")
+#'       ),
+#'       mainPanel()
+#'     )
+#'   )
+#'
+#'   server <- function(input, output, session) {
+#'     cb_server("librarian", librarian_cohort)
+#'   }
+#'
+#'   shinyApp(ui, server)
+#' }
+#'
 #' @export
 cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition = TRUE, new_step = c("clone", "configure")) {
   ns <- shiny::NS(id)

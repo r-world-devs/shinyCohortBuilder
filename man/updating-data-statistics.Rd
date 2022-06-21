@@ -37,6 +37,46 @@ When rendering the output, a good practice is to use cached data statistics avai
 `cohort$get_cache(step_id)`.
 This way, you omit running additional computations which results with performance improvement.
 }
+\examples{
+if (interactive()) {
+  library(magrittr)
+  library(shiny)
+  library(cohortBuilder)
+  library(shinyCohortBuilder)
+
+  ui <- fluidPage(
+    sliderInput("step_two_max", "Max step two copies", min = 6, max = 12, value = 8),
+    uiOutput("2-stats_books")
+  )
+
+  server <- function(input, output, session) {
+    coh <- cohort(
+      set_source(as.tblist(librarian)),
+      step(
+        filter(
+          "range", id = "copies", dataset = "books",
+          variable = "copies", range = c(5, 12)
+        )
+      ),
+      step(
+        filter(
+          "range", id = "copies", dataset = "books",
+          variable = "copies", range = c(6, 8)
+        )
+      )
+    ) \%>\% run()
+    coh$attributes$stats <- c("pre", "post")
+    observeEvent(input$step_two_max, {
+      coh$update_filter("copies", step_id = 2, range = c(6, input$step_two_max))
+      run(coh, min_step_id = "2")
+      .update_data_stats(coh$get_source(), step_id = "2", cohort = coh, session = session)
+    })
+  }
+
+  shinyApp(ui, server)
+}
+
+}
 \seealso{
 \link{source-gui-layer}
 }
