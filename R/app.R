@@ -34,7 +34,8 @@ demo_app <- function(
   steps = TRUE, stats = c("pre", "post"), run_button = FALSE, feedback = TRUE, state = TRUE,
   bootstrap = 3, enable_bookmarking = TRUE, code = TRUE, attrition = TRUE, show_help = TRUE,
   new_step = c("clone", "configure")) {
-  options("shiny.minified" = FALSE)
+  old_opts <- options()
+  on.exit(options(old_opts))
   options("cb_active_filter" = FALSE)
   if (isTRUE(enable_bookmarking)) {
     shiny::enableBookmarking(store = "url")
