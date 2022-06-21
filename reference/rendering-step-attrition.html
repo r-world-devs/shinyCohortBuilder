@@ -142,6 +142,47 @@ For example:
     <div class="dont-index"><p><a href="source-gui-layer.html">source-gui-layer</a></p></div>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span class="r-in">  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span>
+<span class="r-in">  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.rstudio.com/" class="external-link">shiny</a></span><span class="op">)</span></span>
+<span class="r-in">  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-world-devs/cohortBuilder/" class="external-link">cohortBuilder</a></span><span class="op">)</span></span>
+<span class="r-in">  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">shinyCohortBuilder</span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in">  <span class="va">coh</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/create-cohort.html" class="external-link">cohort</a></span><span class="op">(</span></span>
+<span class="r-in">    <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/set_source.html" class="external-link">set_source</a></span><span class="op">(</span><span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/tblist.html" class="external-link">as.tblist</a></span><span class="op">(</span><span class="va">librarian</span><span class="op">)</span><span class="op">)</span>,</span>
+<span class="r-in">    <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/step.html" class="external-link">step</a></span><span class="op">(</span></span>
+<span class="r-in">      <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
+<span class="r-in">        <span class="st">"range"</span>, id <span class="op">=</span> <span class="st">"copies"</span>, dataset <span class="op">=</span> <span class="st">"books"</span>,</span>
+<span class="r-in">        variable <span class="op">=</span> <span class="st">"copies"</span>, range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">12</span><span class="op">)</span></span>
+<span class="r-in">      <span class="op">)</span></span>
+<span class="r-in">    <span class="op">)</span>,</span>
+<span class="r-in">    <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/step.html" class="external-link">step</a></span><span class="op">(</span></span>
+<span class="r-in">      <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
+<span class="r-in">        <span class="st">"range"</span>, id <span class="op">=</span> <span class="st">"copies"</span>, dataset <span class="op">=</span> <span class="st">"books"</span>,</span>
+<span class="r-in">        variable <span class="op">=</span> <span class="st">"copies"</span>, range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">8</span><span class="op">)</span></span>
+<span class="r-in">      <span class="op">)</span></span>
+<span class="r-in">    <span class="op">)</span></span>
+<span class="r-in">  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/run.html" class="external-link">run</a></span><span class="op">(</span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in">  <span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html" class="external-link">fluidPage</a></span><span class="op">(</span></span>
+<span class="r-in">    <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">div</a></span><span class="op">(</span>id <span class="op">=</span> <span class="st">"attrition"</span><span class="op">)</span></span>
+<span class="r-in">  <span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in">  <span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
+<span class="r-in">    <span class="va">rendering</span> <span class="op">&lt;-</span> <span class="fu">.step_attrition</span><span class="op">(</span></span>
+<span class="r-in">      <span class="va">coh</span><span class="op">$</span><span class="fu">get_source</span><span class="op">(</span><span class="op">)</span>, id <span class="op">=</span> <span class="st">"attr"</span>, cohort <span class="op">=</span> <span class="va">coh</span>, session <span class="op">=</span> <span class="va">session</span>, dataset <span class="op">=</span> <span class="st">"books"</span></span>
+<span class="r-in">    <span class="op">)</span></span>
+<span class="r-in">    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/insertUI.html" class="external-link">insertUI</a></span><span class="op">(</span><span class="st">"#attrition"</span>, ui <span class="op">=</span> <span class="va">rendering</span><span class="op">$</span><span class="va">output</span><span class="op">)</span></span>
+<span class="r-in">    <span class="va">output</span><span class="op">$</span><span class="va">attr</span> <span class="op">&lt;-</span> <span class="va">rendering</span><span class="op">$</span><span class="va">render</span></span>
+<span class="r-in">  <span class="op">}</span></span>
+<span class="r-in"></span>
+<span class="r-in">  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html" class="external-link">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
+<span class="r-in"><span class="op">}</span></span>
+<span class="r-in"></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

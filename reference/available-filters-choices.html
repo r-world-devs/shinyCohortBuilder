@@ -85,7 +85,8 @@ virtualSelect input.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">.available_filters_choices</span><span class="op">(</span><span class="va">source</span>, <span class="va">cohort</span>, <span class="va">...</span><span class="op">)</span>
 
-<span class="fu">.available_filters_choises.default</span><span class="op">(</span><span class="va">source</span>, <span class="va">cohort</span>, <span class="va">...</span><span class="op">)</span>
+<span class="co"># S3 method for default</span>
+<span class="fu">.available_filters_choices</span><span class="op">(</span><span class="va">source</span>, <span class="va">cohort</span>, <span class="va">...</span><span class="op">)</span>
 
 <span class="co"># S3 method for tblist</span>
 <span class="fu">.available_filters_choices</span><span class="op">(</span><span class="va">source</span>, <span class="va">cohort</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
@@ -105,6 +106,42 @@ virtualSelect input.</p>
     <p>`shinyWidgets::prepare_choices` output value.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span class="r-in">  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span>
+<span class="r-in">  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.rstudio.com/" class="external-link">shiny</a></span><span class="op">)</span></span>
+<span class="r-in">  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-world-devs/cohortBuilder/" class="external-link">cohortBuilder</a></span><span class="op">)</span></span>
+<span class="r-in">  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">shinyCohortBuilder</span><span class="op">)</span></span>
+<span class="r-in">  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/dreamRs/shinyWidgets" class="external-link">shinyWidgets</a></span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in">  <span class="va">coh</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/create-cohort.html" class="external-link">cohort</a></span><span class="op">(</span></span>
+<span class="r-in">    <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/set_source.html" class="external-link">set_source</a></span><span class="op">(</span><span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/tblist.html" class="external-link">as.tblist</a></span><span class="op">(</span><span class="va">librarian</span><span class="op">)</span>, available_filters <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span class="r-in">      <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
+<span class="r-in">        <span class="st">"range"</span>, id <span class="op">=</span> <span class="st">"copies"</span>, name <span class="op">=</span> <span class="st">"Copies"</span>, dataset <span class="op">=</span> <span class="st">"books"</span>,</span>
+<span class="r-in">        variable <span class="op">=</span> <span class="st">"copies"</span>, range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">12</span><span class="op">)</span></span>
+<span class="r-in">      <span class="op">)</span>,</span>
+<span class="r-in">      <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
+<span class="r-in">        <span class="st">"date_range"</span>, id <span class="op">=</span> <span class="st">"registered"</span>, name <span class="op">=</span> <span class="st">"Registered"</span>,  dataset <span class="op">=</span> <span class="st">"borrowers"</span>,</span>
+<span class="r-in">        variable <span class="op">=</span> <span class="st">"registered"</span>, range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2010-01-01"</span><span class="op">)</span>, <span class="cn">Inf</span><span class="op">)</span></span>
+<span class="r-in">      <span class="op">)</span></span>
+<span class="r-in">    <span class="op">)</span><span class="op">)</span></span>
+<span class="r-in">  <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/run.html" class="external-link">run</a></span><span class="op">(</span><span class="op">)</span></span>
+<span class="r-in">  <span class="va">filter_choices</span> <span class="op">&lt;-</span> <span class="fu">.available_filters_choices</span><span class="op">(</span><span class="va">coh</span><span class="op">$</span><span class="fu">get_source</span><span class="op">(</span><span class="op">)</span>, <span class="va">coh</span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in">  <span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html" class="external-link">fluidPage</a></span><span class="op">(</span></span>
+<span class="r-in">    <span class="fu"><a href="https://dreamrs.github.io/shinyWidgets/reference/virtualSelectInput.html" class="external-link">virtualSelectInput</a></span><span class="op">(</span><span class="st">"filters"</span>, <span class="st">"Filters"</span>, choices <span class="op">=</span> <span class="va">filter_choices</span>, html <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span class="r-in">  <span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in">  <span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
+<span class="r-in"></span>
+<span class="r-in">  <span class="op">}</span></span>
+<span class="r-in"></span>
+<span class="r-in">  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html" class="external-link">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
+<span class="r-in"><span class="op">}</span></span>
+<span class="r-in"></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

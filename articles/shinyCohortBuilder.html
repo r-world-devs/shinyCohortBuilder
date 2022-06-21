@@ -233,13 +233,13 @@
 <p>If you want to skip configuring filters for all of the tables and columns in the source, you may use <code><a href="../reference/autofilter.html">shinyCohortBuilder::autofilter</a></code> method.</p>
 <p>The method applied on Source, will scan all the columns included in Source and automatically configure proper filters to them. The filters will be stored within a Source, so it’s enough to pass such object to Cohort:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">iris_source</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/set_source.html" class="external-link">set_source</a></span><span class="op">(</span><span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/tblist.html" class="external-link">tblist</a></span><span class="op">(</span>iris <span class="op">=</span> <span class="va">iris</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span> 
+<code class="sourceCode R"><span class="va">iris_source</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/set_source.html" class="external-link">set_source</a></span><span class="op">(</span><span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/tblist.html" class="external-link">tblist</a></span><span class="op">(</span>iris <span class="op">=</span> <span class="va">iris</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> 
   <span class="fu"><a href="../reference/autofilter.html">autofilter</a></span><span class="op">(</span><span class="op">)</span>
 <span class="va">iris_cohort</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/create-cohort.html" class="external-link">cohort</a></span><span class="op">(</span><span class="va">iris_source</span><span class="op">)</span>
 
 <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/sum_up.html" class="external-link">sum_up</a></span><span class="op">(</span><span class="va">iris_cohort</span><span class="op">)</span>
 <span class="co">#&gt; &gt;&gt; Step ID: 1</span>
-<span class="co">#&gt; -&gt; Filter ID: OSNCJ1654176652471</span>
+<span class="co">#&gt; -&gt; Filter ID: OSNCJ1655830375943</span>
 <span class="co">#&gt;    Filter Type: range</span>
 <span class="co">#&gt;    Filter Parameters:</span>
 <span class="co">#&gt;      dataset: iris</span>
@@ -248,7 +248,7 @@
 <span class="co">#&gt;      keep_na: TRUE</span>
 <span class="co">#&gt;      description: </span>
 <span class="co">#&gt;      active: TRUE</span>
-<span class="co">#&gt; -&gt; Filter ID: RVKET1654176652471</span>
+<span class="co">#&gt; -&gt; Filter ID: RVKET1655830375943</span>
 <span class="co">#&gt;    Filter Type: range</span>
 <span class="co">#&gt;    Filter Parameters:</span>
 <span class="co">#&gt;      dataset: iris</span>
@@ -257,7 +257,7 @@
 <span class="co">#&gt;      keep_na: TRUE</span>
 <span class="co">#&gt;      description: </span>
 <span class="co">#&gt;      active: TRUE</span>
-<span class="co">#&gt; -&gt; Filter ID: NVYZE1654176652471</span>
+<span class="co">#&gt; -&gt; Filter ID: NVYZE1655830375943</span>
 <span class="co">#&gt;    Filter Type: range</span>
 <span class="co">#&gt;    Filter Parameters:</span>
 <span class="co">#&gt;      dataset: iris</span>
@@ -266,7 +266,7 @@
 <span class="co">#&gt;      keep_na: TRUE</span>
 <span class="co">#&gt;      description: </span>
 <span class="co">#&gt;      active: TRUE</span>
-<span class="co">#&gt; -&gt; Filter ID: SYYIC1654176652471</span>
+<span class="co">#&gt; -&gt; Filter ID: SYYIC1655830375943</span>
 <span class="co">#&gt;    Filter Type: range</span>
 <span class="co">#&gt;    Filter Parameters:</span>
 <span class="co">#&gt;      dataset: iris</span>
@@ -275,7 +275,7 @@
 <span class="co">#&gt;      keep_na: TRUE</span>
 <span class="co">#&gt;      description: </span>
 <span class="co">#&gt;      active: TRUE</span>
-<span class="co">#&gt; -&gt; Filter ID: HZGJI1654176652472</span>
+<span class="co">#&gt; -&gt; Filter ID: HZGJI1655830375945</span>
 <span class="co">#&gt;    Filter Type: discrete</span>
 <span class="co">#&gt;    Filter Parameters:</span>
 <span class="co">#&gt;      dataset: iris</span>

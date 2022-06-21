@@ -99,6 +99,52 @@
     <p>A `shiny.tag` class `div` object defining html structure of filter input panel.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span class="r-in">  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span>
+<span class="r-in">  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.rstudio.com/" class="external-link">shiny</a></span><span class="op">)</span></span>
+<span class="r-in">  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-world-devs/cohortBuilder/" class="external-link">cohortBuilder</a></span><span class="op">)</span></span>
+<span class="r-in">  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">shinyCohortBuilder</span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in">  <span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html" class="external-link">fluidPage</a></span><span class="op">(</span></span>
+<span class="r-in">    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/actionButton.html" class="external-link">actionButton</a></span><span class="op">(</span><span class="st">"add_filter"</span>, <span class="st">"Add Filter"</span><span class="op">)</span>,</span>
+<span class="r-in">    <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">div</a></span><span class="op">(</span>id <span class="op">=</span> <span class="st">"filter_container"</span><span class="op">)</span></span>
+<span class="r-in">  <span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in">  <span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
+<span class="r-in">    <span class="va">add_gui_filter_layer</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">public</span>, <span class="va">private</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span class="r-in">      <span class="va">private</span><span class="op">$</span><span class="va">steps</span><span class="op">[[</span><span class="st">"1"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">filters</span><span class="op">$</span><span class="va">copies</span><span class="op">$</span><span class="va">gui</span> <span class="op">&lt;-</span> <span class="fu"><a href="gui-filter-layer.html">.gui_filter</a></span><span class="op">(</span></span>
+<span class="r-in">        <span class="va">private</span><span class="op">$</span><span class="va">steps</span><span class="op">[[</span><span class="st">"1"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">filters</span><span class="op">$</span><span class="va">copies</span></span>
+<span class="r-in">      <span class="op">)</span></span>
+<span class="r-in">    <span class="op">}</span></span>
+<span class="r-in">    <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/hooks.html" class="external-link">add_hook</a></span><span class="op">(</span><span class="st">"post_cohort_hook"</span>, <span class="va">add_gui_filter_layer</span><span class="op">)</span></span>
+<span class="r-in">    <span class="va">coh</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/create-cohort.html" class="external-link">cohort</a></span><span class="op">(</span></span>
+<span class="r-in">      <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/set_source.html" class="external-link">set_source</a></span><span class="op">(</span><span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/tblist.html" class="external-link">as.tblist</a></span><span class="op">(</span><span class="va">librarian</span><span class="op">)</span><span class="op">)</span>,</span>
+<span class="r-in">      <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span>
+<span class="r-in">        <span class="st">"range"</span>, id <span class="op">=</span> <span class="st">"copies"</span>, name <span class="op">=</span> <span class="st">"Copies"</span>, dataset <span class="op">=</span> <span class="st">"books"</span>,</span>
+<span class="r-in">        variable <span class="op">=</span> <span class="st">"copies"</span>, range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">12</span><span class="op">)</span></span>
+<span class="r-in">      <span class="op">)</span></span>
+<span class="r-in">    <span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/run.html" class="external-link">run</a></span><span class="op">(</span><span class="op">)</span></span>
+<span class="r-in">    <span class="va">coh</span><span class="op">$</span><span class="va">attributes</span><span class="op">$</span><span class="va">session</span> <span class="op">&lt;-</span> <span class="va">session</span></span>
+<span class="r-in">    <span class="va">coh</span><span class="op">$</span><span class="va">attributes</span><span class="op">$</span><span class="va">feedback</span> <span class="op">&lt;-</span> <span class="cn">TRUE</span></span>
+<span class="r-in"></span>
+<span class="r-in">    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">add_filter</span>, <span class="op">{</span></span>
+<span class="r-in">      <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/insertUI.html" class="external-link">insertUI</a></span><span class="op">(</span></span>
+<span class="r-in">        <span class="st">"#filter_container"</span>,</span>
+<span class="r-in">        ui <span class="op">=</span> <span class="fu">.render_filter</span><span class="op">(</span></span>
+<span class="r-in">          <span class="va">coh</span><span class="op">$</span><span class="fu">get_filter</span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"copies"</span><span class="op">)</span>,</span>
+<span class="r-in">          step_id <span class="op">=</span> <span class="st">"1"</span>,</span>
+<span class="r-in">          cohort <span class="op">=</span> <span class="va">coh</span>,</span>
+<span class="r-in">          ns <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span></span>
+<span class="r-in">        <span class="op">)</span><span class="op">)</span></span>
+<span class="r-in">    <span class="op">}</span>, ignoreInit <span class="op">=</span> <span class="cn">TRUE</span>, once <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span class="r-in">  <span class="op">}</span></span>
+<span class="r-in"></span>
+<span class="r-in">  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html" class="external-link">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
+<span class="r-in"><span class="op">}</span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

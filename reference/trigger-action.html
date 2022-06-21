@@ -128,6 +128,40 @@ attached to a specific JS event, e.g. onclick.</p>
 </ul><p>Both `.trigger_action` and `.trigger_action_js` methods are exported for advanced use only.</p>
     </div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span class="r-in">  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.rstudio.com/" class="external-link">shiny</a></span><span class="op">)</span></span>
+<span class="r-in">  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">shinyCohortBuilder</span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in">  <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/resourcePaths.html" class="external-link">addResourcePath</a></span><span class="op">(</span></span>
+<span class="r-in">    <span class="st">"shinyCohortBuilder"</span>,</span>
+<span class="r-in">    <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"www"</span>, package <span class="op">=</span> <span class="st">"shinyCohortBuilder"</span><span class="op">)</span></span>
+<span class="r-in">  <span class="op">)</span></span>
+<span class="r-in">  <span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html" class="external-link">fluidPage</a></span><span class="op">(</span></span>
+<span class="r-in">    <span class="va">tags</span><span class="op">$</span><span class="fu">head</span><span class="op">(</span></span>
+<span class="r-in">      <span class="fu">shiny</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">tags</a></span><span class="op">$</span><span class="fu">script</span><span class="op">(</span>type <span class="op">=</span> <span class="st">"text/javascript"</span>, src <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/file.path.html" class="external-link">file.path</a></span><span class="op">(</span><span class="st">"shinyCohortBuilder"</span>, <span class="st">"scb.js"</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in">    <span class="op">)</span>,</span>
+<span class="r-in">    <span class="va">tags</span><span class="op">$</span><span class="fu">button</span><span class="op">(</span></span>
+<span class="r-in">      <span class="st">"Trigger action from UI"</span>, class <span class="op">=</span> <span class="st">"btn btn-default"</span>,</span>
+<span class="r-in">      onclick <span class="op">=</span> <span class="fu">.trigger_action_js</span><span class="op">(</span><span class="st">"uiaction"</span>, params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in">    <span class="op">)</span>,</span>
+<span class="r-in">    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/actionButton.html" class="external-link">actionButton</a></span><span class="op">(</span><span class="st">"send"</span>, <span class="st">"Trigger action from server"</span><span class="op">)</span></span>
+<span class="r-in">  <span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in">  <span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
+<span class="r-in">    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">send</span>, <span class="op">{</span></span>
+<span class="r-in">      <span class="fu">.trigger_action</span><span class="op">(</span><span class="va">session</span>, <span class="st">"serveraction"</span>, params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>a <span class="op">=</span> <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
+<span class="r-in">    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/observeEvent.html" class="external-link">observeEvent</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">action</span>, <span class="op">{</span></span>
+<span class="r-in">      <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">input</span><span class="op">$</span><span class="va">action</span><span class="op">)</span></span>
+<span class="r-in">    <span class="op">}</span><span class="op">)</span></span>
+<span class="r-in">  <span class="op">}</span></span>
+<span class="r-in"></span>
+<span class="r-in">  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html" class="external-link">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span>
+<span class="r-in"><span class="op">}</span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

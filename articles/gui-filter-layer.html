@@ -191,7 +191,7 @@
           <span class="va">filter</span><span class="op">$</span><span class="va">input_param</span>
         <span class="op">)</span>,
         <span class="fu"><a href="../reference/dot-cb_input.html">.cb_input</a></span><span class="op">(</span>
-          <span class="fu">keep_na_input</span><span class="op">(</span><span class="va">input_id</span>, <span class="va">filter</span>, <span class="va">cohort</span><span class="op">)</span>,
+          <span class="fu"><a href="../reference/keep_na_input.html">keep_na_input</a></span><span class="op">(</span><span class="va">input_id</span>, <span class="va">filter</span>, <span class="va">cohort</span><span class="op">)</span>,
           <span class="st">"keep_na"</span>
         <span class="op">)</span>
       <span class="op">)</span>
@@ -289,8 +289,8 @@
 <ol start="5" style="list-style-type: decimal">
 <li>When the filters displays pre/post statistics (i.e. discrete filter does) you should assure the ones are included in according filter labels.</li>
 </ol>
-<p>For this case you may use a helper <code>.choice_names</code> function:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.choice_names</span>(</span>
+<p>For this case you may use a helper <code>.pre_post_stats</code> (or <code>.pre_post_stats_text</code>) function:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.pre_post_stats_text</span>(</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">name =</span> <span class="sc">&lt;</span>choices labels names vector<span class="sc">&gt;</span>,</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">current =</span> <span class="sc">&lt;</span>current step statistics vector<span class="sc">&gt;</span>,</span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">previous =</span> <span class="sc">&lt;</span>previous step statistics vector<span class="sc">&gt;</span>,</span>
@@ -299,7 +299,7 @@
 <p>which returns labels with the selected statistics and brackets added.</p>
 <p>The function returns labels in an HTML structure attaching proper classes to the current step labels. Such (HTML) class is used to grey out the label when working with <code>Run Button</code> feature.</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu">.choice_names</span><span class="op">(</span>
+<code class="sourceCode R"><span class="fu"><a href="../reference/pre_post_stats.html">.pre_post_stats_text</a></span><span class="op">(</span>
   name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A"</span>, <span class="st">"B"</span><span class="op">)</span>,
   current <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>,
   previous <span class="op">=</span> <span class="fl">3</span><span class="op">:</span><span class="fl">4</span>,
@@ -403,7 +403,7 @@
             run_flow <span class="op">=</span> <span class="cn">FALSE</span>
           <span class="op">)</span><span class="op">)</span>
         <span class="op">}</span>
-      <span class="op">}</span>, ignoreInit <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">%&gt;%</span> <span class="fu"><a href="../reference/dot-save_observer.html">.save_observer</a></span><span class="op">(</span><span class="va">input_id</span>, <span class="va">session</span><span class="op">)</span>
+      <span class="op">}</span>, ignoreInit <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="../reference/dot-save_observer.html">.save_observer</a></span><span class="op">(</span><span class="va">input_id</span>, <span class="va">session</span><span class="op">)</span>
     <span class="op">}</span>,
     <span class="co"># other methods</span>
   <span class="op">)</span>
@@ -448,7 +448,7 @@
           <span class="va">update_params</span>
         <span class="op">)</span>
       <span class="op">)</span>
-      <span class="fu">.update_keep_na_input</span><span class="op">(</span><span class="va">session</span>, <span class="va">input_id</span>, <span class="va">filter</span>, <span class="va">cohort</span><span class="op">)</span>
+      <span class="fu"><a href="../reference/keep_na_input.html">.update_keep_na_input</a></span><span class="op">(</span><span class="va">session</span>, <span class="va">input_id</span>, <span class="va">filter</span>, <span class="va">cohort</span><span class="op">)</span>
     <span class="op">}</span>,
     <span class="co"># other methods</span>
   <span class="op">)</span>
