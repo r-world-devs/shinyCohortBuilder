@@ -64,7 +64,7 @@ Status: 1 NOTE
 
 ```
 * using log directory 'd:/RCompile/CRANguest/R-devel/shinyCohortBuilder.Rcheck'
-* using R Under development (unstable) (2022-06-05 r82452 ucrt)
+* using R Under development (unstable) (2022-06-20 r82506 ucrt)
 * using platform: x86_64-w64-mingw32 (64-bit)
 ...
 * checking CRAN incoming feasibility ... NOTE
