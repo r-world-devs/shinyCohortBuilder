@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 library(shinyCohortBuilder)
 ```
 
-The goal of this document is to present what options can be specified while using `sinyCohortBuilder` and what effect do they have on the package operations.
+The goal of this document is to present what options can be specified while using `shinyCohortBuilder` and what effect do they have on the package operations.
 
 ## cb_verbose
 

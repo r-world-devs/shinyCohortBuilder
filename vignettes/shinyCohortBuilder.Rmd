@@ -16,6 +16,7 @@ library(magrittr)
 library(cohortBuilder)
 library(shinyCohortBuilder)
 set.seed(123)
+old_opts <- options()
 options(tibble.width = Inf)
 iris <- tibble::as.tibble(iris)
 options("tibble.print_max" = 5)
@@ -314,3 +315,7 @@ No statistics displayed at all.
 Available with `cb_server(..., feedback = TRUE)`.
 
 When enabled, feedback plots (usually displaying data distribution) are show at each filter.
+
+```{r, include = FALSE}
+options(old_opts)
+```
