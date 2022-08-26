@@ -434,7 +434,7 @@ empty_if_false <- function(condition, value, span = TRUE, empty = NULL) {
 
 restore_attribute <- function(cohort, attribute, value) {
   if (is.null(cohort$attributes[[attribute]])) {
-    cohort$attributes[[attribute]] <- value
+    cohort$attributes[attribute] <- list(value)
   }
 }
 
