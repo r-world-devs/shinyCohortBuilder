@@ -798,8 +798,9 @@ bookmark_restore <- function(cohort, enable_bookmarking) {
 #' @export
 cb_server <- function(id, cohort, run_button = FALSE, stats = c("pre", "post"), feedback = FALSE,
                       enable_bookmarking = shiny::getShinyOption("bookmarkStore", default = "disable"),
-                      show_help = TRUE) {
+                      show_help = TRUE, ...) {
 
+  attribs <- rlang::dots_list(...)
   if (!missing(id)) {
     cohort$attributes$id <- id
   }
@@ -812,6 +813,9 @@ cb_server <- function(id, cohort, run_button = FALSE, stats = c("pre", "post"), 
       restore_attribute(cohort, "stats", stats)
       restore_attribute(cohort, "feedback", feedback)
       restore_attribute(cohort, "show_help", show_help)
+      for (attrib in names(attribs)) {
+        restore_attribute(cohort, attrib, attribs[[attrib]])
+      }
 
       shiny::onStop(function() {
         cohort$attributes$session <- NULL
@@ -819,6 +823,9 @@ cb_server <- function(id, cohort, run_button = FALSE, stats = c("pre", "post"), 
         cohort$attributes$stats <- NULL
         cohort$attributes$feedback <- NULL
         cohort$attributes$show_help <- NULL
+        for (attrib in names(attribs)) {
+          cohort$attributes[[attrib]] <- NULL
+        }
       }, session = session)
 
       bookmark_restore(cohort, enable_bookmarking)
