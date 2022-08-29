@@ -4,9 +4,13 @@ extract_selected_values <- function(values, parent_filter_stats, reset) {
   if (reset) {
     return(all_choices)
   }
+  filtered_selection <- values %>% purrr::keep(~!identical(., NA))
+  if (!length(filtered_selection)) {
+    filtered_selection <- list()
+  }
   utils::modifyList(
     all_choices,
-    values %>% purrr::keep(~!identical(., NA)),
+    filtered_selection,
     keep.null = TRUE
   )[names(values)]
 }

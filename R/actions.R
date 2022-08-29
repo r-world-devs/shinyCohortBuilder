@@ -361,6 +361,7 @@ update_next_step <- function(cohort, step_id, reset, session) {
 }
 
 input_val_handler <- function(val) {
+  browser()
   if (is.list(val) && is.null(names(val))) {
     return(unlist(val, recursive = TRUE))
   }
