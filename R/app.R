@@ -124,7 +124,7 @@ demo_app <- function(
       )
       biom_filter <- cohortBuilder::filter(
         type = "multi_discrete", id = "bioms", name = "Biomarkers", dataset = "patients",
-        values = list(biom1 = c("A"), biom2 = c("C")), variables = c("biom1", "biom2")
+        values = NULL, variables = c("biom1", "biom2")
       )
 
       binding_keys <- list(

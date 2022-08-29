@@ -229,8 +229,16 @@ grouped_list_to_df <- function(grouped_list) {
             step_id <- filter$step_id
             filter_id <- filter$id
             filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
+            orig_values <- filter$get_params("values")
+            if (is.null(orig_values)) {
+              orig_values <- filter_cache$choices %>%
+                purrr::map(names)
+            } else {
+              orig_values <- orig_values %>%
+                purrr::map(unlist)
+            }
             filter_value <- purrr::map2(
-              stats::setNames(filter$get_params("values")[names(filter_cache$choices)], names(filter_cache$choices)),
+              stats::setNames(orig_values[names(filter_cache$choices)], names(filter_cache$choices)),
               filter_cache$choices,
               ~extract_selected_value(.x, .y, FALSE)
             )
