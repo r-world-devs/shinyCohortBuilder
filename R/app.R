@@ -186,8 +186,8 @@ demo_app <- function(
             gender_filter,
             age_filter,
             treatment_filter,
-            visit_filter#,
-            #biom_filter
+            visit_filter,
+            biom_filter
           )
         )
       }

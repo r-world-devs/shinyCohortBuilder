@@ -424,7 +424,7 @@ gui_update_filter <- function(cohort, changed_input, session) {
   post_stats_visible <- "post" %in% cohort$attributes$stats
   if (!run_on_request && post_stats_visible) {
     update <- "post_input"
-    gui_update_filters_loop(cohort, step_id, update, FALSE, exclude = filter_id, session)
+    gui_update_filters_loop(cohort, step_id, FALSE, update, exclude = filter_id, session)
   }
 
   if (update_active) {

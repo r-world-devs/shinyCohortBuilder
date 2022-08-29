@@ -46,7 +46,7 @@ multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE,
 
   if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
     return(
-      list(inputId = input_id, choices = NULL, choices_names = NULL, selected = NULL, max_groups = max_groups)
+      list(inputId = input_id, label = NULL, choices = NULL, choicesNames = NULL, selected = NULL, max_groups = max_groups)
     )
   }
 
@@ -86,8 +86,13 @@ multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE,
     choicesNames = choices_names,
     choicesLabels = choices_labels,
     selected = selected_value,
+    label = NULL,
     ...
   )
+
+  if (update) {
+    params$label <- NULL
+  }
 
   return(params)
 }
@@ -248,6 +253,7 @@ grouped_list_to_df <- function(grouped_list) {
     update = function(session, input_id, cohort, reset = FALSE, ...) {
       update_params <- multi_discrete_input_params(filter, input_id, cohort, reset, TRUE, ...)
       update_params$max_groups <- NULL
+      update_params$label <- NULL
       do.call(
         shinyGizmo::updatePickCheckboxInput,
         append(

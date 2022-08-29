@@ -22,7 +22,8 @@ cb_server(
   stats = c("pre", "post"),
   feedback = FALSE,
   enable_bookmarking = shiny::getShinyOption("bookmarkStore", default = "disable"),
-  show_help = TRUE
+  show_help = TRUE,
+  ...
 )
 }
 \arguments{
