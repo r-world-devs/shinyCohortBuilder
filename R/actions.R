@@ -361,10 +361,15 @@ update_next_step <- function(cohort, step_id, reset, session) {
 }
 
 input_val_handler <- function(val) {
-  if (is.list(val) && is.null(names(val))) {
-    return(unlist(val, recursive = TRUE))
-  }
-  else {
+  if (is.list(val)) {
+    if (is.null(names(val))) {
+      return(unlist(val, recursive = TRUE))
+    }
+    return(
+      val %>% purrr::map(unlist) %>%
+        purrr::map_if(~all(.x %in% c("TRUE", "FALSE", "NA")), as.logical)
+    )
+  } else {
     return(val)
   }
 }
