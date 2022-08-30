@@ -411,7 +411,9 @@ gui_update_filter <- function(cohort, changed_input, session) {
     changed_input
   )
   if (!run_on_request) {
+    tictoc::tic()
     cohort$run_step(step_id)
+    tictoc::toc()
   }
 
   run_update <- TRUE
