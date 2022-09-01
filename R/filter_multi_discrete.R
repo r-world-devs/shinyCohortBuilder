@@ -244,7 +244,7 @@ grouped_list_to_df <- function(grouped_list) {
                 purrr::map(names)
             } else {
               orig_values <- orig_values %>%
-                purrr::map(unlist)
+                purrr::map(~as.character(unlist(.)))
             }
             filter_value <- purrr::map2(
               stats::setNames(orig_values[names(filter_cache$choices)], names(filter_cache$choices)),
@@ -260,7 +260,8 @@ grouped_list_to_df <- function(grouped_list) {
               variable = names(filter_cache$n_missing),
               state = "(missing)",
               value = unlist(filter_cache$n_missing)
-            )
+            ) %>% 
+              dplyr::filter(variable %in% plot_data$variable)
             if (identical(filter$get_params("keep_na"), FALSE)) {
               n_missing$value <- 0
             }
