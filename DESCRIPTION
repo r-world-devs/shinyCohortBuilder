@@ -58,6 +58,7 @@ VignetteBuilder: knitr
 Collate:
     'shinyCohortBuilder-package.R'
     'ui_utils.R'
+    'control_utils.R'
     'actions.R'
     'renders.R'
     'filter_discrete.R'

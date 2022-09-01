@@ -1,13 +1,17 @@
 call_filter <- function(filter_id, step_id, cohort, input, output, session) {
   filter <- cohort$get_filter(step_id, filter_id)
   no_data <- cohort$get_cache(step_id, filter_id, state = "pre")$n_data == 0
-  if (cohort$attributes$feedback) {
+  show_feedback <- if_null_default(
+    filter$get_params("feedback"),
+    cohort$attributes$feedback
+  )
+  if (show_feedback) {
     feedback <- filter$gui$feedback(sf_id(step_id, filter_id), cohort, no_data)
   }
 
   filter$gui$server(sf_id(step_id, filter_id), input, output, session, cohort)
 
-  if (cohort$attributes$feedback) {
+  if (show_feedback) {
     session$output[[feedback$plot_id]] <- feedback$render_fun
   }
 }
@@ -89,9 +93,12 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
     cohort$attributes$session$userData$rendered_filters,
     ns(step_filter_id)
   )
-
+  show_feedback <- if_null_default(
+    filter$get_params("feedback"),
+    cohort$attributes$feedback
+  )
   shiny::tagList(
-    if (cohort$attributes$feedback) {
+    if (show_feedback) {
       shiny::div(
         class = "cb_feedback",
         feedback$output_fun(ns(feedback$plot_id), height = "auto", width = "100%")

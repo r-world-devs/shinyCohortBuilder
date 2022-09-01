@@ -76,7 +76,10 @@ multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE,
       parent_stat = parent_filter_stats
     ),
     choice_names,
-    stats = cohort$attributes$stats
+    stats = if_null_default(
+      filter$get_params("stats"),
+      cohort$attributes$stats
+    )
   )
 
   # if (!is.null(filter$get_params("choice_names"))) {
@@ -260,7 +263,7 @@ grouped_list_to_df <- function(grouped_list) {
               variable = names(filter_cache$n_missing),
               state = "(missing)",
               value = unlist(filter_cache$n_missing)
-            ) %>% 
+            ) %>%
               dplyr::filter(variable %in% plot_data$variable)
             if (identical(filter$get_params("keep_na"), FALSE)) {
               n_missing$value <- 0

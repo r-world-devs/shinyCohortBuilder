@@ -53,7 +53,7 @@ demo_app <- function(
         gender = c("F", "M", "F", "F", "F", "M", "M", "F", "F", "M"),
         age = c(50L, 44L, 38L, 49L, 45L, 33L, 43L, 35L, 40L, NA),
         visit = as.Date(c(7152, 7578, 7639, 7121, 7395, 7425, 7456, 7517, 6971, 7030), origin = "1970-01-01"),
-        biom1 = c("A", "B", "A", "A", "B", "B", "B", "A", "A", "A"),
+        biom1 = c("A", "B", "A", "A", "B", "B", "B", "A", NA, "A"),
         biom2 = c("C", "D", "C", "D", "E", "E", "C", "C", "E", "C")
       ),
       therapy = data.frame(
@@ -109,15 +109,17 @@ demo_app <- function(
       gender_filter <- cohortBuilder::filter(
         type = "discrete", id = "gender", name = "Gender", variable = "gender",
         dataset = "patients", value = "M", value_mapping = "gender_mapping",
-        description = "The Gender field denotes the biological sex at birth."
+        description = "The Gender field denotes the biological sex at birth.",
+        stats = "pre"
       )
       age_filter <- cohortBuilder::filter(
         type = "range", id = "age", name = "Age", variable = "age", dataset = "patients", range = NA,
-        description = "The Age field is an length of time that a person has lived or a thing has existed."
+        description = "The Age field is an length of time that a person has lived or a thing has existed.",
+        feedback = FALSE
       )
       treatment_filter <- cohortBuilder::filter(
         type = "discrete", id = "treatment", name = "Treatment", variable = "treatment",
-        dataset = "therapy", value = "Atezo", gui_input = "vs"
+        dataset = "therapy", value = "Atezo", gui_input = "vs", stats = "post"
       )
       visit_filter <- cohortBuilder::filter(
         "date_range", name = "Visit", variable = "visit", dataset = "patients"

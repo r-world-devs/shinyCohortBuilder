@@ -281,7 +281,11 @@ update_filter_gui <- function(cohort, step_id, filter_id, update, reset, session
       show <- FALSE
     }
     gui_update_filter_class(step_id, filter_id, show, "cb_no_data", session)
-    if (cohort$attributes$feedback) {
+    show_feedback <- if_null_default(
+      filter$get_params("feedback"),
+      cohort$attributes$feedback
+    )
+    if (show_feedback) {
       updated_plot <- TRUE
       gui_update_plot(step_id, filter_id, cohort, session) # todo optmize to not extract filter again inside plot
     }
@@ -396,6 +400,8 @@ gui_update_filter <- function(cohort, changed_input, session) {
 
   step_id <- changed_input$step_id
   filter_id <- changed_input$filter_id
+  data_filter <- cohort$get_filter(step_id, filter_id)
+
   force_render <- getOption("scb_render_all", default = FALSE)
 
   print_state("update_filter", changed_input)
@@ -426,7 +432,12 @@ gui_update_filter <- function(cohort, changed_input, session) {
     update_filter_gui(cohort, step_id, filter_id, update, FALSE, session)
   }
 
-  post_stats_visible <- "post" %in% cohort$attributes$stats
+  filter_stats <- if_null_default(
+    data_filter$get_params("stats"),
+    cohort$attributes$stats
+  )
+  post_stats_visible <- "post" %in% filter_stats
+
   if (!run_on_request && post_stats_visible) {
     update <- "post_input"
     gui_update_filters_loop(cohort, step_id, FALSE, update, exclude = filter_id, session)

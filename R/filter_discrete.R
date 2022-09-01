@@ -158,7 +158,11 @@ discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, updat
       name = value_mapping(names(parent_filter_stats), cohort),
       current = filter_stats,
       previous = parent_filter_stats,
-      stats = cohort$attributes$stats
+      stats = if_null_default(
+        filter$get_params("stats"),
+        cohort$attributes$stats
+      )
+
     ),
     selected = selected_value,
     inline = TRUE,
