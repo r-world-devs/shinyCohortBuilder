@@ -192,23 +192,32 @@ grouped_list_to_df <- function(grouped_list) {
 .gui_filter.multi_discrete <- function(filter, ...) {
   list(
     input = function(input_id, cohort) {
-      .cb_input(
-        do.call(
-          shinyGizmo::pickCheckboxInput,
-          append(
-            list(
-              options  = shinyWidgets::pickerOptions(
-                actionsBox = TRUE,
-                size = 10,
-                dropdownAlignRight = 'auto',
-                liveSearch = TRUE,
-                liveSearchNormalize = TRUE
-              )
-            ),
-            multi_discrete_input_params(filter, input_id, cohort, ...)
-          )
+      tagList(
+        .cb_input(
+          do.call(
+            shinyGizmo::pickCheckboxInput,
+            append(
+              list(
+                options  = shinyWidgets::pickerOptions(
+                  actionsBox = TRUE,
+                  size = 10,
+                  dropdownAlignRight = 'auto',
+                  liveSearch = TRUE,
+                  liveSearchNormalize = TRUE
+                )
+              ),
+              multi_discrete_input_params(filter, input_id, cohort, ...)
+            )
+          ),
+          filter$input_param
         ),
-        filter$input_param
+        .cb_input(
+          .keep_na_input(
+            input_id, filter, cohort,
+            msg_fun = function(x) "Keep missing values"
+          ),
+          "keep_na"
+        )
       )
     },
     feedback = function(input_id, cohort, empty = FALSE) {
@@ -272,6 +281,10 @@ grouped_list_to_df <- function(grouped_list) {
           list(session = session),
           update_params
         )
+      )
+      .update_keep_na_input(
+        session, input_id, filter, cohort,
+        msg_fun = function(x) "Keep missing values"
       )
     },
     post_stats = TRUE,

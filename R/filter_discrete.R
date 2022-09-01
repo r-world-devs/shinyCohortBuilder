@@ -91,16 +91,18 @@ is_vs <- function(filter) {
 #' or no value in case of usage 'update' method.
 #' @name keep_na_input
 #' @export
-.keep_na_input <- function(input_id, filter, cohort) {
+.keep_na_input <- function(input_id, filter, cohort,
+                           msg_fun = function(x) glue::glue("Keep missing values ({x})")) {
 
   filter_id <- filter$id
   step_id <- filter$step_id
-  na_count <- cohort$get_cache(step_id, filter_id, state = "pre")$n_missing
+  na_message <- cohort$get_cache(step_id, filter_id, state = "pre")$n_missing %>%
+    msg_fun()
 
   shiny::tagList(
     shiny::checkboxInput(
       paste0(input_id, "-keep_na"),
-      label = glue::glue("Keep missing values ({na_count})"),
+      label = na_message,
       filter$get_params("keep_na")
     ) %>%
       shiny::tagAppendAttributes(class = "cb_na_input")
@@ -109,16 +111,18 @@ is_vs <- function(filter) {
 
 #' @rdname keep_na_input
 #' @export
-.update_keep_na_input <- function(session, input_id, filter, cohort) {
+.update_keep_na_input <- function(session, input_id, filter, cohort,
+                                  msg_fun = function(x) glue::glue("Keep missing values ({x})")) {
 
   filter_id <- filter$id
   step_id <- filter$step_id
-  na_count <- cohort$get_cache(step_id, filter_id, state = "pre")$n_missing
+  na_message <- cohort$get_cache(step_id, filter_id, state = "pre")$n_missing %>%
+    msg_fun()
   shiny::updateCheckboxInput(
     session,
     inputId = paste0(input_id, "-keep_na"),
     value = filter$get_params("keep_na"),
-    label = glue::glue("Keep missing values ({na_count})")
+    label = na_message
   )
 }
 
