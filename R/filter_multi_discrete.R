@@ -82,11 +82,6 @@ multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE,
     )
   )
 
-  # if (!is.null(filter$get_params("choice_names"))) {
-  #   filter$get_params("choice_names")
-  # }  else {
-  #   nested_choice_names
-  # }
   params <- list(
     inputId = input_id,
     choices = choices,

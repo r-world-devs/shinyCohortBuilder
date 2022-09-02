@@ -749,7 +749,7 @@ gui_show_repro_code <- function(cohort, changed_input, session) {
     title = "Reproducible code",
     shiny::tags$code(
       class = "hl background",
-      cohort$get_code(width = I(80), output = FALSE)$text.tidy %>%
+      cohort$get_code(width = I(120), output = FALSE)$text.tidy %>%
         highr::hi_html() %>%
         purrr::map_chr(add_trailing_space) %>%
         paste(collapse = "</br>") %>%
