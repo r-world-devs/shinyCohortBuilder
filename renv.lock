@@ -114,6 +114,18 @@
       "Repository": "RSPM",
       "Hash": "3f038e5ac7f41d4ac41ce658c85e3042"
     },
+    "cohortBuilder": {
+      "Package": "cohortBuilder",
+      "Version": "0.1.2",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "cohortBuilder",
+      "RemoteUsername": "r-world-devs",
+      "RemoteRef": "krystian.allow-to-modify-repro-code",
+      "RemoteSha": "554bc33d976b183ee001878e98a4e1e1fb08515a",
+      "Hash": "f96a5e210b9a7573cfa194c5ad2624bb"
+    },
     "colorspace": {
       "Package": "colorspace",
       "Version": "2.0-3",
@@ -163,6 +175,13 @@
       "Repository": "RSPM",
       "Hash": "eebd27ee58fcc58714eedb7aa07d8ad1"
     },
+    "diffobj": {
+      "Package": "diffobj",
+      "Version": "0.3.5",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "bcaa8b95f8d7d01a5dedfd959ce88ab8"
+    },
     "digest": {
       "Package": "digest",
       "Version": "0.6.29",
@@ -209,7 +228,7 @@
       "Package": "farver",
       "Version": "2.1.0",
       "Source": "Repository",
-      "Repository": "CRAN",
+      "Repository": "RSPM",
       "Hash": "c98eb5133d9cb9e1622b8691487f11bb"
     },
     "fastmap": {
@@ -225,6 +244,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "55624ed409e46c5f358b2c060be87f67"
+    },
+    "formatR": {
+      "Package": "formatR",
+      "Version": "1.12",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "e45696cc90f4d5b993fa1a289e01c5df"
     },
     "fresh": {
       "Package": "fresh",
@@ -293,7 +319,7 @@
       "Package": "gtable",
       "Version": "0.3.0",
       "Source": "Repository",
-      "Repository": "CRAN",
+      "Repository": "RSPM",
       "Hash": "ac5c6baf7822ce8732b343f14c072c4d"
     },
     "highr": {
@@ -342,7 +368,7 @@
       "Package": "isoband",
       "Version": "0.2.5",
       "Source": "Repository",
-      "Repository": "CRAN",
+      "Repository": "RSPM",
       "Hash": "7ab57a6de7f48a8dc84910d1eca42883"
     },
     "jquerylib": {
@@ -370,7 +396,7 @@
       "Package": "labeling",
       "Version": "0.4.2",
       "Source": "Repository",
-      "Repository": "CRAN",
+      "Repository": "RSPM",
       "Hash": "3d5108641f47470611a32d0bdf357a72"
     },
     "later": {
@@ -426,7 +452,7 @@
       "Package": "munsell",
       "Version": "0.5.0",
       "Source": "Repository",
-      "Repository": "CRAN",
+      "Repository": "RSPM",
       "Hash": "6dfe8bf774944bd5595785e3229d8771"
     },
     "nlme": {
@@ -478,6 +504,13 @@
       "Repository": "CRAN",
       "Hash": "7533cd805940821bf23eaf3c8d4c1735"
     },
+    "praise": {
+      "Package": "praise",
+      "Version": "1.0.0",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "a555924add98c99d2f411e37e7d25e9f"
+    },
     "processx": {
       "Package": "processx",
       "Version": "3.5.3",
@@ -520,11 +553,18 @@
       "Repository": "RSPM",
       "Hash": "5e3c5dc0b071b21fa128676560dbe94d"
     },
+    "rematch2": {
+      "Package": "rematch2",
+      "Version": "2.1.2",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Hash": "76c9e04c712a05848ae7a23d2f170a40"
+    },
     "renv": {
       "Package": "renv",
       "Version": "0.13.2",
       "Source": "Repository",
-      "Repository": "RSPM",
+      "Repository": "CRAN",
       "Hash": "079cb1f03ff972b30401ed05623cbe92"
     },
     "rlang": {
@@ -578,27 +618,18 @@
     },
     "shinyGizmo": {
       "Package": "shinyGizmo",
-      "Version": "0.1",
-      "Source": "GitHub",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteRepo": "shinyGizmo",
-      "RemoteUsername": "r-world-devs",
-      "RemoteRef": "HEAD",
-      "RemoteSha": "f4f2ddb834f4dbef3cc56d1cbb18e4261c6e2bd5",
-      "Hash": "5afa0a0282b010cb33713405fc7d8e70"
+      "Version": "0.3.1",
+      "Source": "Local",
+      "RemoteType": "local",
+      "RemoteUrl": "/home/krystiai/projects/shinyGizmo",
+      "Hash": "1c7437a307abef96adca82f17a4c3bf7"
     },
     "shinyWidgets": {
       "Package": "shinyWidgets",
-      "Version": "0.6.4.9100",
-      "Source": "GitHub",
-      "RemoteType": "github",
-      "RemoteHost": "api.github.com",
-      "RemoteUsername": "dreamRs",
-      "RemoteRepo": "shinyWidgets",
-      "RemoteRef": "master",
-      "RemoteSha": "2ce7283a576ba58a7cefafbbc122f78b2dd4f539",
-      "Hash": "c46f797c36bb8a0dcba11908ba11eb51"
+      "Version": "0.7.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "4c00b64347509091f39c01c52f8d9e4c"
     },
     "sourcetools": {
       "Package": "sourcetools",
@@ -634,6 +665,13 @@
       "Source": "Repository",
       "Repository": "RSPM",
       "Hash": "90b28393209827327de889f49935140a"
+    },
+    "testthat": {
+      "Package": "testthat",
+      "Version": "3.1.4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "f76c2a02d0fdc24aa7a47ea34261a6e3"
     },
     "textshaping": {
       "Package": "textshaping",
@@ -709,7 +747,7 @@
       "Package": "viridisLite",
       "Version": "0.4.0",
       "Source": "Repository",
-      "Repository": "CRAN",
+      "Repository": "RSPM",
       "Hash": "55e157e2aa88161bdb0754218470d204"
     },
     "waiter": {
@@ -718,6 +756,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "93e6b6c8ae3f81d4be77a0dc74e5cf5e"
+    },
+    "waldo": {
+      "Package": "waldo",
+      "Version": "0.4.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "035fba89d0c86e2113120f93301b98ad"
     },
     "whisker": {
       "Package": "whisker",
