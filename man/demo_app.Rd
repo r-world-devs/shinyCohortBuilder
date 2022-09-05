@@ -15,7 +15,8 @@ demo_app(
   code = TRUE,
   attrition = TRUE,
   show_help = TRUE,
-  new_step = c("clone", "configure")
+  new_step = c("clone", "configure"),
+  ...
 )
 }
 \arguments{
@@ -45,6 +46,9 @@ See \link[bslib]{bs_theme} version argument.}
 \item{new_step}{Choose which add step method should be used for creating new step.
 Possible options are: "clone" - copy filters from last step,
 "configure" - opening modal and allow to chose filters from available filters.}
+
+\item{...}{Extra parameters passed to selected cohort methods.
+Now only \link{code} arguments are supported.}
 }
 \value{
 No return value, used for side effect which is running a Shiny application.

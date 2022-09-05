@@ -18,6 +18,8 @@
 #' @param new_step Choose which add step method should be used for creating new step.
 #'   Possible options are: "clone" - copy filters from last step,
 #'   "configure" - opening modal and allow to chose filters from available filters.
+#' @param ... Extra parameters passed to selected cohort methods.
+#'   Now only \link{code} arguments are supported.
 #' @return No return value, used for side effect which is running a Shiny application.
 #'
 #' @examples
@@ -33,7 +35,7 @@
 demo_app <- function(
   steps = TRUE, stats = c("pre", "post"), run_button = FALSE, feedback = TRUE, state = TRUE,
   bootstrap = 3, enable_bookmarking = TRUE, code = TRUE, attrition = TRUE, show_help = TRUE,
-  new_step = c("clone", "configure")) {
+  new_step = c("clone", "configure"), ...) {
   old_opts <- options()
   on.exit(options(old_opts))
   options("cb_active_filter" = FALSE)
