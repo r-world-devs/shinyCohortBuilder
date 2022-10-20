@@ -35,7 +35,7 @@ choice_name <- function(name, parent_stat, current_stat, stats) {
     "</span>",
     .envir = list(
       name = empty_if_false(!missing(name), paste0(name, " "), FALSE, ""),
-      open_bracket = empty_if_false(brackets && length(stats), "(", FALSE, ""),
+      open_bracket = empty_if_false(brackets && any(stats %in% c("pre", "post")), "(", FALSE, ""),
       post_stat = empty_if_false(
         "post" %in% stats,
         glue::glue("<span class = 'cb_delayed'>{current}</span>"),
@@ -43,7 +43,7 @@ choice_name <- function(name, parent_stat, current_stat, stats) {
       ),
       slash = empty_if_false(length(stats) == 2, " / ", FALSE, ""),
       pre_stat = empty_if_false("pre" %in% stats, previous, FALSE, ""),
-      close_bracket = empty_if_false(brackets && length(stats), ")", FALSE, ""),
+      close_bracket = empty_if_false(brackets && any(stats %in% c("pre", "post")), ")", FALSE, ""),
       percent_open_bracket = empty_if_false(percent && length(stats) == 2, " (", FALSE, ""),
       percent = empty_if_false(
         percent && length(stats) == 2,
@@ -380,7 +380,7 @@ plot_feedback_bar <- function(plot_data, n_missing) {
       )
       .update_keep_na_input(session, input_id, filter, cohort)
     },
-    post_stats = TRUE,
+    post_stats = "post" %in% filter$get_params("stats"),
     multi_input = FALSE
   )
 }
