@@ -308,6 +308,7 @@ render_current_step <- function(cohort) {
 
 render_steps <- function(cohort, session, init = TRUE) {
 
+  ns <- session$ns
   enable_panel(cohort, session)
   step_names <- names(cohort$get_step())
   active <- FALSE
@@ -331,6 +332,28 @@ render_steps <- function(cohort, session, init = TRUE) {
   }
 
   if (init) {
+    if (cohort$attributes$run_button) {
+      shiny::insertUI(
+        glue::glue("#{ns('cb_panel')}"),
+        where = "beforeEnd",
+        shinyGizmo::conditionalJS(
+          condition = htmlwidgets::JS(glue::glue(
+            "$(\'#{ns('cb_steps')} .cb_step:not(.collapsed) .cb_run_step\').prop('disabled')"
+          )),
+          jsCall = shinyGizmo::jsCalls$custom(
+            true = htmlwidgets::JS("$(this).prop('disabled', true).css('background-color', '#214ca5');"),
+            false = htmlwidgets::JS("$(this).prop('disabled', false).css('background-color', '#ffc107');")
+          ),
+          button(
+            "Run Step", class = "cb_trigger_run", icon = shiny::icon("play"),
+            disabled = NA,
+            onclick = htmlwidgets::JS(glue::glue(
+              "$(\'#{ns('cb_steps')} .cb_step:not(.collapsed) .cb_run_step\').click();"
+            ))
+          )
+        )
+      )
+    }
     shiny::observeEvent(session$input$action, {
       action <- session$input$action
 
