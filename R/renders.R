@@ -341,8 +341,8 @@ render_steps <- function(cohort, session, init = TRUE) {
             "$(\'#{ns('cb_steps')} .cb_step:not(.collapsed) .cb_run_step\').prop('disabled')"
           )),
           jsCall = shinyGizmo::jsCalls$custom(
-            true = htmlwidgets::JS("$(this).prop('disabled', true).css('background-color', '#214ca5');"),
-            false = htmlwidgets::JS("$(this).prop('disabled', false).css('background-color', '#ffc107');")
+            true = htmlwidgets::JS("$(this).prop('disabled', true).addClass('up-to-date');"),
+            false = htmlwidgets::JS("$(this).prop('disabled', false).removeClass('up-to-date');")
           ),
           button(
             "Run Step", class = "cb_trigger_run", icon = shiny::icon("play"),
