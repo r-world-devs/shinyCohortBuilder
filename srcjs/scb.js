@@ -105,7 +105,7 @@ $(document).on('shiny:inputchanged', function(event) {
           id: 'update_filter',
           params: {
             step_id: step_id, filter_id: filter_id, input_value: input_value,
-            input_name: input_name, run_flow: false
+            input_name: input_name, binding: event.inputType, run_flow: false
           }
         },
         {priority: 'event'}

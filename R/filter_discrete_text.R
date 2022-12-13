@@ -135,7 +135,8 @@ discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, 
                 inputId = input_id,
                 label = "Accept",
                 selector = paste0("#", input_params$inputId),
-                `data-dismiss` = "modal", `data-bs-dismiss` = "modal"
+                `data-dismiss` = "modal", `data-bs-dismiss` = "modal",
+                try_binding = FALSE
               ),
               filter$input_param,
               style = "display: inline-block;"

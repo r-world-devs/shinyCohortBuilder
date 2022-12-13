@@ -67,11 +67,11 @@ shiny::runApp(list(
     coh <- cohortBuilder::cohort(
       raw_source,
       cohortBuilder::step(
-        group_filter,
-        gender_filter,
-        age_filter,
-        treatment_filter,
-        visit_filter#,
+        group_filter#,
+        # gender_filter,
+        # age_filter,
+        # treatment_filter,
+        # visit_filter#,
         #biom_filter
       )
     )

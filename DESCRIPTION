@@ -66,6 +66,7 @@ Collate:
     'filter_date_range.R'
     'filter_discrete_text.R'
     'filter_multi_discrete.R'
+    'filter_query.R'
     'app.R'
     'cb_layer.R'
     'source.R'
