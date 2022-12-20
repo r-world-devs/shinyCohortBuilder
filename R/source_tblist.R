@@ -175,7 +175,7 @@ rule_Date <- function(column, name, dataset_name) {
 }
 
 filter_rule <- function(column, name, dataset_name) {
-  rule_method <- paste0("rule_", class(column))
+  rule_method <- paste0("rule_", class(column)[[1]])
   do.call(
     rule_method,
     list(
@@ -198,6 +198,7 @@ autofilter.tblist <- function(source, attach_as = c("step", "meta"), ...) {
   step_rule <- source$dtconn %>%
     purrr::imap(~filter_rules(.x, .y)) %>%
     unlist(recursive = FALSE) %>%
+    purrr::discard(~is.null(.x)) %>%
     purrr::map(~do.call(cohortBuilder::filter, .)) %>%
     unname()
 
