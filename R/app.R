@@ -7,6 +7,8 @@
 #'   Possible options are: "pre" - previous step stat, "post" - current step stats,
 #'   `c("pre", "post")` - for both and NULL for no stats.
 #' @param run_button Should Run button be displayed? If so, the current step computations are run only when clicked.
+#'   Three options are available "none" - no button, "local" - button displayed at each step panel,
+#'   "global" - button visible in top filtering panel.
 #' @param feedback Set to TRUE (default) if feedback plots should be displayed at each filter.
 #' @param state Set to TRUE (default) to enable get/set state panel.
 #' @param bootstrap Boostrap version to be used for filtering panel.
@@ -29,13 +31,18 @@
 #' }
 #' if (interactive()) {
 #'   library(shinyCohortBuilder)
-#'   demo_app(run_button = TRUE, state = FALSE)
+#'   demo_app(run_button = "local", state = FALSE)
 #' }
 #' @export
 demo_app <- function(
-  steps = TRUE, stats = c("pre", "post"), run_button = FALSE, feedback = TRUE, state = TRUE,
+  steps = TRUE, stats = c("pre", "post"), run_button = "none", feedback = TRUE, state = TRUE,
   bootstrap = 3, enable_bookmarking = TRUE, code = TRUE, attrition = TRUE, show_help = TRUE,
   new_step = c("clone", "configure"), ...) {
+
+  if (is.logical(run_button)) {
+    lifecycle::deprecate_stop("0.2.0", "shinyCohorBuilder::demo_app(arg = 'must be a scalar character')")
+  }
+
   old_opts <- options()
   on.exit(options(old_opts))
   options("cb_active_filter" = FALSE)
@@ -276,9 +283,14 @@ demo_app <- function(
 #' @export
 gui <- function(
   cohort,
-  steps = TRUE, stats = c("pre", "post"), run_button = FALSE, feedback = TRUE, state = TRUE,
+  steps = TRUE, stats = c("pre", "post"), run_button = "none", feedback = TRUE, state = TRUE,
   bootstrap = 3, enable_bookmarking = TRUE, code = TRUE, attrition = TRUE, show_help = TRUE,
   new_step = c("clone", "configure")) {
+
+  if (is.logical(run_button)) {
+    lifecycle::deprecate_stop("0.2.0", "shinyCohorBuilder::gui(arg = 'must be a scalar character')")
+  }
+
   if (!interactive()) {
     stop("Message - gui can be used in interactive mode only.")
   }

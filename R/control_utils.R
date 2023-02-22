@@ -4,3 +4,7 @@ if_null_default <- function(val, default) {
   }
   return(val)
 }
+
+is_none <- function(x) {
+  identical(x, "none")
+}

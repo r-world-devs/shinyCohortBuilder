@@ -44,7 +44,8 @@ Imports:
     highr,
     shinyGizmo,
     rlang (>= 1.0),
-    tibble
+    tibble,
+    lifecycle
 Suggests:
     pkgload,
     packer,
@@ -53,7 +54,7 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0)
 Encoding: UTF-8
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 Collate:
     'shinyCohortBuilder-package.R'

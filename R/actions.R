@@ -255,7 +255,7 @@ gui_update_filter_class <- function(step_id, filter_id, show, class, session) {
 
 update_filter_gui <- function(cohort, step_id, filter_id, update, reset, session) {
   filter <- cohort$get_filter(step_id, filter_id)
-  run_on_request <- cohort$attributes$run_button
+  run_on_request <- !is_none(cohort$attributes$run_button)
   updated_input <- FALSE
   updated_plot <- FALSE
   if (("post_input" %in% update) && filter$gui$post_stats) {
@@ -395,7 +395,7 @@ convert_input_value <- function(changed_input, step_id, filter_id, cohort, updat
 
 gui_update_filter <- function(cohort, changed_input, session) {
 
-  run_on_request <- cohort$attributes$run_button
+  run_on_request <- !is_none(cohort$attributes$run_button)
   update_active <- changed_input$input_name == "active"
 
   step_id <- changed_input$step_id
@@ -447,7 +447,7 @@ gui_update_filter <- function(cohort, changed_input, session) {
     gui_update_filter_class(step_id, filter_id, changed_input$active, "hidden-input", session)
   }
 
-  if (!cohort$attributes$run_button) {
+  if (is_none(cohort$attributes$run_button)) {
     gui_update_data_stats(cohort, list(step_id = step_id), session)
     update_next_step(cohort, step_id, FALSE, session)
   }
@@ -1098,7 +1098,7 @@ gui_clear_step <- function(cohort, changed_input, session) {
 
   reset_filters(cohort, changed_input$step_id)
 
-  if (cohort$attributes$run_button) {
+  if (!is_none(cohort$attributes$run_button)) {
     trigger_pending_state(changed_input$step_id, "add", session)
     changed_input$run_flow <- FALSE
   }

@@ -247,7 +247,11 @@ render_step <- function(cohort, step_id, active, allow_rm, input, output, sessio
             disabled = if (active) NA else NULL,
             type = "btn-outline-dark btn-xs"
           ),
-          if (run_button) {
+          if (!is_none(run_button)) {
+            button_style <- ""
+            if (run_button == "global") {
+              button_style <- "display: none;"
+            }
             button(
               title = "Run", class = "cb_run_step",
               icon = shiny::icon("play"),
@@ -257,6 +261,7 @@ render_step <- function(cohort, step_id, active, allow_rm, input, output, sessio
                 ns = ns
               ),
               disabled = NA,
+              style = button_style,
               type = "btn-outline-dark btn-xs"
             )
           }
@@ -306,6 +311,32 @@ render_current_step <- function(cohort) {
   )
 }
 
+insert_global_run_button <- function(session) {
+  ns <- session$ns
+
+  shiny::insertUI(
+    glue::glue("#{ns('cb_panel')}"),
+    where = "beforeEnd",
+    shinyGizmo::conditionalJS(
+      condition = htmlwidgets::JS(glue::glue(
+        "$(\'#{ns('cb_steps')} .cb_step:not(.collapsed) .cb_run_step\').prop('disabled')"
+      )),
+      jsCall = shinyGizmo::jsCalls$custom(
+        true = htmlwidgets::JS("$(this).prop('disabled', true).addClass('up-to-date');"),
+        false = htmlwidgets::JS("$(this).prop('disabled', false).removeClass('up-to-date');")
+      ),
+      button(
+        "Run Step", class = "cb_trigger_run", icon = shiny::icon("play"),
+        disabled = NA,
+        onclick = htmlwidgets::JS(glue::glue(
+          "$(\'#{ns('cb_steps')} .cb_step:not(.collapsed) .cb_run_step\').click();"
+        ))
+      )
+    ),
+    session = session
+  )
+}
+
 render_steps <- function(cohort, session, init = TRUE) {
 
   ns <- session$ns
@@ -332,27 +363,8 @@ render_steps <- function(cohort, session, init = TRUE) {
   }
 
   if (init) {
-    if (cohort$attributes$run_button) {
-      shiny::insertUI(
-        glue::glue("#{ns('cb_panel')}"),
-        where = "beforeEnd",
-        shinyGizmo::conditionalJS(
-          condition = htmlwidgets::JS(glue::glue(
-            "$(\'#{ns('cb_steps')} .cb_step:not(.collapsed) .cb_run_step\').prop('disabled')"
-          )),
-          jsCall = shinyGizmo::jsCalls$custom(
-            true = htmlwidgets::JS("$(this).prop('disabled', true).addClass('up-to-date');"),
-            false = htmlwidgets::JS("$(this).prop('disabled', false).removeClass('up-to-date');")
-          ),
-          button(
-            "Run Step", class = "cb_trigger_run", icon = shiny::icon("play"),
-            disabled = NA,
-            onclick = htmlwidgets::JS(glue::glue(
-              "$(\'#{ns('cb_steps')} .cb_step:not(.collapsed) .cb_run_step\').click();"
-            ))
-          )
-        )
-      )
+    if (identical(cohort$attributes$run_button, "global")) {
+      insert_global_run_button(session)
     }
     shiny::observeEvent(session$input$action, {
       action <- session$input$action
@@ -826,10 +838,13 @@ bookmark_restore <- function(cohort, enable_bookmarking) {
 #' @param cohort Cohort object storing filtering steps configuration.
 #' @return `shiny::moduleServer` output providing server logic for filtering panel module.
 #' @export
-cb_server <- function(id, cohort, run_button = FALSE, stats = c("pre", "post"), feedback = FALSE,
+cb_server <- function(id, cohort, run_button = "none", stats = c("pre", "post"), feedback = FALSE,
                       enable_bookmarking = shiny::getShinyOption("bookmarkStore", default = "disable"),
                       show_help = TRUE, ...) {
 
+  if (is.logical(run_button)) {
+    lifecycle::deprecate_stop("0.2.0", "shinyCohorBuilder::cb_server(arg = 'must be a scalar character')")
+  }
   attribs <- rlang::dots_list(...)
   if (!missing(id)) {
     cohort$attributes$id <- id

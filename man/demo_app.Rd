@@ -7,7 +7,7 @@
 demo_app(
   steps = TRUE,
   stats = c("pre", "post"),
-  run_button = FALSE,
+  run_button = "none",
   feedback = TRUE,
   state = TRUE,
   bootstrap = 3,
@@ -26,7 +26,9 @@ demo_app(
 Possible options are: "pre" - previous step stat, "post" - current step stats,
 `c("pre", "post")` - for both and NULL for no stats.}
 
-\item{run_button}{Should Run button be displayed? If so, the current step computations are run only when clicked.}
+\item{run_button}{Should Run button be displayed? If so, the current step computations are run only when clicked.
+Three options are available "none" - no button, "local" - button displayed at each step panel,
+"global" - button visible in top filtering panel.}
 
 \item{feedback}{Set to TRUE (default) if feedback plots should be displayed at each filter.}
 
@@ -63,6 +65,6 @@ if (interactive()) {
 }
 if (interactive()) {
   library(shinyCohortBuilder)
-  demo_app(run_button = TRUE, state = FALSE)
+  demo_app(run_button = "local", state = FALSE)
 }
 }
