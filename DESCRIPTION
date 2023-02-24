@@ -1,7 +1,7 @@
 Package: shinyCohortBuilder
 Type: Package
 Title: Modular Cohort-Building Framework for Analytical Dashboards
-Version: 0.1.2
+Version: 0.1.0.9000
 Authors@R: 
     c(person('Krystian', 'Igras', 
              email = 'krystian8207@gmail.com', 
@@ -39,7 +39,7 @@ Imports:
     shiny,
     shinyWidgets (>= 0.7.0),
     dplyr,
-    cohortBuilder (>= 0.1.2),
+    cohortBuilder (>= 0.2.0),
     tryCatchLog,
     highr,
     shinyGizmo,
