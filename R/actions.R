@@ -255,10 +255,10 @@ gui_update_filter_class <- function(step_id, filter_id, show, class, session) {
 
 update_filter_gui <- function(cohort, step_id, filter_id, update, reset, session) {
   filter <- cohort$get_filter(step_id, filter_id)
-  run_on_request <- !is_none(cohort$attributes$run_button)
   updated_input <- FALSE
   updated_plot <- FALSE
-  if (("post_input" %in% update) && filter$gui$post_stats) {
+
+  if (("post_input" %in% update) && !identical(filter$gui$post_stats, FALSE)) {
     update <- c(update, "input")
   }
   if (("multi_input" %in% update) && filter$gui$multi_input) {
@@ -424,21 +424,20 @@ gui_update_filter <- function(cohort, changed_input, session) {
   if (!force_render && !is.null(changed_input$active)) {
     run_update <- !insert_filter(step_id, filter_id, cohort, session)
   }
-  if (run_update) {
-    update <- c("plot", "multi_input")
-    if (!run_on_request) {
-      update <- c(update, "post_input")
-    }
-    update_filter_gui(cohort, step_id, filter_id, update, FALSE, session)
-  }
-
   filter_stats <- if_null_default(
     data_filter$get_params("stats"),
     cohort$attributes$stats
   )
   post_stats_visible <- "post" %in% filter_stats
+  if (run_update) {
+    update <- c("plot", "multi_input")
+    if (!run_on_request && post_stats_visible) {
+      update <- c(update, "post_input")
+    }
+    update_filter_gui(cohort, step_id, filter_id, update, FALSE, session)
+  }
 
-  if (!run_on_request && post_stats_visible) {
+  if (!run_on_request && ("post" %in% cohort$attributes$stats)) {
     update <- "post_input"
     gui_update_filters_loop(cohort, step_id, FALSE, update, exclude = filter_id, session)
   }

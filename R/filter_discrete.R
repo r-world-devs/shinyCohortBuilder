@@ -1,7 +1,10 @@
-extend_stats <- function(current, parent) {
+extend_stats <- function(current, parent, inherit_parent = character(0)) {
   missing_stats <- setdiff(names(parent), names(current))
   for (missing_stat in missing_stats) {
     current[[missing_stat]] <- 0
+    if (missing_stat %in% inherit_parent) {
+      current[[missing_stat]] <- parent[[missing_stat]]
+    }
   }
   current[names(parent)]
 }
@@ -140,7 +143,12 @@ discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, updat
   parent_filter_stats <- cohort$get_cache(step_id, filter_id, state = "pre")$choices
   filter_stats <- extend_stats(
     cohort$get_cache(step_id, filter_id, state = "post")$choices,
-    parent_filter_stats
+    parent_filter_stats,
+    inherit_parent = if (is.null(cohort$get_cache(step_id, filter_id, state = "post"))) {
+      filter_params$value
+    } else {
+      character(0)
+    }
   )
   selected_value <- extract_selected_value(
     filter$get_params("value"),
@@ -380,7 +388,7 @@ plot_feedback_bar <- function(plot_data, n_missing) {
       )
       .update_keep_na_input(session, input_id, filter, cohort)
     },
-    post_stats = "post" %in% filter$get_params("stats"),
+    post_stats = if (is.null(filter$get_params("stats"))) NULL else "post" %in% filter$get_params("stats"),
     multi_input = FALSE
   )
 }

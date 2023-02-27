@@ -78,7 +78,7 @@ shiny::runApp(list(
     # or below if initialized without default data source
     # coh <- cohortBuilder::cohort()
 
-    shinyCohortBuilder::cb_server(id = "fk", coh, feedback = TRUE)
+    shinyCohortBuilder::cb_server(id = "fk", run_button = "global", coh, feedback = TRUE)
 
     # input[["fk-cb_data_updated"]] triggers when any data was updated
     # "fk-" prefix is the id passed to cb_ui and cb_server (useful when many cohortBuilder objects are created)
