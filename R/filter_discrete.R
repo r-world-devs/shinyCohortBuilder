@@ -1,7 +1,10 @@
-extend_stats <- function(current, parent) {
+extend_stats <- function(current, parent, inherit_parent = character(0)) {
   missing_stats <- setdiff(names(parent), names(current))
   for (missing_stat in missing_stats) {
     current[[missing_stat]] <- 0
+    if (missing_stat %in% inherit_parent) {
+      current[[missing_stat]] <- parent[[missing_stat]]
+    }
   }
   current[names(parent)]
 }
@@ -35,7 +38,7 @@ choice_name <- function(name, parent_stat, current_stat, stats) {
     "</span>",
     .envir = list(
       name = empty_if_false(!missing(name), paste0(name, " "), FALSE, ""),
-      open_bracket = empty_if_false(brackets && length(stats), "(", FALSE, ""),
+      open_bracket = empty_if_false(brackets && any(stats %in% c("pre", "post")), "(", FALSE, ""),
       post_stat = empty_if_false(
         "post" %in% stats,
         glue::glue("<span class = 'cb_delayed'>{current}</span>"),
@@ -43,7 +46,7 @@ choice_name <- function(name, parent_stat, current_stat, stats) {
       ),
       slash = empty_if_false(length(stats) == 2, " / ", FALSE, ""),
       pre_stat = empty_if_false("pre" %in% stats, previous, FALSE, ""),
-      close_bracket = empty_if_false(brackets && length(stats), ")", FALSE, ""),
+      close_bracket = empty_if_false(brackets && any(stats %in% c("pre", "post")), ")", FALSE, ""),
       percent_open_bracket = empty_if_false(percent && length(stats) == 2, " (", FALSE, ""),
       percent = empty_if_false(
         percent && length(stats) == 2,
@@ -91,16 +94,18 @@ is_vs <- function(filter) {
 #' or no value in case of usage 'update' method.
 #' @name keep_na_input
 #' @export
-.keep_na_input <- function(input_id, filter, cohort) {
+.keep_na_input <- function(input_id, filter, cohort,
+                           msg_fun = function(x) glue::glue("Keep missing values ({x})")) {
 
   filter_id <- filter$id
   step_id <- filter$step_id
-  na_count <- cohort$get_cache(step_id, filter_id, state = "pre")$n_missing
+  na_message <- cohort$get_cache(step_id, filter_id, state = "pre")$n_missing %>%
+    msg_fun()
 
   shiny::tagList(
     shiny::checkboxInput(
       paste0(input_id, "-keep_na"),
-      label = glue::glue("Keep missing values ({na_count})"),
+      label = na_message,
       filter$get_params("keep_na")
     ) %>%
       shiny::tagAppendAttributes(class = "cb_na_input")
@@ -109,16 +114,18 @@ is_vs <- function(filter) {
 
 #' @rdname keep_na_input
 #' @export
-.update_keep_na_input <- function(session, input_id, filter, cohort) {
+.update_keep_na_input <- function(session, input_id, filter, cohort,
+                                  msg_fun = function(x) glue::glue("Keep missing values ({x})")) {
 
   filter_id <- filter$id
   step_id <- filter$step_id
-  na_count <- cohort$get_cache(step_id, filter_id, state = "pre")$n_missing
+  na_message <- cohort$get_cache(step_id, filter_id, state = "pre")$n_missing %>%
+    msg_fun()
   shiny::updateCheckboxInput(
     session,
     inputId = paste0(input_id, "-keep_na"),
     value = filter$get_params("keep_na"),
-    label = glue::glue("Keep missing values ({na_count})")
+    label = na_message
   )
 }
 
@@ -136,7 +143,12 @@ discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, updat
   parent_filter_stats <- cohort$get_cache(step_id, filter_id, state = "pre")$choices
   filter_stats <- extend_stats(
     cohort$get_cache(step_id, filter_id, state = "post")$choices,
-    parent_filter_stats
+    parent_filter_stats,
+    inherit_parent = if (is.null(cohort$get_cache(step_id, filter_id, state = "post"))) {
+      filter_params$value
+    } else {
+      character(0)
+    }
   )
   selected_value <- extract_selected_value(
     filter$get_params("value"),
@@ -154,7 +166,11 @@ discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, updat
       name = value_mapping(names(parent_filter_stats), cohort),
       current = filter_stats,
       previous = parent_filter_stats,
-      stats = cohort$attributes$stats
+      stats = if_null_default(
+        filter$get_params("stats"),
+        cohort$attributes$stats
+      )
+
     ),
     selected = selected_value,
     inline = TRUE,
@@ -372,7 +388,7 @@ plot_feedback_bar <- function(plot_data, n_missing) {
       )
       .update_keep_na_input(session, input_id, filter, cohort)
     },
-    post_stats = TRUE,
+    post_stats = if (is.null(filter$get_params("stats"))) NULL else "post" %in% filter$get_params("stats"),
     multi_input = FALSE
   )
 }

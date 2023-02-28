@@ -130,7 +130,6 @@ post_cohort_hook <- function(public, private, ...) {
 
 
 .onLoad <- function(libname, pkgname){
-
   cohortBuilder::add_hook("pre_update_source_hook", pre_update_source_hook)
   cohortBuilder::add_hook("post_update_source_hook", post_update_source_hook)
   cohortBuilder::add_hook("post_run_step_hook", post_run_step_hook)
@@ -139,5 +138,15 @@ post_cohort_hook <- function(public, private, ...) {
   cohortBuilder::add_hook("post_restore_hook", post_restore_hook)
   cohortBuilder::add_hook("post_cohort_hook", post_cohort_hook)
   cohortBuilder::add_hook("post_update_source_hook", post_cohort_hook)
+}
 
+.onUnload <- function(libpath) {
+  options("pre_update_source_hook" = NULL)
+  options("post_update_source_hook" = NULL)
+  options("post_run_step_hook" = NULL)
+  options("post_rm_step_hook" = NULL)
+  options("pre_restore_hook" = NULL)
+  options("post_restore_hook" = NULL)
+  options("post_cohort_hook" = NULL)
+  options("post_update_source_hook" = NULL)
 }

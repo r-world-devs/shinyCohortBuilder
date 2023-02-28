@@ -1,13 +1,17 @@
 call_filter <- function(filter_id, step_id, cohort, input, output, session) {
   filter <- cohort$get_filter(step_id, filter_id)
   no_data <- cohort$get_cache(step_id, filter_id, state = "pre")$n_data == 0
-  if (cohort$attributes$feedback) {
+  show_feedback <- if_null_default(
+    filter$get_params("feedback"),
+    cohort$attributes$feedback
+  )
+  if (show_feedback) {
     feedback <- filter$gui$feedback(sf_id(step_id, filter_id), cohort, no_data)
   }
 
   filter$gui$server(sf_id(step_id, filter_id), input, output, session, cohort)
 
-  if (cohort$attributes$feedback) {
+  if (show_feedback) {
     session$output[[feedback$plot_id]] <- feedback$render_fun
   }
 }
@@ -89,9 +93,12 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
     cohort$attributes$session$userData$rendered_filters,
     ns(step_filter_id)
   )
-
+  show_feedback <- if_null_default(
+    filter$get_params("feedback"),
+    cohort$attributes$feedback
+  )
   shiny::tagList(
-    if (cohort$attributes$feedback) {
+    if (show_feedback) {
       shiny::div(
         class = "cb_feedback",
         feedback$output_fun(ns(feedback$plot_id), height = "auto", width = "100%")
@@ -240,7 +247,11 @@ render_step <- function(cohort, step_id, active, allow_rm, input, output, sessio
             disabled = if (active) NA else NULL,
             type = "btn-outline-dark btn-xs"
           ),
-          if (run_button) {
+          if (!is_none(run_button)) {
+            button_style <- ""
+            if (run_button == "global") {
+              button_style <- "display: none;"
+            }
             button(
               title = "Run", class = "cb_run_step",
               icon = shiny::icon("play"),
@@ -250,6 +261,7 @@ render_step <- function(cohort, step_id, active, allow_rm, input, output, sessio
                 ns = ns
               ),
               disabled = NA,
+              style = button_style,
               type = "btn-outline-dark btn-xs"
             )
           }
@@ -299,8 +311,35 @@ render_current_step <- function(cohort) {
   )
 }
 
+insert_global_run_button <- function(session) {
+  ns <- session$ns
+
+  shiny::insertUI(
+    glue::glue("#{ns('cb_panel')}"),
+    where = "beforeEnd",
+    shinyGizmo::conditionalJS(
+      condition = htmlwidgets::JS(glue::glue(
+        "$(\'#{ns('cb_steps')} .cb_step:not(.collapsed) .cb_run_step\').prop('disabled')"
+      )),
+      jsCall = shinyGizmo::jsCalls$custom(
+        true = htmlwidgets::JS("$(this).prop('disabled', true).addClass('up-to-date');"),
+        false = htmlwidgets::JS("$(this).prop('disabled', false).removeClass('up-to-date');")
+      ),
+      button(
+        "Run Step", class = "cb_trigger_run", icon = shiny::icon("play"),
+        disabled = NA,
+        onclick = htmlwidgets::JS(glue::glue(
+          "$(\'#{ns('cb_steps')} .cb_step:not(.collapsed) .cb_run_step\').click();"
+        ))
+      )
+    ),
+    session = session
+  )
+}
+
 render_steps <- function(cohort, session, init = TRUE) {
 
+  ns <- session$ns
   enable_panel(cohort, session)
   step_names <- names(cohort$get_step())
   active <- FALSE
@@ -324,6 +363,9 @@ render_steps <- function(cohort, session, init = TRUE) {
   }
 
   if (init) {
+    if (identical(cohort$attributes$run_button, "global")) {
+      insert_global_run_button(session)
+    }
     shiny::observeEvent(session$input$action, {
       action <- session$input$action
 
@@ -434,7 +476,7 @@ empty_if_false <- function(condition, value, span = TRUE, empty = NULL) {
 
 restore_attribute <- function(cohort, attribute, value) {
   if (is.null(cohort$attributes[[attribute]])) {
-    cohort$attributes[[attribute]] <- value
+    cohort$attributes[attribute] <- list(value)
   }
 }
 
@@ -796,10 +838,14 @@ bookmark_restore <- function(cohort, enable_bookmarking) {
 #' @param cohort Cohort object storing filtering steps configuration.
 #' @return `shiny::moduleServer` output providing server logic for filtering panel module.
 #' @export
-cb_server <- function(id, cohort, run_button = FALSE, stats = c("pre", "post"), feedback = FALSE,
+cb_server <- function(id, cohort, run_button = "none", stats = c("pre", "post"), feedback = FALSE,
                       enable_bookmarking = shiny::getShinyOption("bookmarkStore", default = "disable"),
-                      show_help = TRUE) {
+                      show_help = TRUE, ...) {
 
+  if (is.logical(run_button)) {
+    lifecycle::deprecate_stop("0.2.0", "shinyCohorBuilder::cb_server(arg = 'must be a scalar character')")
+  }
+  attribs <- rlang::dots_list(...)
   if (!missing(id)) {
     cohort$attributes$id <- id
   }
@@ -812,6 +858,9 @@ cb_server <- function(id, cohort, run_button = FALSE, stats = c("pre", "post"), 
       restore_attribute(cohort, "stats", stats)
       restore_attribute(cohort, "feedback", feedback)
       restore_attribute(cohort, "show_help", show_help)
+      for (attrib in names(attribs)) {
+        restore_attribute(cohort, attrib, attribs[[attrib]])
+      }
 
       shiny::onStop(function() {
         cohort$attributes$session <- NULL
@@ -819,6 +868,9 @@ cb_server <- function(id, cohort, run_button = FALSE, stats = c("pre", "post"), 
         cohort$attributes$stats <- NULL
         cohort$attributes$feedback <- NULL
         cohort$attributes$show_help <- NULL
+        for (attrib in names(attribs)) {
+          cohort$attributes[[attrib]] <- NULL
+        }
       }, session = session)
 
       bookmark_restore(cohort, enable_bookmarking)

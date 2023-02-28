@@ -7,7 +7,7 @@
 demo_app(
   steps = TRUE,
   stats = c("pre", "post"),
-  run_button = FALSE,
+  run_button = "none",
   feedback = TRUE,
   state = TRUE,
   bootstrap = 3,
@@ -15,7 +15,8 @@ demo_app(
   code = TRUE,
   attrition = TRUE,
   show_help = TRUE,
-  new_step = c("clone", "configure")
+  new_step = c("clone", "configure"),
+  ...
 )
 }
 \arguments{
@@ -25,7 +26,9 @@ demo_app(
 Possible options are: "pre" - previous step stat, "post" - current step stats,
 `c("pre", "post")` - for both and NULL for no stats.}
 
-\item{run_button}{Should Run button be displayed? If so, the current step computations are run only when clicked.}
+\item{run_button}{Should Run button be displayed? If so, the current step computations are run only when clicked.
+Three options are available "none" - no button, "local" - button displayed at each step panel,
+"global" - button visible in top filtering panel.}
 
 \item{feedback}{Set to TRUE (default) if feedback plots should be displayed at each filter.}
 
@@ -45,6 +48,9 @@ See \link[bslib]{bs_theme} version argument.}
 \item{new_step}{Choose which add step method should be used for creating new step.
 Possible options are: "clone" - copy filters from last step,
 "configure" - opening modal and allow to chose filters from available filters.}
+
+\item{...}{Extra parameters passed to selected cohort methods.
+Now only \link{code} arguments are supported.}
 }
 \value{
 No return value, used for side effect which is running a Shiny application.
@@ -59,6 +65,6 @@ if (interactive()) {
 }
 if (interactive()) {
   library(shinyCohortBuilder)
-  demo_app(run_button = TRUE, state = FALSE)
+  demo_app(run_button = "local", state = FALSE)
 }
 }

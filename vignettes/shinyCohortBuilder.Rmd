@@ -266,9 +266,9 @@ See more at [custom gui layer](custom-gui-layer.html).
 
 ### Run button
 
-Available with `cb_server(..., run_button = TRUE)`.
+Available with `cb_server(..., run_button = "local")` or `cb_server(..., run_button = "global")`.
 
-When the option is enabled a "play" button is displayed at each filtering step panel.
+When the option is enabled a "play" button is displayed at each filtering step panel (or in the top filtering panel in case of `"global"` setting).
 More to that, no data operation will be run until the button is clicked.
 
 With `shinyCohortBuilder` each user action (changes in filters selection) triggers data calculation with respect to selected options.

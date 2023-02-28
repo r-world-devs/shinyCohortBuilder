@@ -18,11 +18,12 @@ cb_ui(
 cb_server(
   id,
   cohort,
-  run_button = FALSE,
+  run_button = "none",
   stats = c("pre", "post"),
   feedback = FALSE,
   enable_bookmarking = shiny::getShinyOption("bookmarkStore", default = "disable"),
-  show_help = TRUE
+  show_help = TRUE,
+  ...
 )
 }
 \arguments{
@@ -44,7 +45,9 @@ Possible options are: "clone" - copy filters from last step,
 
 \item{cohort}{Cohort object storing filtering steps configuration.}
 
-\item{run_button}{Should Run button be displayed? If so, the current step computations are run only when clicked.}
+\item{run_button}{Should Run button be displayed? If so, the current step computations are run only when clicked.
+Three options are available "none" - no button, "local" - button displayed at each step panel,
+"global" - button visible in top filtering panel.}
 
 \item{stats}{Choose which statistics should be displayed for data (and some filters).
 Possible options are: "pre" - previous step stat, "post" - current step stats,

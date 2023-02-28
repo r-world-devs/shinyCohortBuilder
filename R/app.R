@@ -7,6 +7,8 @@
 #'   Possible options are: "pre" - previous step stat, "post" - current step stats,
 #'   `c("pre", "post")` - for both and NULL for no stats.
 #' @param run_button Should Run button be displayed? If so, the current step computations are run only when clicked.
+#'   Three options are available "none" - no button, "local" - button displayed at each step panel,
+#'   "global" - button visible in top filtering panel.
 #' @param feedback Set to TRUE (default) if feedback plots should be displayed at each filter.
 #' @param state Set to TRUE (default) to enable get/set state panel.
 #' @param bootstrap Boostrap version to be used for filtering panel.
@@ -18,6 +20,8 @@
 #' @param new_step Choose which add step method should be used for creating new step.
 #'   Possible options are: "clone" - copy filters from last step,
 #'   "configure" - opening modal and allow to chose filters from available filters.
+#' @param ... Extra parameters passed to selected cohort methods.
+#'   Now only \link{code} arguments are supported.
 #' @return No return value, used for side effect which is running a Shiny application.
 #'
 #' @examples
@@ -27,13 +31,18 @@
 #' }
 #' if (interactive()) {
 #'   library(shinyCohortBuilder)
-#'   demo_app(run_button = TRUE, state = FALSE)
+#'   demo_app(run_button = "local", state = FALSE)
 #' }
 #' @export
 demo_app <- function(
-  steps = TRUE, stats = c("pre", "post"), run_button = FALSE, feedback = TRUE, state = TRUE,
+  steps = TRUE, stats = c("pre", "post"), run_button = "none", feedback = TRUE, state = TRUE,
   bootstrap = 3, enable_bookmarking = TRUE, code = TRUE, attrition = TRUE, show_help = TRUE,
-  new_step = c("clone", "configure")) {
+  new_step = c("clone", "configure"), ...) {
+
+  if (is.logical(run_button)) {
+    lifecycle::deprecate_stop("0.2.0", "shinyCohorBuilder::demo_app(arg = 'must be a scalar character')")
+  }
+
   old_opts <- options()
   on.exit(options(old_opts))
   options("cb_active_filter" = FALSE)
@@ -53,7 +62,7 @@ demo_app <- function(
         gender = c("F", "M", "F", "F", "F", "M", "M", "F", "F", "M"),
         age = c(50L, 44L, 38L, 49L, 45L, 33L, 43L, 35L, 40L, NA),
         visit = as.Date(c(7152, 7578, 7639, 7121, 7395, 7425, 7456, 7517, 6971, 7030), origin = "1970-01-01"),
-        biom1 = c("A", "B", "A", "A", "B", "B", "B", "A", "A", "A"),
+        biom1 = c("A", "B", "A", "A", "B", "B", "B", "A", NA, "A"),
         biom2 = c("C", "D", "C", "D", "E", "E", "C", "C", "E", "C")
       ),
       therapy = data.frame(
@@ -109,22 +118,24 @@ demo_app <- function(
       gender_filter <- cohortBuilder::filter(
         type = "discrete", id = "gender", name = "Gender", variable = "gender",
         dataset = "patients", value = "M", value_mapping = "gender_mapping",
-        description = "The Gender field denotes the biological sex at birth."
+        description = "The Gender field denotes the biological sex at birth.",
+        stats = "pre"
       )
       age_filter <- cohortBuilder::filter(
         type = "range", id = "age", name = "Age", variable = "age", dataset = "patients", range = NA,
-        description = "The Age field is an length of time that a person has lived or a thing has existed."
+        description = "The Age field is an length of time that a person has lived or a thing has existed.",
+        feedback = FALSE
       )
       treatment_filter <- cohortBuilder::filter(
         type = "discrete", id = "treatment", name = "Treatment", variable = "treatment",
-        dataset = "therapy", value = "Atezo", gui_input = "vs"
+        dataset = "therapy", value = "Atezo", gui_input = "vs", stats = "post"
       )
       visit_filter <- cohortBuilder::filter(
         "date_range", name = "Visit", variable = "visit", dataset = "patients"
       )
       biom_filter <- cohortBuilder::filter(
         type = "multi_discrete", id = "bioms", name = "Biomarkers", dataset = "patients",
-        values = list(biom1 = c("A"), biom2 = c("C")), variables = c("biom1", "biom2")
+        values = NULL, variables = c("biom1", "biom2")
       )
 
       binding_keys <- list(
@@ -186,8 +197,8 @@ demo_app <- function(
             gender_filter,
             age_filter,
             treatment_filter,
-            visit_filter#,
-            #biom_filter
+            visit_filter,
+            biom_filter
           )
         )
       }
@@ -272,9 +283,14 @@ demo_app <- function(
 #' @export
 gui <- function(
   cohort,
-  steps = TRUE, stats = c("pre", "post"), run_button = FALSE, feedback = TRUE, state = TRUE,
+  steps = TRUE, stats = c("pre", "post"), run_button = "none", feedback = TRUE, state = TRUE,
   bootstrap = 3, enable_bookmarking = TRUE, code = TRUE, attrition = TRUE, show_help = TRUE,
   new_step = c("clone", "configure")) {
+
+  if (is.logical(run_button)) {
+    lifecycle::deprecate_stop("0.2.0", "shinyCohorBuilder::gui(arg = 'must be a scalar character')")
+  }
+
   if (!interactive()) {
     stop("Message - gui can be used in interactive mode only.")
   }

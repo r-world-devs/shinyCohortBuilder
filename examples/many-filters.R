@@ -79,7 +79,7 @@ server <- function(input, output, session) {
     )
   )
 
-  cb_server(id = "patients", coh, run_button = TRUE, stats = c("pre", "post"), feedback = TRUE)
+  cb_server(id = "patients", coh, run_button = "global", stats = c("pre", "post"), feedback = TRUE)
 
   returned_data <- shiny::eventReactive(input[["patients-cb_data_updated"]], {
     coh$get_data(step_id = coh$last_step_id(), state = "post")

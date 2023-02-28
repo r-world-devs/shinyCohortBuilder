@@ -4,9 +4,13 @@ extract_selected_values <- function(values, parent_filter_stats, reset) {
   if (reset) {
     return(all_choices)
   }
+  filtered_selection <- values %>% purrr::keep(~!identical(., NA))
+  if (!length(filtered_selection)) {
+    filtered_selection <- list()
+  }
   utils::modifyList(
     all_choices,
-    values %>% purrr::keep(~!identical(., NA)),
+    filtered_selection,
     keep.null = TRUE
   )[names(values)]
 }
@@ -42,11 +46,13 @@ attach_list_names <- function(list_vals, list_names) {
 multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
   step_id <- filter$step_id
   filter_id <- filter$id
+  filter_params <- filter$get_params()
+  
   max_groups <- length(cohort$get_cache("1", filter_id, state = "pre")$choices)
 
   if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
     return(
-      list(inputId = input_id, choices = NULL, choices_names = NULL, selected = NULL, max_groups = max_groups)
+      list(inputId = input_id, label = NULL, choices = NULL, choicesNames = NULL, selected = NULL, max_groups = max_groups)
     )
   }
 
@@ -63,7 +69,16 @@ multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE,
   )
   choices <- parent_filter_stats %>% purrr::map(names)
   choices_names <- shinyGizmo::pickCheckboxNames(choices)
-  choices_labels <- shinyGizmo::pickCheckboxLabels(choices)
+  
+  value_mapping <- function(x, cohort) x
+  if (!is.null(filter_params$value_mapping)) {
+    value_mapping <- cohort$get_source()$attributes$value_mappings[[filter_params$value_mapping]]
+  }
+  
+  choices_labels <- value_mapping(
+    shinyGizmo::pickCheckboxLabels(choices),
+    cohort
+  )
 
   choices_names <- purrr::pmap(
     list(
@@ -72,22 +87,25 @@ multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE,
       parent_stat = parent_filter_stats
     ),
     choice_names,
-    stats = cohort$attributes$stats
+    stats = if_null_default(
+      filter$get_params("stats"),
+      cohort$attributes$stats
+    )
   )
 
-  # if (!is.null(filter$get_params("choice_names"))) {
-  #   filter$get_params("choice_names")
-  # }  else {
-  #   nested_choice_names
-  # }
   params <- list(
     inputId = input_id,
     choices = choices,
     choicesNames = choices_names,
     choicesLabels = choices_labels,
     selected = selected_value,
+    label = NULL,
     ...
   )
+
+  if (update) {
+    params$label <- NULL
+  }
 
   return(params)
 }
@@ -183,23 +201,32 @@ grouped_list_to_df <- function(grouped_list) {
 .gui_filter.multi_discrete <- function(filter, ...) {
   list(
     input = function(input_id, cohort) {
-      .cb_input(
-        do.call(
-          shinyGizmo::pickCheckboxInput,
-          append(
-            list(
-              options  = shinyWidgets::pickerOptions(
-                actionsBox = TRUE,
-                size = 10,
-                dropdownAlignRight = 'auto',
-                liveSearch = TRUE,
-                liveSearchNormalize = TRUE
-              )
-            ),
-            multi_discrete_input_params(filter, input_id, cohort, ...)
-          )
+      tagList(
+        .cb_input(
+          do.call(
+            shinyGizmo::pickCheckboxInput,
+            append(
+              list(
+                options  = shinyWidgets::pickerOptions(
+                  actionsBox = TRUE,
+                  size = 10,
+                  dropdownAlignRight = 'auto',
+                  liveSearch = TRUE,
+                  liveSearchNormalize = TRUE
+                )
+              ),
+              multi_discrete_input_params(filter, input_id, cohort, ...)
+            )
+          ),
+          filter$input_param
         ),
-        filter$input_param
+        .cb_input(
+          .keep_na_input(
+            input_id, filter, cohort,
+            msg_fun = function(x) "Keep missing values"
+          ),
+          "keep_na"
+        )
       )
     },
     feedback = function(input_id, cohort, empty = FALSE) {
@@ -220,8 +247,16 @@ grouped_list_to_df <- function(grouped_list) {
             step_id <- filter$step_id
             filter_id <- filter$id
             filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
+            orig_values <- filter$get_params("values")
+            if (is.null(orig_values)) {
+              orig_values <- filter_cache$choices %>%
+                purrr::map(names)
+            } else {
+              orig_values <- orig_values %>%
+                purrr::map(~as.character(unlist(.)))
+            }
             filter_value <- purrr::map2(
-              stats::setNames(filter$get_params("values")[names(filter_cache$choices)], names(filter_cache$choices)),
+              stats::setNames(orig_values[names(filter_cache$choices)], names(filter_cache$choices)),
               filter_cache$choices,
               ~extract_selected_value(.x, .y, FALSE)
             )
@@ -234,7 +269,8 @@ grouped_list_to_df <- function(grouped_list) {
               variable = names(filter_cache$n_missing),
               state = "(missing)",
               value = unlist(filter_cache$n_missing)
-            )
+            ) %>%
+              dplyr::filter(variable %in% plot_data$variable)
             if (identical(filter$get_params("keep_na"), FALSE)) {
               n_missing$value <- 0
             }
@@ -248,12 +284,17 @@ grouped_list_to_df <- function(grouped_list) {
     update = function(session, input_id, cohort, reset = FALSE, ...) {
       update_params <- multi_discrete_input_params(filter, input_id, cohort, reset, TRUE, ...)
       update_params$max_groups <- NULL
+      update_params$label <- NULL
       do.call(
         shinyGizmo::updatePickCheckboxInput,
         append(
           list(session = session),
           update_params
         )
+      )
+      .update_keep_na_input(
+        session, input_id, filter, cohort,
+        msg_fun = function(x) "Keep missing values"
       )
     },
     post_stats = TRUE,
