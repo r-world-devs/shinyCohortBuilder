@@ -673,7 +673,7 @@ gui_show_step_filter_modal <- function(cohort, changed_input, session) {
         shinyGizmo::valueButton(
           inputId = ns("add_step_configured"),
           label = "Accept",
-          selector = paste0("#", ns("configure_step")),
+          selector = paste0("[data-id=\"", ns("configure_step"), "\"]"),
           onclick = .trigger_action_js("add_step_configure", ns = ns),
           `data-dismiss` = "modal", `data-bs-dismiss` = "modal",
           disabled = NA
