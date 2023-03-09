@@ -51,7 +51,7 @@ div.cb_container .cb_no_attrition {
 }
 
 .cb_filter_content.cb_no_data {
-  margin-bottom: 1rem;
+  margin-bottom: 0.5em;
 }
 
 .cb_filter_content.cb_no_data .cb_inputs, .cb_filter_content.cb_no_data .cb_feedback {
@@ -73,7 +73,7 @@ div.cb_container .cb_no_attrition {
 .cb_filter .filter_tooltip {
   float: right;
   clear: both;
-  margin-right: -0.8rem;
+  margin-right: -0.8em;
 }
 
 .cb_filter .filter_tooltip > i {
@@ -81,23 +81,23 @@ div.cb_container .cb_no_attrition {
 }
 
 .cb_input[data-param="keep_na"] {
-  margin-top: -1rem;
+  margin-top: -1em;
   color: #8a8a8a;
-  font-size: 0.8rem;
+  font-size: 0.8em;
 }
 
 .cb_input[data-param="keep_na"] input {
   transform: scale(0.8);
   position: relative;
   vertical-align: middle;
-  bottom: 0.1rem;
+  bottom: 0.1em;
   margin-top: 0;
 }
 
 .scb_data_stats {
-  height: 1.7rem;
-  font-size: 0.8rem;
-  margin-top: -0.8rem;
+  height: 1.7em;
+  font-size: 0.8em;
+  margin-top: -0.8em;
 }
 
 .scb_data_stats > span {
@@ -166,6 +166,23 @@ div.cb_container .cb_no_attrition {
 
 .cb_container .input-daterange .input-group-addon {
   padding: 0;
+}
+
+.cb_step > .header {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.cb_step > .content {
+  padding: 10px;
+}
+
+.cb_input .material-switch {
+  margin-left: 4px;
+}
+
+.material-switch > label {
+  margin-bottom: 5px;
 }
 
 .modal-body {

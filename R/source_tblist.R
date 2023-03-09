@@ -34,15 +34,14 @@ dataset_help_icon <- function(cohort, dataset_name, ns) {
 dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
   stats_id <- ns(paste0(step_id, "-stats_", dataset_name))
   shiny::tagList(
-    shiny::tags$strong(dataset_name),
+    shiny::tags$strong(class = "cb_filters_group", dataset_name),
     dataset_help_icon(cohort, dataset_name, ns),
-    shiny::htmlOutput(stats_id, inline = TRUE, style = "float: right;"),
-    shiny::hr(style = "margin-top: 0.3rem;"),
+    shiny::htmlOutput(stats_id, inline = TRUE, style = "float: right; "),
+    shiny::hr(style = "margin-top: 0.1em;"),
     filters %>%
       purrr::map(
         ~ .render_filter(.x, step_id, cohort, ns = ns)
-      ),
-    shiny::div(style = "padding-top: 1rem; padding-bottom: 1rem;")
+      )
   )
 }
 

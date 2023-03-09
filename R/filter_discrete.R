@@ -129,6 +129,17 @@ is_vs <- function(filter) {
   )
 }
 
+inherit_parent_stats <- function(filter_values, parent_options, is_cached) {
+  if (is_cached) {
+    return(character(0))
+  }
+  if (is.na(filter_values)) {
+    return(parent_options)
+  } else {
+    return(filter_values)
+  }
+}
+
 discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
   step_id <- filter$step_id
   filter_id <- filter$id
@@ -144,11 +155,11 @@ discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, updat
   filter_stats <- extend_stats(
     cohort$get_cache(step_id, filter_id, state = "post")$choices,
     parent_filter_stats,
-    inherit_parent = if (is.null(cohort$get_cache(step_id, filter_id, state = "post"))) {
-      filter_params$value
-    } else {
-      character(0)
-    }
+    inherit_parent = inherit_parent_stats(
+      filter_params$value,
+      names(parent_filter_stats),
+      !is.null(cohort$get_cache(step_id, filter_id, state = "post"))
+    )
   )
   selected_value <- extract_selected_value(
     filter$get_params("value"),
