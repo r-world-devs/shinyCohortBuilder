@@ -40,8 +40,6 @@ Note regarding checking CRAN incoming feasibility.
 * checking CRAN incoming feasibility ... NOTE
 Maintainer: 'Krystian Igras <krystian8207@gmail.com>'
 
-New submission
-
 Possibly mis-spelled words in DESCRIPTION:
   Analytical (3:46)
   analytical (16:13)
@@ -56,8 +54,6 @@ Status: 1 NOTE
 ...
 * checking CRAN incoming feasibility ... Note_to_CRAN_maintainers
 Maintainer: ‘Krystian Igras <krystian8207@gmail.com>’
-
-New submission
 ...
 Status: OK
 ```
