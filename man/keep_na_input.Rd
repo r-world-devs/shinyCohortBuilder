@@ -28,6 +28,9 @@
 
 \item{cohort}{Cohort object.}
 
+\item{msg_fun}{Function taking number of missing values as an argument and
+returning missing values label.}
+
 \item{session}{Shiny session object.}
 }
 \value{

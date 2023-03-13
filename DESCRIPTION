@@ -38,6 +38,7 @@ Imports:
     htmltools,
     shiny (>= 1.7.0),
     shinyWidgets (>= 0.7.0),
+    htmlwidgets,
     dplyr,
     cohortBuilder (>= 0.2.0),
     tryCatchLog,
