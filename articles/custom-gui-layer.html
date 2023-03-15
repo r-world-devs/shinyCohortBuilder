@@ -14,10 +14,10 @@
 <link rel="apple-touch-icon" type="image/png" sizes="76x76" href="../apple-touch-icon-76x76.png">
 <link rel="apple-touch-icon" type="image/png" sizes="60x60" href="../apple-touch-icon-60x60.png">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.1.0/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.1.0/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Creating custom source extension">
+<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Creating custom source extension">
 <meta property="og:description" content="shinyCohortBuilder">
 <meta property="og:image" content="https://github.com/r-world-devs/shinyCohortBuilder/logo.png">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">shinyCohortBuilder</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -99,7 +99,7 @@
 
 
 <div class="row">
-  <main id="main"><div class="page-header">
+  <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Creating custom source extension</h1>
             
       
@@ -109,19 +109,34 @@
 
     
     
-<p>If you want to use <code>shinyCohortBuilder</code> with a custom source type, a set of methods needs to be defined.</p>
-<p>Currently there exists one official extension <code>cohortBuilder.db</code> package that allows you to use <code>shinyCohortBuilder</code> (and <code>cohortBuilder</code>) with database connections.</p>
-<p>The goal of this document is to explain how to create custom extensions to <code>shinyCohortBuilder</code>.</p>
-<p>In general to create the custom layer you need to create an R package where:</p>
+<p>If you want to use <code>shinyCohortBuilder</code> with a custom
+source type, a set of methods needs to be defined.</p>
+<p>Currently there exists one official extension
+<code>cohortBuilder.db</code> package that allows you to use
+<code>shinyCohortBuilder</code> (and <code>cohortBuilder</code>) with
+database connections.</p>
+<p>The goal of this document is to explain how to create custom
+extensions to <code>shinyCohortBuilder</code>.</p>
+<p>In general to create the custom layer you need to create an R package
+where:</p>
 <ol style="list-style-type: decimal">
-<li>The custom Source extension for <code>cohortBuilder</code> methods is implemented (see. <code>vignettes("custom-extensions", package = "cohortBuilder")</code>).</li>
-<li>A set of integration S3 methods for <code>shinyCohortBuilder</code> are implemented.</li>
-<li>Extra filters (added in the extension) GUI layers are implemented (see <a href="gui-filter-layer.html">custom GUI filters</a>).</li>
+<li>The custom Source extension for <code>cohortBuilder</code> methods
+is implemented (see.
+<code>vignettes("custom-extensions", package = "cohortBuilder")</code>).</li>
+<li>A set of integration S3 methods for <code>shinyCohortBuilder</code>
+are implemented.</li>
+<li>Extra filters (added in the extension) GUI layers are implemented
+(see <a href="gui-filter-layer.html">custom GUI filters</a>).</li>
 </ol>
-<p>If you have <code>cohortBuilder</code> integration ready for the selected source <code>type</code> (a new package named <code>cohortBuilder.&lt;type&gt;</code>), the next step is to add <code>shinyCohortBuilder</code> integration.</p>
-<p>Below we describe all the required and optional methods you need to define within the created package.</p>
+<p>If you have <code>cohortBuilder</code> integration ready for the
+selected source <code>type</code> (a new package named
+<code>cohortBuilder.&lt;type&gt;</code>), the next step is to add
+<code>shinyCohortBuilder</code> integration.</p>
+<p>Below we describe all the required and optional methods you need to
+define within the created package.</p>
 <ol style="list-style-type: decimal">
-<li><strong><code>.render_filters</code> - method used to define structure for filters rendering in a selected step</strong></li>
+<li><strong><code>.render_filters</code> - method used to define
+structure for filters rendering in a selected step</strong></li>
 </ol>
 <p>Required parameters:</p>
 <ul>
@@ -138,11 +153,16 @@
 </ul>
 <p>Details:</p>
 <ul>
-<li>The method should return HTML structure including statistics output placeholder and a list of filter renderings.</li>
-<li>In order to get all the filters included in the selected step use <code>cohort$get_step(step_id)$filters</code>.</li>
-<li>Data statistics outputs should be consistent with <code>.update_data_stats</code> method described below.</li>
-<li>Each filter should be rendered with usage of <code>.render_filter</code> method.</li>
-<li>List of filters rendering should be wrapped into <code>shiny::div(class = "cb_filters", `data-step_id` = step_id)</code>.</li>
+<li>The method should return HTML structure including statistics output
+placeholder and a list of filter renderings.</li>
+<li>In order to get all the filters included in the selected step use
+<code>cohort$get_step(step_id)$filters</code>.</li>
+<li>Data statistics outputs should be consistent with
+<code>.update_data_stats</code> method described below.</li>
+<li>Each filter should be rendered with usage of
+<code>.render_filter</code> method.</li>
+<li>List of filters rendering should be wrapped into
+<code>shiny::div(class = "cb_filters", `data-step_id` = step_id)</code>.</li>
 </ul>
 <p>Examples:</p>
 <ul>
@@ -150,42 +170,45 @@
 <code>shinyCohortBuilder</code> - default method</li>
 </ul>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">.render_filters.default</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source</span>, <span class="va">cohort</span>, <span class="va">step_id</span>, <span class="va">ns</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">step</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_step</span><span class="op">(</span><span class="va">step_id</span><span class="op">)</span>
-  <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/tagList.html" class="external-link">tagList</a></span><span class="op">(</span>
-    <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/htmlOutput.html" class="external-link">htmlOutput</a></span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">step_id</span>, <span class="st">"-stats"</span><span class="op">)</span><span class="op">)</span>, class <span class="op">=</span> <span class="st">"scb_data_stats"</span><span class="op">)</span>,
-    <span class="va">step</span><span class="op">$</span><span class="va">filters</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-      <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="op">~</span> <span class="fu"><a href="../reference/dot-render_filter.html">.render_filter</a></span><span class="op">(</span><span class="va">.x</span>, <span class="va">step_id</span>, <span class="va">cohort</span>, ns <span class="op">=</span> <span class="va">ns</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-      <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">div</a></span><span class="op">(</span>class <span class="op">=</span> <span class="st">"cb_filters"</span>, `data-step_id` <span class="op">=</span> <span class="va">step_id</span><span class="op">)</span>
-  <span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">.render_filters.default</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source</span>, <span class="va">cohort</span>, <span class="va">step_id</span>, <span class="va">ns</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">step</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_step</span><span class="op">(</span><span class="va">step_id</span><span class="op">)</span></span>
+<span>  <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/htmltools/reference/tagList.html" class="external-link">tagList</a></span><span class="op">(</span></span>
+<span>    <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://shiny.rstudio.com/reference/shiny/latest/htmlOutput.html" class="external-link">htmlOutput</a></span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">step_id</span>, <span class="st">"-stats"</span><span class="op">)</span><span class="op">)</span>, class <span class="op">=</span> <span class="st">"scb_data_stats"</span><span class="op">)</span>,</span>
+<span>    <span class="va">step</span><span class="op">$</span><span class="va">filters</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="op">~</span> <span class="fu"><a href="../reference/dot-render_filter.html">.render_filter</a></span><span class="op">(</span><span class="va">.x</span>, <span class="va">step_id</span>, <span class="va">cohort</span>, ns <span class="op">=</span> <span class="va">ns</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">div</a></span><span class="op">(</span>class <span class="op">=</span> <span class="st">"cb_filters"</span>, `data-step_id` <span class="op">=</span> <span class="va">step_id</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <ul>
 <li>
 <code>shinyCohortBuilder</code> - tblist data class</li>
 </ul>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">.render_filters.tblist</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source</span>, <span class="va">cohort</span>, <span class="va">step_id</span>, <span class="va">ns</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">step</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_step</span><span class="op">(</span><span class="va">step_id</span><span class="op">)</span>
-
-  <span class="fu">group_filters</span><span class="op">(</span><span class="va">cohort</span><span class="op">$</span><span class="fu">get_source</span><span class="op">(</span><span class="op">)</span>, <span class="va">step</span><span class="op">$</span><span class="va">filters</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-    <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/imap.html" class="external-link">imap</a></span><span class="op">(</span><span class="op">~</span> <span class="fu">dataset_filters</span><span class="op">(</span><span class="va">.x</span>, <span class="va">.y</span>, <span class="va">step_id</span>, <span class="va">cohort</span>, ns <span class="op">=</span> <span class="va">ns</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-    <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">div</a></span><span class="op">(</span>class <span class="op">=</span> <span class="st">"cb_filters"</span>, `data-step_id` <span class="op">=</span> <span class="va">step_id</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
-<p>In this example we group all the defined filters by related datasets from source (<code>group_filters</code>), and attach a separate statistics placeholder for each dataset (dataset_filters).</p>
+<code class="sourceCode R"><span><span class="va">.render_filters.tblist</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source</span>, <span class="va">cohort</span>, <span class="va">step_id</span>, <span class="va">ns</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">step</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_step</span><span class="op">(</span><span class="va">step_id</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu">group_filters</span><span class="op">(</span><span class="va">cohort</span><span class="op">$</span><span class="fu">get_source</span><span class="op">(</span><span class="op">)</span>, <span class="va">step</span><span class="op">$</span><span class="va">filters</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/imap.html" class="external-link">imap</a></span><span class="op">(</span><span class="op">~</span> <span class="fu">dataset_filters</span><span class="op">(</span><span class="va">.x</span>, <span class="va">.y</span>, <span class="va">step_id</span>, <span class="va">cohort</span>, ns <span class="op">=</span> <span class="va">ns</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">div</a></span><span class="op">(</span>class <span class="op">=</span> <span class="st">"cb_filters"</span>, `data-step_id` <span class="op">=</span> <span class="va">step_id</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p>In this example we group all the defined filters by related datasets
+from source (<code>group_filters</code>), and attach a separate
+statistics placeholder for each dataset (dataset_filters).</p>
 <ul>
 <li>
 <code>cohortBuilder.db</code> - db data class</li>
 </ul>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">render_filters.db</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source</span>, <span class="va">cohort</span>, <span class="va">step_id</span>, <span class="va">ns</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">step</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_step</span><span class="op">(</span><span class="va">step_id</span><span class="op">)</span>
-
-  <span class="fu">group_filters_db</span><span class="op">(</span><span class="va">cohort</span><span class="op">$</span><span class="fu">get_source</span><span class="op">(</span><span class="op">)</span>, <span class="va">step</span><span class="op">$</span><span class="va">filters</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-    <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/imap.html" class="external-link">imap</a></span><span class="op">(</span><span class="op">~</span> <span class="fu">dataset_filters_db</span><span class="op">(</span><span class="va">.x</span>, <span class="va">.y</span>, <span class="va">step_id</span>, <span class="va">cohort</span>, ns <span class="op">=</span> <span class="va">ns</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">div</a></span><span class="op">(</span>class <span class="op">=</span> <span class="st">"cb_filters"</span>, `data-step_id` <span class="op">=</span> <span class="va">step_id</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">render_filters.db</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source</span>, <span class="va">cohort</span>, <span class="va">step_id</span>, <span class="va">ns</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">step</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_step</span><span class="op">(</span><span class="va">step_id</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu">group_filters_db</span><span class="op">(</span><span class="va">cohort</span><span class="op">$</span><span class="fu">get_source</span><span class="op">(</span><span class="op">)</span>, <span class="va">step</span><span class="op">$</span><span class="va">filters</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/imap.html" class="external-link">imap</a></span><span class="op">(</span><span class="op">~</span> <span class="fu">dataset_filters_db</span><span class="op">(</span><span class="va">.x</span>, <span class="va">.y</span>, <span class="va">step_id</span>, <span class="va">cohort</span>, ns <span class="op">=</span> <span class="va">ns</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">div</a></span><span class="op">(</span>class <span class="op">=</span> <span class="st">"cb_filters"</span>, `data-step_id` <span class="op">=</span> <span class="va">step_id</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
-<li><strong><code>.update_data_stats</code> - logic for updating data statistics</strong></li>
+<li><strong><code>.update_data_stats</code> - logic for updating data
+statistics</strong></li>
 </ol>
 <p>Required parameters:</p>
 <ul>
@@ -202,12 +225,21 @@
 </ul>
 <p>Details:</p>
 <ul>
-<li>The function should define rendering output for consistent with the output placeholder stated within <code>.render_filters</code>.</li>
-<li>It’s recommended the statistics are taken from the Cohort cache <code>cohort$get_cache(step_id, state = "pre")</code>.</li>
-<li>It’s recommended the output performs previous step data validation (in terms of data existence) and returns descriptive message to the user.</li>
-<li>Use <code>cohort$attributes$stats</code> to get displayed statistics state chosen by the user (“pre”, “post”, both or NULL).</li>
-<li>For printing the statistics use <code>.pre_post_stats</code> (or <code>.pre_post_stats_text</code>)` which returns formatted statistics output.</li>
-<li>You may directly assign the rendering to the output or use <code>.sendOutput</code> method (useful when sending output in loop see “tblist” source example below).</li>
+<li>The function should define rendering output for consistent with the
+output placeholder stated within <code>.render_filters</code>.</li>
+<li>It’s recommended the statistics are taken from the Cohort cache
+<code>cohort$get_cache(step_id, state = "pre")</code>.</li>
+<li>It’s recommended the output performs previous step data validation
+(in terms of data existence) and returns descriptive message to the
+user.</li>
+<li>Use <code>cohort$attributes$stats</code> to get displayed statistics
+state chosen by the user (“pre”, “post”, both or NULL).</li>
+<li>For printing the statistics use <code>.pre_post_stats</code> (or
+<code>.pre_post_stats_text</code>)` which returns formatted statistics
+output.</li>
+<li>You may directly assign the rendering to the output or use
+<code>.sendOutput</code> method (useful when sending output in loop see
+“tblist” source example below).</li>
 </ul>
 <p>Examples:</p>
 <ul>
@@ -215,86 +247,94 @@
 <code>shinyCohortBuilder</code> - default method</li>
 </ul>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">.update_data_stats.default</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source</span>, <span class="va">step_id</span>, <span class="va">cohort</span>, <span class="va">session</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">ns</span> <span class="op">&lt;-</span> <span class="va">session</span><span class="op">$</span><span class="va">ns</span>
-  <span class="va">stats</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="va">attributes</span><span class="op">$</span><span class="va">stats</span>
-
-  <span class="va">session</span><span class="op">$</span><span class="va">output</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">step_id</span>, <span class="st">"-stats"</span><span class="op">)</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderUI.html" class="external-link">renderUI</a></span><span class="op">(</span><span class="op">{</span>
-    <span class="va">previous</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_cache</span><span class="op">(</span><span class="va">step_id</span>, state <span class="op">=</span> <span class="st">"pre"</span><span class="op">)</span><span class="op">$</span><span class="va">n_rows</span>
-    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="va">previous</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span>
-      <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="st">"No data selected in previous step."</span><span class="op">)</span>
-    <span class="op">}</span>
-    <span class="va">current</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_cache</span><span class="op">(</span><span class="va">step_id</span>, state <span class="op">=</span> <span class="st">"post"</span><span class="op">)</span><span class="op">$</span><span class="va">n_rows</span>
-    <span class="fu"><a href="../reference/pre_post_stats.html">.pre_post_stats</a></span><span class="op">(</span><span class="va">current</span>, <span class="va">previous</span>, percent <span class="op">=</span> <span class="cn">TRUE</span>, stats <span class="op">=</span> <span class="va">stats</span><span class="op">)</span>
-  <span class="op">}</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">.update_data_stats.default</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source</span>, <span class="va">step_id</span>, <span class="va">cohort</span>, <span class="va">session</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">ns</span> <span class="op">&lt;-</span> <span class="va">session</span><span class="op">$</span><span class="va">ns</span></span>
+<span>  <span class="va">stats</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="va">attributes</span><span class="op">$</span><span class="va">stats</span></span>
+<span></span>
+<span>  <span class="va">session</span><span class="op">$</span><span class="va">output</span><span class="op">[[</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">step_id</span>, <span class="st">"-stats"</span><span class="op">)</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://shiny.rstudio.com/reference/shiny/latest/renderUI.html" class="external-link">renderUI</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>    <span class="va">previous</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_cache</span><span class="op">(</span><span class="va">step_id</span>, state <span class="op">=</span> <span class="st">"pre"</span><span class="op">)</span><span class="op">$</span><span class="va">n_rows</span></span>
+<span>    <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="va">previous</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span>      <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="st">"No data selected in previous step."</span><span class="op">)</span></span>
+<span>    <span class="op">}</span></span>
+<span>    <span class="va">current</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_cache</span><span class="op">(</span><span class="va">step_id</span>, state <span class="op">=</span> <span class="st">"post"</span><span class="op">)</span><span class="op">$</span><span class="va">n_rows</span></span>
+<span>    <span class="fu"><a href="../reference/pre_post_stats.html">.pre_post_stats</a></span><span class="op">(</span><span class="va">current</span>, <span class="va">previous</span>, percent <span class="op">=</span> <span class="cn">TRUE</span>, stats <span class="op">=</span> <span class="va">stats</span><span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <ul>
 <li>
 <code>shinyCohortBuilder</code> - tblist data class</li>
 </ul>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">.update_data_stats.tblist</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source</span>, <span class="va">step_id</span>, <span class="va">cohort</span>, <span class="va">session</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">stats</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="va">attributes</span><span class="op">$</span><span class="va">stats</span>
-  <span class="va">step</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_step</span><span class="op">(</span><span class="va">step_id</span><span class="op">)</span>
-
-  <span class="va">dataset_names</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">cohort</span><span class="op">$</span><span class="fu">get_source</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">attributes</span><span class="op">$</span><span class="va">datasets</span><span class="op">)</span>
-  <span class="va">data_filters</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map_chr</a></span><span class="op">(</span><span class="va">step</span><span class="op">$</span><span class="va">filters</span>, <span class="va">get_filter_dataset</span><span class="op">)</span>
-  <span class="va">dataset_names</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">intersect</a></span><span class="op">(</span><span class="va">dataset_names</span>, <span class="va">data_filters</span><span class="op">)</span>
-
-  <span class="va">dataset_names</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">walk</a></span><span class="op">(</span>
-    <span class="op">~</span> <span class="fu"><a href="../reference/dot-sendOutput.html">.sendOutput</a></span><span class="op">(</span>
-      <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">step_id</span>, <span class="st">"-stats_"</span>, <span class="va">.x</span><span class="op">)</span>,
-      <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderUI.html" class="external-link">renderUI</a></span><span class="op">(</span><span class="op">{</span>
-        <span class="va">previous</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_cache</span><span class="op">(</span><span class="va">step_id</span>, state <span class="op">=</span> <span class="st">"pre"</span><span class="op">)</span><span class="op">[[</span><span class="va">.x</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">n_rows</span>
-        <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="va">previous</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span>
-          <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="st">"No data selected in previous step."</span><span class="op">)</span>
-        <span class="op">}</span>
-        <span class="va">current</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_cache</span><span class="op">(</span><span class="va">step_id</span>, state <span class="op">=</span> <span class="st">"post"</span><span class="op">)</span><span class="op">[[</span><span class="va">.x</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">n_rows</span>
-        <span class="fu"><a href="../reference/pre_post_stats.html">.pre_post_stats</a></span><span class="op">(</span><span class="va">current</span>, <span class="va">previous</span>, percent <span class="op">=</span> <span class="cn">TRUE</span>, stats <span class="op">=</span> <span class="va">stats</span><span class="op">)</span>
-      <span class="op">}</span><span class="op">)</span>,
-      <span class="va">session</span>
-    <span class="op">)</span>
-  <span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">.update_data_stats.tblist</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source</span>, <span class="va">step_id</span>, <span class="va">cohort</span>, <span class="va">session</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">stats</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="va">attributes</span><span class="op">$</span><span class="va">stats</span></span>
+<span>  <span class="va">step</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_step</span><span class="op">(</span><span class="va">step_id</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">dataset_names</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">cohort</span><span class="op">$</span><span class="fu">get_source</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">attributes</span><span class="op">$</span><span class="va">datasets</span><span class="op">)</span></span>
+<span>  <span class="va">data_filters</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map_chr</a></span><span class="op">(</span><span class="va">step</span><span class="op">$</span><span class="va">filters</span>, <span class="va">get_filter_dataset</span><span class="op">)</span></span>
+<span>  <span class="va">dataset_names</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">intersect</a></span><span class="op">(</span><span class="va">dataset_names</span>, <span class="va">data_filters</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">dataset_names</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">walk</a></span><span class="op">(</span></span>
+<span>    <span class="op">~</span> <span class="fu"><a href="../reference/dot-sendOutput.html">.sendOutput</a></span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">step_id</span>, <span class="st">"-stats_"</span>, <span class="va">.x</span><span class="op">)</span>,</span>
+<span>      <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://shiny.rstudio.com/reference/shiny/latest/renderUI.html" class="external-link">renderUI</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>        <span class="va">previous</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_cache</span><span class="op">(</span><span class="va">step_id</span>, state <span class="op">=</span> <span class="st">"pre"</span><span class="op">)</span><span class="op">[[</span><span class="va">.x</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">n_rows</span></span>
+<span>        <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="va">previous</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span>          <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="st">"No data selected in previous step."</span><span class="op">)</span></span>
+<span>        <span class="op">}</span></span>
+<span>        <span class="va">current</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_cache</span><span class="op">(</span><span class="va">step_id</span>, state <span class="op">=</span> <span class="st">"post"</span><span class="op">)</span><span class="op">[[</span><span class="va">.x</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">n_rows</span></span>
+<span>        <span class="fu"><a href="../reference/pre_post_stats.html">.pre_post_stats</a></span><span class="op">(</span><span class="va">current</span>, <span class="va">previous</span>, percent <span class="op">=</span> <span class="cn">TRUE</span>, stats <span class="op">=</span> <span class="va">stats</span><span class="op">)</span></span>
+<span>      <span class="op">}</span><span class="op">)</span>,</span>
+<span>      <span class="va">session</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <ul>
 <li><code>cohortBuilder.db</code></li>
 </ul>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">update_data_stats.db</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source</span>, <span class="va">step_id</span>, <span class="va">cohort</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">stats</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="va">attributes</span><span class="op">$</span><span class="va">stats</span>
-
-  <span class="va">dataset_names</span> <span class="op">&lt;-</span> <span class="va">source</span><span class="op">$</span><span class="va">attributes</span><span class="op">$</span><span class="va">tables</span>
-  <span class="va">dataset_names</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">walk</a></span><span class="op">(</span>
-    <span class="op">~</span> <span class="fu">shinyCohortBuilder</span><span class="fu">::</span><span class="fu">sendOutput</span><span class="op">(</span>
-      <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">step_id</span>, <span class="st">"-stats_"</span>, <span class="va">.x</span><span class="op">)</span>,
-      <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderUI.html" class="external-link">renderUI</a></span><span class="op">(</span><span class="op">{</span>
-        <span class="va">previous</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_cache</span><span class="op">(</span><span class="va">step_id</span>, state <span class="op">=</span> <span class="st">"pre"</span><span class="op">)</span><span class="op">[[</span><span class="va">.x</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">n_rows</span>
-        <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="va">previous</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span>
-          <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="st">"No data selected in previous step."</span><span class="op">)</span>
-        <span class="op">}</span>
-        <span class="va">current</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_cache</span><span class="op">(</span><span class="va">step_id</span>, state <span class="op">=</span> <span class="st">"post"</span><span class="op">)</span><span class="op">[[</span><span class="va">.x</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">n_rows</span>
-        <span class="fu">shinyCohortBuilder</span><span class="fu">::</span><span class="fu"><a href="../reference/pre_post_stats.html">pre_post_stats</a></span><span class="op">(</span><span class="va">current</span>, <span class="va">previous</span>, percent <span class="op">=</span> <span class="cn">TRUE</span>, stats <span class="op">=</span> <span class="va">stats</span><span class="op">)</span>
-      <span class="op">}</span><span class="op">)</span>
-    <span class="op">)</span>
-  <span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">update_data_stats.db</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source</span>, <span class="va">step_id</span>, <span class="va">cohort</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">stats</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="va">attributes</span><span class="op">$</span><span class="va">stats</span></span>
+<span></span>
+<span>  <span class="va">dataset_names</span> <span class="op">&lt;-</span> <span class="va">source</span><span class="op">$</span><span class="va">attributes</span><span class="op">$</span><span class="va">tables</span></span>
+<span>  <span class="va">dataset_names</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">walk</a></span><span class="op">(</span></span>
+<span>    <span class="op">~</span> <span class="fu">shinyCohortBuilder</span><span class="fu">::</span><span class="fu">sendOutput</span><span class="op">(</span></span>
+<span>      <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">step_id</span>, <span class="st">"-stats_"</span>, <span class="va">.x</span><span class="op">)</span>,</span>
+<span>      <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://shiny.rstudio.com/reference/shiny/latest/renderUI.html" class="external-link">renderUI</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>        <span class="va">previous</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_cache</span><span class="op">(</span><span class="va">step_id</span>, state <span class="op">=</span> <span class="st">"pre"</span><span class="op">)</span><span class="op">[[</span><span class="va">.x</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">n_rows</span></span>
+<span>        <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="va">previous</span> <span class="op">&gt;</span> <span class="fl">0</span><span class="op">)</span> <span class="op">{</span></span>
+<span>          <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="st">"No data selected in previous step."</span><span class="op">)</span></span>
+<span>        <span class="op">}</span></span>
+<span>        <span class="va">current</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_cache</span><span class="op">(</span><span class="va">step_id</span>, state <span class="op">=</span> <span class="st">"post"</span><span class="op">)</span><span class="op">[[</span><span class="va">.x</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">n_rows</span></span>
+<span>        <span class="fu">shinyCohortBuilder</span><span class="fu">::</span><span class="fu"><a href="../reference/pre_post_stats.html">pre_post_stats</a></span><span class="op">(</span><span class="va">current</span>, <span class="va">previous</span>, percent <span class="op">=</span> <span class="cn">TRUE</span>, stats <span class="op">=</span> <span class="va">stats</span><span class="op">)</span></span>
+<span>      <span class="op">}</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <ol start="3" style="list-style-type: decimal">
-<li><strong><code>autofilter</code> (optional) - automatically generate filters configuration based on Source data</strong></li>
+<li><strong><code>autofilter</code> (optional) - automatically generate
+filters configuration based on Source data</strong></li>
 </ol>
 <p>Required parameters:</p>
 <ul>
 <li>
 <code>source</code> - Source object,</li>
 <li>
-<code>attach_as</code> - Should filters be added as the first step (<code>"step"</code>) or as available filters for configuration panel (<code>"meta"</code>),</li>
+<code>attach_as</code> - Should filters be added as the first step
+(<code>"step"</code>) or as available filters for configuration panel
+(<code>"meta"</code>),</li>
 <li>
 <code>...</code> - Unused, added for S3 integration only.</li>
 </ul>
 <p>Details:</p>
 <ul>
-<li>Generate filters based on Source data (i.e. column types) using <code><a href="https://r-world-devs.github.io/cohortBuilder/reference/filter.html" class="external-link">cohortBuilder::filter</a></code>.</li>
-<li>When <code>attach_as = "step"</code> wrap them with <code><a href="https://r-world-devs.github.io/cohortBuilder/reference/step.html" class="external-link">cohortBuilder::step</a></code> and attach to the Source using <code>add_step</code> method.</li>
-<li>When <code>attach_as = "meta"</code> attach filters to the <code>available_filters</code> Source attribute (<code>source$attributes$available_filters</code>).</li>
+<li>Generate filters based on Source data (i.e. column types) using
+<code><a href="https://r-world-devs.github.io/cohortBuilder/reference/filter.html" class="external-link">cohortBuilder::filter</a></code>.</li>
+<li>When <code>attach_as = "step"</code> wrap them with
+<code><a href="https://r-world-devs.github.io/cohortBuilder/reference/step.html" class="external-link">cohortBuilder::step</a></code> and attach to the Source using
+<code>add_step</code> method.</li>
+<li>When <code>attach_as = "meta"</code> attach filters to the
+<code>available_filters</code> Source attribute
+(<code>source$attributes$available_filters</code>).</li>
 <li>The method should return Source object.</li>
 </ul>
 <p>Examples:</p>
@@ -303,25 +343,26 @@
 <code>shinyCohortBuilder</code> - tblist data class</li>
 </ul>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">autofilter.tblist</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source</span>, <span class="va">attach_as</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"step"</span>, <span class="st">"meta"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">attach_as</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/arg_match.html" class="external-link">arg_match</a></span><span class="op">(</span><span class="va">attach_as</span><span class="op">)</span>
-  <span class="va">step_rule</span> <span class="op">&lt;-</span> <span class="va">source</span><span class="op">$</span><span class="va">dtconn</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-    <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/imap.html" class="external-link">imap</a></span><span class="op">(</span><span class="op">~</span><span class="fu">filter_rules</span><span class="op">(</span><span class="va">.x</span>, <span class="va">.y</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span>recursive <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-    <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="fu">cohortBuilder</span><span class="fu">::</span><span class="va"><a href="https://r-world-devs.github.io/cohortBuilder/reference/filter.html" class="external-link">filter</a></span>, <span class="va">.</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-    <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="op">)</span>
-
-  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">attach_as</span>, <span class="st">"meta"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span>
-    <span class="va">source</span><span class="op">$</span><span class="va">attributes</span><span class="op">$</span><span class="va">available_filters</span> <span class="op">&lt;-</span> <span class="va">step_rule</span>
-  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span>
-    <span class="va">source</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span>
-      <span class="fu">cohortBuilder</span><span class="fu">::</span><span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/add_step.html" class="external-link">add_step</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="fu">cohortBuilder</span><span class="fu">::</span><span class="va"><a href="https://r-world-devs.github.io/cohortBuilder/reference/step.html" class="external-link">step</a></span>, <span class="va">step_rule</span><span class="op">)</span><span class="op">)</span>
-  <span class="op">}</span>
-
-  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">source</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">autofilter.tblist</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source</span>, <span class="va">attach_as</span> <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"step"</span>, <span class="st">"meta"</span><span class="op">)</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">attach_as</span> <span class="op">&lt;-</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/arg_match.html" class="external-link">arg_match</a></span><span class="op">(</span><span class="va">attach_as</span><span class="op">)</span></span>
+<span>  <span class="va">step_rule</span> <span class="op">&lt;-</span> <span class="va">source</span><span class="op">$</span><span class="va">dtconn</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/imap.html" class="external-link">imap</a></span><span class="op">(</span><span class="op">~</span><span class="fu">filter_rules</span><span class="op">(</span><span class="va">.x</span>, <span class="va">.y</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/unlist.html" class="external-link">unlist</a></span><span class="op">(</span>recursive <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="op">~</span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="fu">cohortBuilder</span><span class="fu">::</span><span class="va"><a href="https://r-world-devs.github.io/cohortBuilder/reference/filter.html" class="external-link">filter</a></span>, <span class="va">.</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/unname.html" class="external-link">unname</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">attach_as</span>, <span class="st">"meta"</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">source</span><span class="op">$</span><span class="va">attributes</span><span class="op">$</span><span class="va">available_filters</span> <span class="op">&lt;-</span> <span class="va">step_rule</span></span>
+<span>  <span class="op">}</span> <span class="kw">else</span> <span class="op">{</span></span>
+<span>    <span class="va">source</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>      <span class="fu">cohortBuilder</span><span class="fu">::</span><span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/add_step.html" class="external-link">add_step</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="fu">cohortBuilder</span><span class="fu">::</span><span class="va"><a href="https://r-world-devs.github.io/cohortBuilder/reference/step.html" class="external-link">step</a></span>, <span class="va">step_rule</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">}</span></span>
+<span></span>
+<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">source</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <ol start="4" style="list-style-type: decimal">
-<li><strong><code>.available_filters_choices</code> - define choices for new step configuration panel</strong></li>
+<li><strong><code>.available_filters_choices</code> - define choices for
+new step configuration panel</strong></li>
 </ol>
 <p>Required parameters:</p>
 <ul>
@@ -334,8 +375,10 @@
 </ul>
 <p>Details:</p>
 <ul>
-<li>The function should return <code><a href="https://dreamrs.github.io/shinyWidgets/reference/prepare_choices.html" class="external-link">shinyWidgets::prepare_choices</a></code> output.</li>
-<li>The argument <code>value</code> of <code>prepare_choices</code> should point to filter ids.</li>
+<li>The function should return
+<code><a href="https://dreamrs.github.io/shinyWidgets/reference/prepare_choices.html" class="external-link">shinyWidgets::prepare_choices</a></code> output.</li>
+<li>The argument <code>value</code> of <code>prepare_choices</code>
+should point to filter ids.</li>
 </ul>
 <p>Examples:</p>
 <ul>
@@ -343,30 +386,31 @@
 <code>shinyCohortBuilder</code> - tblist data class</li>
 </ul>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">.available_filters_choices.tblist</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source</span>, <span class="va">cohort</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span>
-
-  <span class="va">available_filters</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="va">attributes</span><span class="op">$</span><span class="va">available_filters</span>
-
-  <span class="va">choices</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">available_filters</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span>
-    <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>
-      name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span>
-        <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/builder.html" class="external-link">div</a></span><span class="op">(</span>
-          `data-tooltip-z-index` <span class="op">=</span> <span class="fl">9999</span>,
-          `data-tooltip` <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="fu">get_params</span><span class="op">(</span><span class="st">"description"</span><span class="op">)</span>,
-          `data-tooltip-position` <span class="op">=</span> <span class="st">"top right"</span>,
-          `data-tooltip-allow-html` <span class="op">=</span> <span class="st">"true"</span>,
-          <span class="va">x</span><span class="op">$</span><span class="va">name</span>
-        <span class="op">)</span>
-      <span class="op">)</span>,
-      id <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">id</span>,
-      dataset <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="fu">get_params</span><span class="op">(</span><span class="st">"dataset"</span><span class="op">)</span>
-    <span class="op">)</span>
-  <span class="op">}</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="op">)</span>
-
-  <span class="fu">shinyWidgets</span><span class="fu">::</span><span class="fu"><a href="https://dreamrs.github.io/shinyWidgets/reference/prepare_choices.html" class="external-link">prepare_choices</a></span><span class="op">(</span><span class="va">choices</span>, <span class="va">name</span>, <span class="va">id</span>, <span class="va">dataset</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">.available_filters_choices.tblist</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source</span>, <span class="va">cohort</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span></span>
+<span>  <span class="va">available_filters</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="va">attributes</span><span class="op">$</span><span class="va">available_filters</span></span>
+<span></span>
+<span>  <span class="va">choices</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">available_filters</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
+<span>      name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">as.character</a></span><span class="op">(</span></span>
+<span>        <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/htmltools/reference/builder.html" class="external-link">div</a></span><span class="op">(</span></span>
+<span>          `data-tooltip-z-index` <span class="op">=</span> <span class="fl">9999</span>,</span>
+<span>          `data-tooltip` <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="fu">get_params</span><span class="op">(</span><span class="st">"description"</span><span class="op">)</span>,</span>
+<span>          `data-tooltip-position` <span class="op">=</span> <span class="st">"top right"</span>,</span>
+<span>          `data-tooltip-allow-html` <span class="op">=</span> <span class="st">"true"</span>,</span>
+<span>          <span class="va">x</span><span class="op">$</span><span class="va">name</span></span>
+<span>        <span class="op">)</span></span>
+<span>      <span class="op">)</span>,</span>
+<span>      id <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">id</span>,</span>
+<span>      dataset <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="fu">get_params</span><span class="op">(</span><span class="st">"dataset"</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">}</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu">shinyWidgets</span><span class="fu">::</span><span class="fu"><a href="https://dreamrs.github.io/shinyWidgets/reference/prepare_choices.html" class="external-link">prepare_choices</a></span><span class="op">(</span><span class="va">choices</span>, <span class="va">name</span>, <span class="va">id</span>, <span class="va">dataset</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <ol start="5" style="list-style-type: decimal">
-<li><strong><code>.step_attrition</code> - define how step attrition plot should be rendered</strong></li>
+<li><strong><code>.step_attrition</code> - define how step attrition
+plot should be rendered</strong></li>
 </ol>
 <p>Required parameters:</p>
 <ul>
@@ -383,9 +427,16 @@
 </ul>
 <p>Details:</p>
 <ul>
-<li>The method should return list of two objects, output - returning UI output placeholder (having optional user input controllers affecting the output, see “tblist” example below) and render - rendering function defining the plot generating expression.</li>
-<li>Within rendering function use <code>cohort$show_attrition</code> method to generate the plot (and pass required parameters to it when needed, see “tblist” class example where <code>dataset</code> is needed).</li>
-<li>Use provided <code>id</code> parameter to as an id of plot output placeholder.</li>
+<li>The method should return list of two objects, output - returning UI
+output placeholder (having optional user input controllers affecting the
+output, see “tblist” example below) and render - rendering function
+defining the plot generating expression.</li>
+<li>Within rendering function use <code>cohort$show_attrition</code>
+method to generate the plot (and pass required parameters to it when
+needed, see “tblist” class example where <code>dataset</code> is
+needed).</li>
+<li>Use provided <code>id</code> parameter to as an id of plot output
+placeholder.</li>
 </ul>
 <p>Examples:</p>
 <ul>
@@ -393,40 +444,45 @@
 <code>shinyCohortBuilder</code> - default method</li>
 </ul>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">.step_attrition.default</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source</span>, <span class="va">id</span>, <span class="va">cohort</span>, <span class="va">session</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">ns</span> <span class="op">&lt;-</span> <span class="va">session</span><span class="op">$</span><span class="va">ns</span>
-
-  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-    render <span class="op">=</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span>
-      <span class="va">cohort</span><span class="op">$</span><span class="fu">show_attrition</span><span class="op">(</span><span class="op">)</span>
-    <span class="op">}</span><span class="op">)</span>,
-    output <span class="op">=</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/plotOutput.html" class="external-link">plotOutput</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span>
-  <span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">.step_attrition.default</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source</span>, <span class="va">id</span>, <span class="va">cohort</span>, <span class="va">session</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">ns</span> <span class="op">&lt;-</span> <span class="va">session</span><span class="op">$</span><span class="va">ns</span></span>
+<span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    render <span class="op">=</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://shiny.rstudio.com/reference/shiny/latest/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>      <span class="va">cohort</span><span class="op">$</span><span class="fu">show_attrition</span><span class="op">(</span><span class="op">)</span></span>
+<span>    <span class="op">}</span><span class="op">)</span>,</span>
+<span>    output <span class="op">=</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://shiny.rstudio.com/reference/shiny/latest/plotOutput.html" class="external-link">plotOutput</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <ul>
 <li>
 <code>shinyCohortBuilder</code> - tblist data class</li>
 </ul>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">.step_attrition.tblist</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source</span>, <span class="va">id</span>, <span class="va">cohort</span>, <span class="va">session</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">ns</span> <span class="op">&lt;-</span> <span class="va">session</span><span class="op">$</span><span class="va">ns</span>
-  <span class="va">choices</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">source</span><span class="op">$</span><span class="va">attributes</span><span class="op">$</span><span class="va">datasets</span><span class="op">)</span>
-
-  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>
-    render <span class="op">=</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span>
-      <span class="va">cohort</span><span class="op">$</span><span class="fu">show_attrition</span><span class="op">(</span>dataset <span class="op">=</span> <span class="va">session</span><span class="op">$</span><span class="va">input</span><span class="op">$</span><span class="va">attrition_input</span><span class="op">)</span>
-    <span class="op">}</span><span class="op">)</span>,
-    output <span class="op">=</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/htmltools/man/tagList.html" class="external-link">tagList</a></span><span class="op">(</span>
-      <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/selectInput.html" class="external-link">selectInput</a></span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">"attrition_input"</span><span class="op">)</span>, <span class="st">"Choose dataset"</span>, <span class="va">choices</span><span class="op">)</span>,
-      <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/plotOutput.html" class="external-link">plotOutput</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span>
-    <span class="op">)</span>
-  <span class="op">)</span>
-<span class="op">}</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">.step_attrition.tblist</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">source</span>, <span class="va">id</span>, <span class="va">cohort</span>, <span class="va">session</span>, <span class="va">...</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">ns</span> <span class="op">&lt;-</span> <span class="va">session</span><span class="op">$</span><span class="va">ns</span></span>
+<span>  <span class="va">choices</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">source</span><span class="op">$</span><span class="va">attributes</span><span class="op">$</span><span class="va">datasets</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    render <span class="op">=</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://shiny.rstudio.com/reference/shiny/latest/renderPlot.html" class="external-link">renderPlot</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>      <span class="va">cohort</span><span class="op">$</span><span class="fu">show_attrition</span><span class="op">(</span>dataset <span class="op">=</span> <span class="va">session</span><span class="op">$</span><span class="va">input</span><span class="op">$</span><span class="va">attrition_input</span><span class="op">)</span></span>
+<span>    <span class="op">}</span><span class="op">)</span>,</span>
+<span>    output <span class="op">=</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rstudio.github.io/htmltools/reference/tagList.html" class="external-link">tagList</a></span><span class="op">(</span></span>
+<span>      <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://shiny.rstudio.com/reference/shiny/latest/selectInput.html" class="external-link">selectInput</a></span><span class="op">(</span><span class="fu">ns</span><span class="op">(</span><span class="st">"attrition_input"</span><span class="op">)</span>, <span class="st">"Choose dataset"</span>, <span class="va">choices</span><span class="op">)</span>,</span>
+<span>      <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://shiny.rstudio.com/reference/shiny/latest/plotOutput.html" class="external-link">plotOutput</a></span><span class="op">(</span><span class="va">id</span><span class="op">)</span></span>
+<span>    <span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 <ol start="6" style="list-style-type: decimal">
-<li><strong><code>.custom_attrition</code> - (optional) a custom method used for your own version of attrition plot</strong></li>
+<li><strong><code>.custom_attrition</code> - (optional) a custom method
+used for your own version of attrition plot</strong></li>
 </ol>
-<p>The parameters and output structure is the same as for <code>.step_attrition</code>. The main difference is that you should put your custom logic for generating attrition (i.e. using a specific package meant for this).</p>
-<p>When the method is defined, the attrition will be printed inside an extra tab of attrition modal.</p>
+<p>The parameters and output structure is the same as for
+<code>.step_attrition</code>. The main difference is that you should put
+your custom logic for generating attrition (i.e. using a specific
+package meant for this).</p>
+<p>When the method is defined, the attrition will be printed inside an
+extra tab of attrition modal.</p>
   </main>
 </div>
 
@@ -439,7 +495,7 @@
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
     </footer>
