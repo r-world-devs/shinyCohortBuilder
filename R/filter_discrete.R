@@ -89,6 +89,8 @@ is_vs <- function(filter) {
 #' @param filter Filter object.
 #' @param cohort Cohort object.
 #' @param session Shiny session object.
+#' @param msg_fun Function taking number of missing values as an argument and
+#'   returning missing values label.
 #'
 #' @return Nested list of `shiny.tag` objects storing html structure of the input,
 #' or no value in case of usage 'update' method.
