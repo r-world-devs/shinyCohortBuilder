@@ -1,4 +1,4 @@
-# shinyCohortBuilder (development version)
+# shinyCohortBuilder 0.2.0 
 
 * Arguments `feedback` and `stats` passed to filter definitions are now respected and override the arguments passed to `cb_server`.
 * Fix updating filters data when other filters are changed (https://github.com/r-world-devs/shinyCohortBuilder/issues/27).
