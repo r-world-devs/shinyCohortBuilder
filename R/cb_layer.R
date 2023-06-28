@@ -1,5 +1,5 @@
 attach_filter_gui <- function(filter) {
-  filter$gui <- .gui_filter(filter)
+  filter$gui <- rlang::exec(.gui_filter, filter, !!!filter$get_params("gui_args"))
   return(filter)
 }
 
