@@ -1,3 +1,7 @@
+# shinyCohortBuilder (development version)
+
+* Fixed error showing up when user deactivates filter with more than one value set.
+
 # shinyCohortBuilder 0.2.0 
 
 * Arguments `feedback` and `stats` passed to filter definitions are now respected and override the arguments passed to `cb_server`.

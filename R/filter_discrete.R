@@ -132,10 +132,10 @@ is_vs <- function(filter) {
 }
 
 inherit_parent_stats <- function(filter_values, parent_options, is_cached) {
-  if (is_cached) {
+  if (is_cached || is.null(filter_values)) {
     return(character(0))
   }
-  if (is.na(filter_values)) {
+  if (identical(filter_values, NA)) {
     return(parent_options)
   } else {
     return(filter_values)
