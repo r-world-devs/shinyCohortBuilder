@@ -108,6 +108,8 @@ You may switch from checkbox group to search dropdown (`shinyWidgets::virtualSel
 
 ![](doc_02.gif)
 
+You can customize the input controller with `gui_args` argument (e.g. you disable search option for discrete filter (`shinyWidgets::virtualSelectInput`) with `gui_args = list(search = FALSE)`).
+
 4. Slider or numeric input for range filter
 
 For range filters the default input in GUI is connection of slider and numeric range input.
@@ -116,6 +118,8 @@ You can choose which input to use by providing selected `gui_input` parameter:
 - `gui_input = "numeric"` - numeric range only,
 - `gui_input = "slider"` - slider only,
 - `gui_input = c("slider", "numeric")` or skipped - both options.
+
+Argument `gui_args` can be also used to customize the controller.
 
 ![](05.png)
 
