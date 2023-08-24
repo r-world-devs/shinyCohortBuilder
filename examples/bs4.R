@@ -34,7 +34,7 @@ age_filter <- cohortBuilder::filter(
 )
 treatment_filter <- cohortBuilder::filter(
   type = "discrete", id = "treatment", name = "Treatment", variable = "treatment",
-  dataset = "therapy", value = "Atezo", gui_input = "vs"
+  dataset = "therapy", value = "Atezo", gui_input = "vs", gui_args = list(search = FALSE)
 )
 visit_filter <- cohortBuilder::filter(
   "date_range", name = "Visit", variable = "visit", dataset = "patients"

@@ -7,7 +7,7 @@
         .cb_input(
           do.call(
             shiny::dateRangeInput,
-            append(
+            modify_list(
               list(weekstart = 1, startview = "decade"),
               range_input_params(filter, input_id, cohort, ...)
             )

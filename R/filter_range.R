@@ -86,6 +86,7 @@ range_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
     ...
   )
 
+  # Below should be deprecated now soon
   if (inherits(filter, "range")) {
     if (!is.null(filter$get_params("step"))) {
       params$step <- filter$get_params("step")
@@ -166,7 +167,10 @@ is_gui_type <- function(filter, type) {
           .cb_input(
             do.call(
               shiny::sliderInput,
-              append(list(ticks = FALSE, round = -2), suff_id(input_params, "slider"))
+              modify_list(
+                list(ticks = FALSE, round = -2),
+                suff_id(input_params, "slider")
+              )
             ),
             filter$input_param
           )

@@ -205,7 +205,7 @@ grouped_list_to_df <- function(grouped_list) {
         .cb_input(
           do.call(
             shinyGizmo::pickCheckboxInput,
-            append(
+            modify_list(
               list(
                 options  = shinyWidgets::pickerOptions(
                   actionsBox = TRUE,
