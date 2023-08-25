@@ -115,12 +115,14 @@ discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, 
 .gui_filter.discrete_text <- function(filter, ...) {
   list(
     input = function(input_id, cohort) {
-      input_params <- discrete_text_input_params(filter, input_id, cohort)
-      input_params$width <- "100%"
+      input_params <- modify_list(
+        list(
+          all = NULL, readonly = FALSE, width = "100%",
+          inputId = paste0(input_id, "_selected")
+        ),
+        discrete_text_input_params(filter, input_id, cohort, ...)
+      )
       parent <- input_params$all
-      input_params$all <- NULL
-      input_params$readonly <- FALSE
-      input_params$inputId <- paste0(input_id, "_selected")
 
       shiny::tagList(
         shinyGizmo::modalDialogUI(

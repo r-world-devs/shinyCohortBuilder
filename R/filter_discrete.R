@@ -328,7 +328,7 @@ plot_feedback_bar <- function(plot_data, n_missing) {
         .cb_input(
           do.call(
             input_fun,
-            append(
+            modify_list(
               extra_params,
               discrete_input_params(filter, input_id, cohort, ...)
             )
