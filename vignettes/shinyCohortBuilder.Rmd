@@ -108,7 +108,7 @@ You may switch from checkbox group to search dropdown (`shinyWidgets::virtualSel
 
 ![](doc_02.gif)
 
-You can customize the input controller with `gui_args` argument (e.g. you disable search option for discrete filter (`shinyWidgets::virtualSelectInput`) with `gui_args = list(search = FALSE)`).
+You can customize the input controller with `gui_args` argument (see the next section).  
 
 4. Slider or numeric input for range filter
 
@@ -119,11 +119,32 @@ You can choose which input to use by providing selected `gui_input` parameter:
 - `gui_input = "slider"` - slider only,
 - `gui_input = c("slider", "numeric")` or skipped - both options.
 
-Argument `gui_args` can be also used to customize the controller.
-
 ![](05.png)
 
-5. Mapping for discrete filter options
+5. Controller configuration
+
+You can customize filter GUI controller with `gui_args` argument passed to the filter.
+The argument stores list of parameters that are passed to the function responsible for generating the filter controller.
+
+List of functions that are used for specific filter type:
+
+- `"discrete"` (default) - `shiny::checkboxGroupInput`
+- `"discrete"` (`gui_input = "vs"`) - `shinyWidgets::virtualSelectInput`
+- `"range"` (`gui_input = "slider"`) - `shiny::sliderInput`
+- `"range"` (`gui_input = "numeric"`) - `shinyWidgets::numericRangeInput`
+- `"range"` (`gui_input = c("slider", "numeric")`, default) - arguments are passed to both functions
+- `"date_range"` - `shiny::dateRangeInput`
+- `"multi_discrete"` - `shinyGizmo::pickCheckboxInput`
+- `"discrete_text"` - `shinyGizmo::textArea`
+
+An example is disabling search feature and showing dropdown list at the top of it.
+You can achieve this with:
+
+```
+filter(type = "discrete", ..., gui_input = "vs", gui_args = list(search = FALSE, position = "top"))
+```
+
+6. Mapping for discrete filter options
 
 It may happen some of the columns are storing key, not readable values to the users.
 In this case we'd like to replace keys with understandable labels in the input controller.
