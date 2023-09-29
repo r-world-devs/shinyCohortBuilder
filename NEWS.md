@@ -1,4 +1,4 @@
-# shinyCohortBuilder (development version)
+# shinyCohortBuilder 0.2.1
 
 * Fixed error showing up when user deactivates filter with more than one value set.
 * Added `gui_args` argument that can be set to `filter`. 
