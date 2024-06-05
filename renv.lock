@@ -618,11 +618,8 @@
     },
     "shinyGizmo": {
       "Package": "shinyGizmo",
-      "Version": "0.3.1",
-      "Source": "Local",
-      "RemoteType": "local",
-      "RemoteUrl": "/home/krystiai/projects/shinyGizmo",
-      "Hash": "1c7437a307abef96adca82f17a4c3bf7"
+      "Version": "0.4.2",
+      "Source": "Repository"
     },
     "shinyWidgets": {
       "Package": "shinyWidgets",
