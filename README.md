@@ -6,7 +6,7 @@ workflow to Shiny.
 
 ![](man/figures/doc_01.gif)
 
-[![version](https://img.shields.io/static/v1.svg?label=github.com&message=v.0.1.2&color=ff69b4)](https://r-world-devs.github.io/shinyCohortBuilder/)
+[![version](https://img.shields.io/static/v1.svg?label=github.com&message=v.0.2.1&color=ff69b4)](https://r-world-devs.github.io/shinyCohortBuilder/)
 [![lifecycle](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 
 ## Installation
@@ -118,14 +118,14 @@ visit the package
 
 Special thanks to:
 
--   [Kamil Wais](mailto:kamil.wais@gmail.com) for highlighting the need
-    for the package and its relevance to real-world applications.
--   [Adam Foryś](mailto:adam.forys@gmail.com) for technical support,
-    numerous suggestions for the current and future implementation of
-    the package.
--   [Paweł Kawski](mailto:pawel.kawski@gmail.com) for indication of
-    initial assumptions about the package based on real-world medical
-    data.
+- [Kamil Wais](mailto:kamil.wais@gmail.com) for highlighting the need
+  for the package and its relevance to real-world applications.
+- [Adam Foryś](mailto:adam.forys@gmail.com) for technical support,
+  numerous suggestions for the current and future implementation of the
+  package.
+- [Paweł Kawski](mailto:pawel.kawski@gmail.com) for indication of
+  initial assumptions about the package based on real-world medical
+  data.
 
 ## Getting help
 

@@ -21,4 +21,4 @@ srcscss/*
 srcjs/*
 .Rprofile
 cran-comments.md
-
+meta_data.yaml

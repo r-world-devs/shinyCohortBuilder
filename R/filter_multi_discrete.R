@@ -46,6 +46,8 @@ attach_list_names <- function(list_vals, list_names) {
 multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
   step_id <- filter$step_id
   filter_id <- filter$id
+  filter_params <- filter$get_params()
+
   max_groups <- length(cohort$get_cache("1", filter_id, state = "pre")$choices)
 
   if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
@@ -67,7 +69,16 @@ multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE,
   )
   choices <- parent_filter_stats %>% purrr::map(names)
   choices_names <- shinyGizmo::pickCheckboxNames(choices)
-  choices_labels <- shinyGizmo::pickCheckboxLabels(choices)
+
+  value_mapping <- function(x, cohort) x
+  if (!is.null(filter_params$value_mapping)) {
+    value_mapping <- cohort$get_source()$attributes$value_mappings[[filter_params$value_mapping]]
+  }
+
+  choices_labels <- value_mapping(
+    shinyGizmo::pickCheckboxLabels(choices),
+    cohort
+  )
 
   choices_names <- purrr::pmap(
     list(
@@ -190,11 +201,11 @@ grouped_list_to_df <- function(grouped_list) {
 .gui_filter.multi_discrete <- function(filter, ...) {
   list(
     input = function(input_id, cohort) {
-      tagList(
+      shiny::tagList(
         .cb_input(
           do.call(
             shinyGizmo::pickCheckboxInput,
-            append(
+            modify_list(
               list(
                 options  = shinyWidgets::pickerOptions(
                   actionsBox = TRUE,

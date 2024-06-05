@@ -36,15 +36,17 @@ Imports:
     ggplot2,
     ggiraph,
     htmltools,
-    shiny,
+    shiny (>= 1.7.0),
     shinyWidgets (>= 0.7.0),
+    htmlwidgets,
     dplyr,
-    cohortBuilder (>= 0.1.2),
+    cohortBuilder (>= 0.2.0),
     tryCatchLog,
     highr,
-    shinyGizmo,
+    shinyGizmo (>= 0.4.2),
     rlang (>= 1.0),
-    tibble
+    tibble,
+    lifecycle
 Suggests:
     pkgload,
     packer,
@@ -53,7 +55,7 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0)
 Encoding: UTF-8
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 Collate:
     'shinyCohortBuilder-package.R'

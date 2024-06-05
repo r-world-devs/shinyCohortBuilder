@@ -13,6 +13,9 @@ globalVariables(c(
 
 NULL
 
+force_import <- function() {
+  htmltools::tag
+}
 
 #' Source compatibility methods.
 #'

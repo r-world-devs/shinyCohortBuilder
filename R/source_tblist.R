@@ -34,15 +34,14 @@ dataset_help_icon <- function(cohort, dataset_name, ns) {
 dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
   stats_id <- ns(paste0(step_id, "-stats_", dataset_name))
   shiny::tagList(
-    shiny::tags$strong(dataset_name),
+    shiny::tags$strong(class = "cb_filters_group", dataset_name),
     dataset_help_icon(cohort, dataset_name, ns),
-    shiny::htmlOutput(stats_id, inline = TRUE, style = "float: right;"),
-    shiny::hr(style = "margin-top: 0.3rem;"),
+    shiny::htmlOutput(stats_id, inline = TRUE, style = "float: right; "),
+    shiny::hr(style = "margin-top: 0.1em;"),
     filters %>%
       purrr::map(
         ~ .render_filter(.x, step_id, cohort, ns = ns)
-      ),
-    shiny::div(style = "padding-top: 1rem; padding-bottom: 1rem;")
+      )
   )
 }
 
@@ -175,7 +174,7 @@ rule_Date <- function(column, name, dataset_name) {
 }
 
 filter_rule <- function(column, name, dataset_name) {
-  rule_method <- paste0("rule_", class(column))
+  rule_method <- paste0("rule_", class(column)[[1]])
   do.call(
     rule_method,
     list(
@@ -198,6 +197,7 @@ autofilter.tblist <- function(source, attach_as = c("step", "meta"), ...) {
   step_rule <- source$dtconn %>%
     purrr::imap(~filter_rules(.x, .y)) %>%
     unlist(recursive = FALSE) %>%
+    purrr::discard(~is.null(.x)) %>%
     purrr::map(~do.call(cohortBuilder::filter, .)) %>%
     unname()
 

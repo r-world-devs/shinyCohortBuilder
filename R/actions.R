@@ -255,10 +255,10 @@ gui_update_filter_class <- function(step_id, filter_id, show, class, session) {
 
 update_filter_gui <- function(cohort, step_id, filter_id, update, reset, session) {
   filter <- cohort$get_filter(step_id, filter_id)
-  run_on_request <- cohort$attributes$run_button
   updated_input <- FALSE
   updated_plot <- FALSE
-  if (("post_input" %in% update) && filter$gui$post_stats) {
+
+  if (("post_input" %in% update) && !identical(filter$gui$post_stats, FALSE)) {
     update <- c(update, "input")
   }
   if (("multi_input" %in% update) && filter$gui$multi_input) {
@@ -396,7 +396,7 @@ convert_input_value <- function(changed_input, step_id, filter_id, cohort, updat
 
 gui_update_filter <- function(cohort, changed_input, session) {
 
-  run_on_request <- cohort$attributes$run_button
+  run_on_request <- !is_none(cohort$attributes$run_button)
   update_active <- changed_input$input_name == "active"
 
   step_id <- changed_input$step_id
@@ -425,21 +425,20 @@ gui_update_filter <- function(cohort, changed_input, session) {
   if (!force_render && !is.null(changed_input$active)) {
     run_update <- !insert_filter(step_id, filter_id, cohort, session)
   }
-  if (run_update) {
-    update <- c("plot", "multi_input")
-    if (!run_on_request) {
-      update <- c(update, "post_input")
-    }
-    update_filter_gui(cohort, step_id, filter_id, update, FALSE, session)
-  }
-
   filter_stats <- if_null_default(
     data_filter$get_params("stats"),
     cohort$attributes$stats
   )
   post_stats_visible <- "post" %in% filter_stats
+  if (run_update) {
+    update <- c("plot", "multi_input")
+    if (!run_on_request && post_stats_visible) {
+      update <- c(update, "post_input")
+    }
+    update_filter_gui(cohort, step_id, filter_id, update, FALSE, session)
+  }
 
-  if (!run_on_request && post_stats_visible) {
+  if (!run_on_request && ("post" %in% cohort$attributes$stats)) {
     update <- "post_input"
     gui_update_filters_loop(cohort, step_id, FALSE, update, exclude = filter_id, session)
   }
@@ -448,7 +447,7 @@ gui_update_filter <- function(cohort, changed_input, session) {
     gui_update_filter_class(step_id, filter_id, changed_input$active, "hidden-input", session)
   }
 
-  if (!cohort$attributes$run_button) {
+  if (is_none(cohort$attributes$run_button)) {
     gui_update_data_stats(cohort, list(step_id = step_id), session)
     update_next_step(cohort, step_id, FALSE, session)
   }
@@ -675,7 +674,7 @@ gui_show_step_filter_modal <- function(cohort, changed_input, session) {
         shinyGizmo::valueButton(
           inputId = ns("add_step_configured"),
           label = "Accept",
-          selector = paste0("#", ns("configure_step")),
+          selector = paste0("[data-id=\"", ns("configure_step"), "\"]"),
           onclick = .trigger_action_js("add_step_configure", ns = ns),
           `data-dismiss` = "modal", `data-bs-dismiss` = "modal",
           disabled = NA
@@ -1099,7 +1098,7 @@ gui_clear_step <- function(cohort, changed_input, session) {
 
   reset_filters(cohort, changed_input$step_id)
 
-  if (cohort$attributes$run_button) {
+  if (!is_none(cohort$attributes$run_button)) {
     trigger_pending_state(changed_input$step_id, "add", session)
     changed_input$run_flow <- FALSE
   }
