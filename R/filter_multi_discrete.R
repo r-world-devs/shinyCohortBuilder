@@ -112,31 +112,23 @@ multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE,
 
 plot_feedback_multi_bar <- function(plot_data, n_missing) {
 
-  if (NROW(plot_data) == 0) {
-    gg_object <- ggplot2::ggplot()
-  } else {
-    add_greycol <- FALSE
+  gg_object <- ggplot2::ggplot()
+  if (NROW(plot_data) > 0) {
+
+    n_lvls <- length(unique(plot_data$state))
+    color_palette <- getOption("scb_chart_palette", scb_chart_palette)$discrete
+    n_colors <- length(color_palette)
+    chart_cols <- color_palette[rep_len(1:n_colors, n_lvls)]
+
     if (sum(n_missing$value) > 0) {
       plot_data <- dplyr::bind_rows(
         plot_data,
         n_missing
       )
-      add_greycol <- TRUE
-    }
-
-    color_palette <- scb_color_palette
-    colors_selected <-
-      color_palette$shades["grayscale" != names(color_palette$shades)]
-    colors_selected <- colors_selected %>% unlist
-    colors_selected <- colors_selected[seq(3, 6 * 4, by = 4)]
-    colors_selected <- colors_selected[c(1, 2, 6, 4, 5)]
-    colors_selected <- rev(colors_selected)
-    colors_selected <- rep(colors_selected, 1000)
-    colors_selected <- unname(colors_selected)
-    colors_selected <- colors_selected[1:length(unique(plot_data$state))]
-
-    if (add_greycol) {
-      colors_selected[length(colors_selected)] <- "grey40"
+      chart_cols <- c(
+        chart_cols,
+        getOption("scb_chart_palette", scb_chart_palette)$no_data
+      )
     }
 
     gg_object <- plot_data %>%
@@ -169,7 +161,7 @@ plot_feedback_multi_bar <- function(plot_data, n_missing) {
         ),
         panel.spacing = ggplot2::unit(c(0, 0, 0, 0), "mm")
       ) +
-      ggplot2::scale_fill_manual(name = NULL, breaks = unique(plot_data$state), values = colors_selected) +
+      ggplot2::scale_fill_manual(name = NULL, breaks = unique(plot_data$state), values = chart_cols) +
       ggiraph::geom_bar_interactive(
         position = ggplot2::position_stack(reverse = TRUE), stat = "identity", width = 1
       )
@@ -260,7 +252,6 @@ grouped_list_to_df <- function(grouped_list) {
               filter_cache$choices,
               ~extract_selected_value(.x, .y, FALSE)
             )
-
             plot_data <- filter_cache$choices %>%
               purrr::imap(function(x, y) {x[unlist(filter_value[y])]}) %>%
               grouped_list_to_df() %>%
