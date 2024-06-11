@@ -45,6 +45,13 @@ Default value: stored within `shinyCohortBuilder::scb_label` object.
 List of labels used within the filtering panel.
 For available names please check `shinyCohortBuilder::scb_label` structure.
 
+## scb_icons
+
+Default value: stored within `shinyCohortBuilder::scb_icons` object.
+
+List of icons used within the filtering panel.
+To list configurable icons please check `shinyCohortBuilder::scb_icons` structure.
+
 ## scb_chart_palette
 
 Default value: stored within `shinyCohortBuilder::scb_chart_palette` object.

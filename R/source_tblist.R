@@ -24,10 +24,10 @@ dataset_help_icon <- function(cohort, dataset_name, ns) {
   shiny::a(
     href = "#",
     class = "dataset_tooltip",
-    shiny::icon(
-      "question-circle",
-      onclick = .trigger_action_js("show_help", list(field = dataset_name), ns = ns)
-    )
+    getOption("scb_icons", scb_labels)$dataset_help_icon %>%
+      shiny::tagAppendAttributes(
+        onclick = .trigger_action_js("show_help", list(field = dataset_name), ns = ns)
+      )
   )
 }
 

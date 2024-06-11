@@ -154,8 +154,9 @@ discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, 
               )
           ),
           button = button(
-            "Set values", class = "btn-sm cb_filter_discrete_set_vals",
-            icon = shiny::icon("keyboard"),
+            getOption("scb_icons", scb_labels)$filter_discrete_text_bttn_label,
+            icon = getOption("scb_icons", scb_labels)$filter_discrete_text_bttn_icon,
+            class = "btn-sm cb_filter_discrete_set_vals",
             `data-toggle` = "modal", `data-target` = paste0("#", paste0(input_id, "modal_in")),
             `data-bs-toggle` = "modal", `data-bs-target` = paste0("#", paste0(input_id, "modal_in")),
             onclick = move_dialog_to_body_js

@@ -42,8 +42,8 @@ div.cb_container .cb_no_attrition {
 }
 
 .cb_filter_content {
-  border-left: 1px solid #01174550;
-  padding: 3px 5px;
+  border-left: 1px solid var(--scb-filter-indent-color, #01174550);
+  padding: 3px 5px 5px 5px;
   margin-left: 5px;
 }
 
@@ -52,7 +52,7 @@ div.cb_container .cb_no_attrition {
 }
 
 .cb_filters_group > .cb_filter:last-of-type > .cb_filter_content {
-  border-bottom: 1px solid #01174550;
+  border-bottom: 1px solid var(--scb-filter-indent-color, #01174550);
 }
 
 .cb_na_input > .checkbox {
