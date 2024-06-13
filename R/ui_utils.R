@@ -106,3 +106,19 @@ scb_chart_palette <- list(
   histogram = "#51a2e5",
   no_data = "grey40"
 )
+
+#' Track changes of cohort data in Shiny
+#'
+#' The function returns Shiny input object related to selected cohort that is triggered whenever
+#' cohort data filters were applied to it within filtering panel.
+#'
+#' The function is meant to be used as a trigger for Shiny render functions and observers.
+#'
+#' @param session Shiny session object.
+#' @param cohort_id Id of the cohort.
+#'
+#' @export
+cb_changed <- function(session, cohort_id) {
+  ns <- session$ns
+  session$input[[ns(paste0(cohort_id, "-cb_data_updated"))]]
+}

@@ -232,6 +232,7 @@ autofilter.tblist <- function(source, attach_as = c("step", "meta"), ...) {
       dataset = x$get_params("dataset")
     )
   }) %>% dplyr::bind_rows()
+  choices$name <- gsub("\"", "'", choices$name) # prevents invalid interpolation for setting labels
 
   shinyWidgets::prepare_choices(choices, name, id, dataset)
 }
