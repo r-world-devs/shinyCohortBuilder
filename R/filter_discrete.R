@@ -292,7 +292,7 @@ plot_feedback_bar <- function(plot_data, n_missing) {
         extra_params <- list(
           multiple = TRUE,
           html = TRUE,
-          search =  TRUE,
+          search =  FALSE,
           selectAllOnlyVisible = TRUE,
           zIndex = 9999
         )
