@@ -303,6 +303,7 @@ gui <- function(
     ui = function(req) {
       shiny::fluidPage(
         shiny::tags$style("body {font-size: 12px;};"),
+        shiny::tags$style("code.hl.background {color: #000 !important};"),
         cb_ui(
           id = "coh", style = "width: 300px; float: left;",
           steps = steps, state = state, code = code, attrition = attrition,
