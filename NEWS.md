@@ -6,6 +6,7 @@
 * Added customization for filter feedback plots color palette via `scb_chart_palette` option.
 * Fixed `discrete_filter` modal visibility with backdrop turned on.
 * Modified look for filter activating switch and filter containers to improve visibility.
+* Fixed rendering all the filter values for discrete filter when `gui_input="vs"` is used (#47).
 
 # shinyCohortBuilder 0.2.1
 
