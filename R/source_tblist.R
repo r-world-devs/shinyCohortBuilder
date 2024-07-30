@@ -24,7 +24,7 @@ dataset_help_icon <- function(cohort, dataset_name, ns) {
   shiny::a(
     href = "#",
     class = "dataset_tooltip",
-    getOption("scb_icons", scb_labels)$dataset_help_icon %>%
+    getOption("scb_icons", scb_icons)$dataset_help_icon %>%
       shiny::tagAppendAttributes(
         onclick = .trigger_action_js("show_help", list(field = dataset_name), ns = ns)
       )

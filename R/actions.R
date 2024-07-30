@@ -746,13 +746,36 @@ gui_show_repro_code <- function(cohort, changed_input, session) {
   shiny::showModal(shiny::modalDialog(
     size = "xl",
     title = "Reproducible code",
-    shiny::tags$code(
-      class = "hl background",
-      cohort$get_code(width = I(120), output = FALSE)$text.tidy %>%
-        highr::hi_html() %>%
-        purrr::map_chr(add_trailing_space) %>%
-        paste(collapse = "</br>") %>%
-        shiny::HTML()
+    shiny::tags$pre(
+      shiny::tags$code(
+        id = "scb-reproducible-code",
+        class = "hl background",
+        cohort$get_code(width = I(120), output = FALSE)$text.tidy %>%
+          highr::hi_html() %>%
+          purrr::map_chr(add_trailing_space) %>%
+          paste(collapse = "\n") %>%
+          shiny::HTML()
+      )
+    ),
+    footer = shiny::tagList(
+      shiny::actionButton(
+        inputId = "scb-copy-to-clipboard",
+        label = "Copy to Clipboard",
+        icon = shiny::icon("copy"),
+        onclick = '
+        $(this).hide();
+        navigator.clipboard.writeText($("#scb-reproducible-code")[0].innerText);
+        $("#scb-copy-to-clipboard-tooltip").show().fadeOut(2000, function() {
+            $("#scb-copy-to-clipboard").show();
+        });
+      '
+      ),
+      shiny::tags$span(
+        id = "scb-copy-to-clipboard-tooltip",
+        style = "display:none; color: green; margin-left: 10px;",
+        "Copied to clipboard!"
+      ),
+      shiny::modalButton("Dismiss")
     )
   ))
 }

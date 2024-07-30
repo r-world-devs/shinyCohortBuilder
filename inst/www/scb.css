@@ -222,3 +222,7 @@ div.cb_container .cb_no_attrition {
 .modal-body {
   overflow-wrap: break-word;
 }
+
+code.hl.background {
+  color: #000 !important;
+}
