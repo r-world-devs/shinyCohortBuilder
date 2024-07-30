@@ -758,9 +758,10 @@ gui_show_repro_code <- function(cohort, changed_input, session) {
       )
     ),
     footer = shiny::tagList(
-      shiny::actionButton(
-        inputId = "scb-copy-to-clipboard",
-        label = "Copy to Clipboard",
+      button(
+        id = "scb-copy-to-clipboard",
+        label = "",
+        title = "Copy to Clipboard",
         icon = shiny::icon("copy"),
         onclick = '
         $(this).hide();
@@ -770,10 +771,10 @@ gui_show_repro_code <- function(cohort, changed_input, session) {
         });
       '
       ),
-      shiny::tags$span(
+      button(
         id = "scb-copy-to-clipboard-tooltip",
-        style = "display:none; color: green; margin-left: 10px;",
-        "Copied to clipboard!"
+        icon = shiny::icon("check"),
+        style = "border: 0px; background: none; display: none",
       ),
       shiny::modalButton("Dismiss")
     )
