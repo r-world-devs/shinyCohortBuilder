@@ -747,6 +747,7 @@ gui_show_repro_code <- function(cohort, changed_input, session) {
     size = "xl",
     title = "Reproducible code",
     shiny::tags$pre(
+      .noWS = c("after-begin", "before-end"),
       shiny::tags$code(
         id = "scb-reproducible-code",
         class = "hl background",
