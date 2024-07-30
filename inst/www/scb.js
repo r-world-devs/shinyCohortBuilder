@@ -1,5 +1,3 @@
-const cb_input_ignore = ['.vscomp-search-input'];
-
 const get_filter = function(step_id, filter_id, ns_prefix) {
   var selector = '#' + ns_prefix + step_id + ' div.cb_filter[data-filter_id="' + filter_id +'"]';
   return $(selector);
@@ -83,15 +81,10 @@ Shiny.addCustomMessageHandler('update_class', update_class);
 
 var exec_event = {};
 $(document).on('shiny:inputchanged', function(event) {
-  var event_el = event.target;
-  if (event_el == document) {
+  if (event.target == document || Boolean(event.target.dataset.ignore)) {
     return true;
   }
-  var ignore_input = Boolean(event_el.dataset.ignore) || $(event_el).is(cb_input_ignore.join(','));
-  if (ignore_input) {
-    return true;
-  }
-  var filter_input = event_el.closest('.cb_input');
+  var filter_input = event.target.closest('.cb_input');
   if (Boolean(filter_input)) {
     var ns_prefix = filter_input.closest('.cb_container').dataset.ns_prefix;
     var step_id = filter_input.closest('.cb_step')?.dataset?.step_id;
