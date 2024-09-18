@@ -1,7 +1,7 @@
 library(magrittr)
 library(cohortBuilder)
 library(shinyCohortBuilder)
-library(shinyQueryBuilder)
+pkgload::load_all()
 options(scb_minified = FALSE)
 coh <- cohort(
   source = set_source(
@@ -14,6 +14,7 @@ coh <- cohort(
       value = queryBuilder::queryGroup(
         queryBuilder::queryRule("Petal.Length", "between", c(2, 4))
       ),
+      gui_args = list(filters = list(`Petal.Length` = list(label = "Petal Length")), allow_groups = FALSE),
       active = FALSE
     )
   )

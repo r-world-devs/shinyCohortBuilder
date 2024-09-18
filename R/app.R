@@ -301,7 +301,7 @@ gui <- function(
 
   shiny::runApp(list(
     ui = function(req) {
-      shiny::fluidPage(
+      bslib::page_fluid(
         shiny::tags$style("body {font-size: 12px;};"),
         cb_ui(
           id = "coh", style = "width: 300px; float: left;",

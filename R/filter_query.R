@@ -2,51 +2,80 @@ take_from_list <- function(list_obj, id) {
   purrr::keep(list_obj, ~ .$id == id)[[1]]
 }
 
-rematch_value <- function(val, val_set, stat_name) {
-  if (stat_name == "values") {
-    return(intersect(val, val_set))
+rematch_with_validation <- function(val, filter_config) {
+  config_vars <- names(filter_config)
+  if ("values" %in% config_vars) {
+    return(intersect(val, filter_config$values))
   }
-  if (stat_name == "validation") {
-    # todo extend to not only between but other operators
-    if (length(val) == 2) {
-      return(c(max(val[1], val_set[1]), min(val[2], val_set[2])))
+  if ("validation" %in% config_vars) {
+    validation_stats <- filter_config[["validation"]]
+    if ("min" %in% names(validation_stats)) {
+      val[val < validation_stats$min] <- validation_stats$min
+    }
+    if ("max" %in% names(validation_stats)) {
+      val[val > validation_stats$max] <- validation_stats$max
     }
     return(val)
   }
   return(val)
 }
 
-limit_vals <- function(rule, filters, reset) {
-  filter_vals <- take_from_list(filters, rule$id)
-  stat_name <- filter_vals$stat_name
-  filter_vals <- unlist(unname(filter_vals[[stat_name]]))
+get_val_from_validation <- function(filter_config) {
+  config_vars <- names(filter_config)
+  if ("default_value" %in% config_vars) {
+    return(filter_config$default_value)
+  }
+  if ("values" %in% config_vars) {
+    return(filter_config$values)
+  }
+  if ("validation" %in% config_vars) {
+    validation_stats <- filter_config[["validation"]]
+    val <- c()
+    if ("min" %in% names(validation_stats)) {
+      val[1] <- validation_stats$min
+    }
+    if ("max" %in% names(validation_stats)) {
+      val[length(val) + 1] <- validation_stats$max
+    }
+    return(val)
+  }
+  stop("Couldn't extract new filter value from validation setting.")
+}
+
+adapt_vals_to_limits <- function(rule, filters, reset) {
+  filter_config <- take_from_list(filters, rule$id)
+  validation_vars <- c("values", "validation")
+  validation_var <- validation_vars[validation_vars %in% names(filter_config)]
+  if (length(validation_var) != 1) {
+    stop("It's required to have the filter validation set.")
+  }
 
   if (identical(rule$value, NA) || reset) {
-    rule$value <- filter_vals
+    rule$value <- get_val_from_validation(filter_config)
   } else {
-    rule$value <- rematch_value(rule$value, filter_vals, stat_name)
+    rule$value <- rematch_with_validation(rule$value, filter_config)
   }
 
   return(rule$value)
 }
 
-customize_vals <- function(rules, filters, reset) {
+adapt_rules_vals_to_limits <- function(rules, filters, reset) {
 
   if (!is.null(rules$condition)) {
-    rules$rules <- purrr::modify(rules$rules, customize_vals, filters = filters, reset = reset)
+    rules$rules <- purrr::modify(rules$rules, adapt_rules_vals_to_limits, filters = filters, reset = reset)
   } else {
-    rules$value <- limit_vals(rules, filters, reset)
+    rules$value <- adapt_vals_to_limits(rules, filters, reset)
   }
 
   return(rules)
 }
 
-customize_rules <- function(rules, filters, reset = FALSE) {
+adapt_rules_to_limits <- function(rules, filters, reset = FALSE) {
 
   if (identical(rules, NA) || identical(rules, NULL)) {
     return(list())
   }
-  rules <- customize_vals(rules, filters, reset)
+  rules <- adapt_rules_vals_to_limits(rules, filters, reset)
 
   return(rules)
 }
@@ -62,22 +91,37 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
     )
   }
 
+  gui_args <- list(...)
+  if (is.null(gui_args$filters)) {
+    gui_args$filters <- list()
+  }
+
   parent_specs <- cohort$get_cache(step_id, filter_id, state = "pre")$specs
+  setting_from_stat <- base::get("setting_from_stat", envir = asNamespace("shinyQueryBuilder"), inherits = FALSE)
   filters <- filter$get_params("variables") %>%
-    purrr::map(~shinyQueryBuilder:::setting_from_stat(parent_specs[[.x]], .x))
-  selected_value <- customize_rules(
+    purrr::map(
+      ~ setting_from_stat(
+        parent_specs[[.x]], .x, !!!gui_args$filters[[.x]],
+        .queryBuilderConfig = queryBuilder::queryBuilderConfig
+      )
+    ) |>
+    purrr::map(~rlang::inject(shinyQueryBuilder::queryFilter(!!!.x)))
+  gui_args$filters <- NULL
+  selected_value <- adapt_rules_to_limits(
     filter$get_params("value"),
     filters,
     reset
   )
 
-  params <- list(
-    inputId = input_id,
-    rules = selected_value,
-    filters = filters,
-    allow_new_rules = TRUE,
-    allow_groups = TRUE,
-    ...
+  params <- modify_list(
+    list(
+      inputId = input_id,
+      rules = selected_value,
+      filters = filters,
+      allow_add_rules = TRUE,
+      allow_groups = TRUE
+    ),
+    gui_args
   )
 
   return(params)
@@ -88,7 +132,7 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
 .gui_filter.query <- function(filter, ...) {
   list(
     input = function(input_id, cohort) {
-      input_params <- query_input_params(filter, input_id, cohort)
+      input_params <- query_input_params(filter, input_id, cohort, ...)
       input_params$inputId <- paste0(input_id, "_selected")
 
       shiny::tagList(
@@ -113,7 +157,8 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
           button = button(
             "Set rules",
             icon = shiny::icon("keyboard"), style = "width: 100%; margin-top: 0.5em; margin-bottom: 0.5em;",
-            `data-toggle` = "modal", `data-target` = paste0("#", paste0(input_id, "modal_in"))
+            `data-toggle` = "modal", `data-target` = paste0("#", paste0(input_id, "modal_in")),
+            `data-bs-toggle` = "modal", `data-bs-target` = paste0("#", paste0(input_id, "modal_in"))
           )
         ),
         .cb_input(
@@ -125,23 +170,24 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
     feedback = function(input_id, cohort, empty = FALSE) {
       list(
         plot_id = shiny::NS(input_id, "feedback_plot") ,
-        output_fun = ggiraph::girafeOutput,
+        output_fun = shiny::htmlOutput,
         render_fun = if (!is.null(empty)) {
-          ggiraph::renderGirafe({
+          shiny::renderUI({
             if(empty) { # when no data in parent step
-              return(
-                ggiraph::girafe(
-                  ggobj      = ggplot2::ggplot(),
-                  width_svg  = 10,
-                  height_svg = 0.1
-                )
-              )
+              return(NULL)
             }
+            filter_val <- queryBuilder::queryToExpr(filter$get_params("value"))
+            modal_id <- shiny::NS(input_id, "query_modal")
             return(
-              ggiraph::girafe(
-                ggobj      = ggplot2::ggplot(),
-                width_svg  = 10,
-                height_svg = 0.1
+              shinyGizmo::modalDialogUI(
+                modal_id,
+                htmltools::pre(htmltools::code(utils::capture.output(filter_val))),
+                button = button(
+                  "Show query",
+                  icon = shiny::icon("keyboard"), style = "width: 100%; margin-top: 0.5em; margin-bottom: 0.5em;",
+                  `data-toggle` = "modal", `data-target` = paste0("#", modal_id),
+                  `data-bs-toggle` = "modal", `data-bs-target` = paste0("#", modal_id)
+                )
               )
             )
           })
