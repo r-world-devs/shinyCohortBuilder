@@ -39,6 +39,10 @@ treatment_filter <- cohortBuilder::filter(
 visit_filter <- cohortBuilder::filter(
   "date_range", name = "Visit", variable = "visit", dataset = "patients"
 )
+biom_filter <- cohortBuilder::filter(
+  "multi_discrete", name = "Biomarkers", variables = c("biom1", "biom2"), dataset = "patients",
+  values = NA
+)
 
 pin_controlbar <- function(controlbar, ...) {
   controlbar[[2]] <- controlbar[[2]] %>%
@@ -71,8 +75,8 @@ shiny::runApp(list(
         gender_filter,
         age_filter,
         treatment_filter,
-        visit_filter#,
-        #biom_filter
+        visit_filter,
+        biom_filter
       )
     )
     # or below if initialized without default data source

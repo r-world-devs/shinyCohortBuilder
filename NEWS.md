@@ -1,3 +1,13 @@
+# shinyCohortBuilder (development version)
+
+* Added customization for filtering panel button classes via `scb_button_type` option.
+* Added customization for filtering panel labels via `scb_labels` option.
+* Added customization for filtering panel icons via `scb_icons` option.
+* Added customization for filter feedback plots color palette via `scb_chart_palette` option.
+* Fixed `discrete_filter` modal visibility with backdrop turned on.
+* Modified look for filter activating switch and filter containers to improve visibility.
+* Fixed rendering all the filter values for discrete filter when `gui_input="vs"` is used (#47).
+
 # shinyCohortBuilder 0.2.1
 
 * Fixed error showing up when user deactivates filter with more than one value set.

@@ -109,7 +109,7 @@ range_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
 
 plot_feedback_hist <- function(plot_data, n_missing, n_total) {
 
-  choosen_color <- "#51a2e5"
+  choosen_color <- getOption("scb_chart_palette", scb_chart_palette)$discrete[1]
 
   gg_object <- plot_data %>%
     ggplot2::ggplot(ggplot2::aes(x = level, y = count)) +
