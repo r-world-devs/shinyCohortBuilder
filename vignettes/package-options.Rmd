@@ -38,6 +38,27 @@ Having the option enabled, results with rendering filter related controllers onl
 If you prefer to render all the filters when filtering panel is generated, just set `options("scb_render_all" = TRUE)`.
 With such configuration, you can realize a slight delay when filter controllers are enrolled for the first time. 
 
+## scb_labels
+
+Default value: stored within `shinyCohortBuilder::scb_label` object.
+
+List of labels used within the filtering panel.
+For available names please check `shinyCohortBuilder::scb_label` structure.
+
+## scb_icons
+
+Default value: stored within `shinyCohortBuilder::scb_icons` object.
+
+List of icons used within the filtering panel.
+To list configurable icons please check `shinyCohortBuilder::scb_icons` structure.
+
+## scb_chart_palette
+
+Default value: stored within `shinyCohortBuilder::scb_chart_palette` object.
+
+List of color palettes used to render filter feedback plots.
+See `shinyCohortBuilder::scb_label` documentation for more details.
+
 ## scb_minified
 
 Default value: `TRUE`.

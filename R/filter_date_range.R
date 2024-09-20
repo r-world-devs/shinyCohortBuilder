@@ -25,7 +25,7 @@
         plot_id = shiny::NS(input_id, "feedback_plot") ,
         output_fun = shiny::plotOutput,
         render_fun = if (!is.null(empty)) {
-          shiny::renderPlot(bg = "transparent", height = 100, {
+          shiny::renderPlot(bg = "transparent", height = 60, {
             if(empty) { # when no data in parent step
               return(
                 empty_plot()

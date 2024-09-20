@@ -204,27 +204,6 @@ discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, updat
   return(params)
 }
 
-scb_color_palette <- list(
-  bootstrap = c(primary = '#3c8dbc'),
-  primary = c(blue = "#0066CC", white = "#FFFFFF", grey = "#B1B3B3", black = "#000000"),
-  secondary = c(
-    blue = "#0066CC", red = "#E40046", violet = "#A05EB5", green = "#00965E",
-    yellow = "#FFC72C", orange = "#ED8B00", cyan = "#00E5EF"
-  ),
-  shades = list(
-    blues = c("#00346a", "#004c9e", "#51a2e5", "#c9dff6"),
-    reds = c("#7d0020", "#ba0031", "#ff6696", "#ffa6c1"),
-    violets = c("#552b5e", "#80428b", "#d1a4d9", "#e4c7e8"),
-    greens = c("#004d2a", "#007342", "#4cc8a4", "#9ddec6"),
-    yellows = c("#856200", "#c49300", "#ffde7e", "#ffebb1"),
-    oranges = c("#7f4400", "#bd6400", "#ffbc62", "#fed6a4"),
-    grayscale = c(
-      "#000000", "#161616", "#2d2d2d", "#464646", "#5d5d5d", "#747474",
-      "#8a8a8a", "#a1a1a1", "#b8b8b8", "#d1d1d1", "#e8e8e8", "#ffffff"
-    )
-  )
-)
-
 format_number <- function(number) {
   format(number, nsmall = 0, big.mark = " ")
 }
@@ -236,10 +215,20 @@ plot_feedback_bar <- function(plot_data, n_missing) {
     n = unlist(plot_data)
   )
 
+  n_rows <- nrow(feedback_data)
+  color_palette <- getOption("scb_chart_palette", scb_chart_palette)$discrete
+  n_colors <- length(color_palette)
+  chart_cols <- color_palette[rep_len(1:n_colors, n_rows)]
+
+
   if (n_missing > 0) {
     feedback_data <- rbind(
       feedback_data,
       data.frame(level = "(missing)", n = n_missing)
+    )
+    chart_cols <- c(
+      chart_cols,
+      getOption("scb_chart_palette", scb_chart_palette)$no_data
     )
   }
 
@@ -247,29 +236,15 @@ plot_feedback_bar <- function(plot_data, n_missing) {
     gg_object <- ggplot2::ggplot()
   } else {
 
-    color_palette <- scb_color_palette
-    colors_selected <-
-      color_palette$shades["grayscale" != names(color_palette$shades)]
-    colors_selected <- colors_selected %>% unlist
-    colors_selected <- colors_selected[seq(3, 6 * 4, by = 4)]
-    colors_selected <- colors_selected[c(1, 2, 6, 4, 5)]
-    colors_selected <- rev(colors_selected)
-    colors_selected <- rep(colors_selected, 1000)
-    colors_selected <- colors_selected[(NROW(colors_selected) - NROW(feedback_data) + 1):NROW(colors_selected)]
-    colors_selected <- unname(colors_selected)
-
-    if ("(missing)" %in% feedback_data$level) {
-      colors_selected <- c(colors_selected[-1], "grey40")
-    }
-
     gg_object <-
       feedback_data %>%
       ggplot2::ggplot(
-        ggplot2::aes(x = "I",
-                     y = n,
-                     fill = level,
-                     tooltip = paste0(level, " (", format_number(n), ")"),
-                     data_id = level)) +
+        ggplot2::aes(
+          x = "I", y = n, fill = level,
+          tooltip = paste0(level, " (", format_number(n), ")"),
+          data_id = level
+        )
+      ) +
       ggplot2::geom_col(position = ggplot2::position_stack(reverse = TRUE)) +
       ggplot2::coord_flip() +
       ggplot2::scale_x_discrete(expand = c(0, 0)) +
@@ -284,18 +259,16 @@ plot_feedback_bar <- function(plot_data, n_missing) {
         plot.background  = ggplot2::element_blank(),
         legend.position = "none",
         plot.margin = ggplot2::unit(c(0, 0, 0, 0),"mm"),
-        panel.border = ggplot2::element_rect(colour = "grey50",
-                                             fill = NA,
-                                             size = 1),
+        panel.border = ggplot2::element_rect(colour = "grey50", fill = NA, size = 1),
         panel.spacing = ggplot2::unit(c(0, 0, 0, 0), "mm")) +
-      ggplot2::scale_fill_manual(name = NULL, values = colors_selected) +
+      ggplot2::scale_fill_manual(name = NULL, values = chart_cols) +
       ggiraph::geom_col_interactive(
         position = ggplot2::position_stack(reverse = TRUE)
       )
   }
 
   ggiraph::girafe(
-    ggobj      = gg_object,
+    ggobj = gg_object,
     width_svg  = 10,
     height_svg = 1.5,
     options = list(

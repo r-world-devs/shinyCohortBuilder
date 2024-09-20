@@ -24,20 +24,20 @@ dataset_help_icon <- function(cohort, dataset_name, ns) {
   shiny::a(
     href = "#",
     class = "dataset_tooltip",
-    shiny::icon(
-      "question-circle",
-      onclick = .trigger_action_js("show_help", list(field = dataset_name), ns = ns)
-    )
+    getOption("scb_icons", scb_icons)$dataset_help_icon %>%
+      shiny::tagAppendAttributes(
+        onclick = .trigger_action_js("show_help", list(field = dataset_name), ns = ns)
+      )
   )
 }
 
 dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
   stats_id <- ns(paste0(step_id, "-stats_", dataset_name))
-  shiny::tagList(
-    shiny::tags$strong(class = "cb_filters_group", dataset_name),
+  shiny::div(
+    class = "cb_filters_group",
+    shiny::tags$strong(dataset_name),
     dataset_help_icon(cohort, dataset_name, ns),
     shiny::htmlOutput(stats_id, inline = TRUE, style = "float: right; "),
-    shiny::hr(style = "margin-top: 0.1em;"),
     filters %>%
       purrr::map(
         ~ .render_filter(.x, step_id, cohort, ns = ns)
@@ -232,6 +232,7 @@ autofilter.tblist <- function(source, attach_as = c("step", "meta"), ...) {
       dataset = x$get_params("dataset")
     )
   }) %>% dplyr::bind_rows()
+  choices$name <- gsub("\"", "'", choices$name) # prevents invalid interpolation for setting labels
 
   shinyWidgets::prepare_choices(choices, name, id, dataset)
 }

@@ -1,4 +1,5 @@
 call_filter <- function(filter_id, step_id, cohort, input, output, session) {
+  ns <- session$ns
   filter <- cohort$get_filter(step_id, filter_id)
   no_data <- cohort$get_cache(step_id, filter_id, state = "pre")$n_data == 0
   show_feedback <- if_null_default(
@@ -187,10 +188,10 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
     `data-filter_id` = filter_id,
     filter_help_icon(filter, ns, "filter", filter_description, cohort),
     .cb_input(
-      shinyWidgets::materialSwitch(
+      shinyWidgets::prettySwitch(
         inputId = ns(active_id), label = filter$name,
-        value = active_filter, right = TRUE
-      ),
+        value = active_filter, inline = TRUE
+      ) |> htmltools::tagAppendAttributes(class = "cb_activate_filter"),
       "active"
     ),
     shiny::div(
@@ -226,26 +227,26 @@ render_step <- function(cohort, step_id, active, allow_rm, input, output, sessio
         shiny::tags$strong(class = "cb_step_name", glue::glue("Step {step_id}")),
         shiny::tags$div(style = "float: right;",
           button(
-            title = "Delete Step", class = "cb_rm_step",
+            title = getOption("scb_labels", scb_labels)$delete_step_title, class = "cb_rm_step btn-xs",
             onclick = shiny::HTML(
               shinyGizmo::accordionEnrollOnClick(prev = TRUE),
               .trigger_action_js("rm_step", list(step_id = step_id), ns = ns)
             ),
-            icon = shiny::icon("trash-alt"),
-            type = "btn-outline-dark btn-xs",
+            icon = getOption("scb_icons", scb_icons)$delete_step,
             disabled = if (allow_rm) NULL else NA
           ),
           button(
-            title = "Clear Filters", icon = shiny::icon("sync-alt", class = "fa-flip-horizontal"),
+            title = getOption("scb_labels", scb_labels)$clear_filters_title,
+            icon = getOption("scb_icons", scb_icons)$clear_filters,
             onclick = .trigger_action_js("clear_step", list(step_id = step_id, run_flow = TRUE, reset = TRUE), ns = ns),
-            type = "btn-outline-dark btn-xs"
+            class = "btn-xs"
           ),
           button(
-            title = "Show / Edit", class = paste("cb_show_step", shinyGizmo::activatorClass),
-            icon = shiny::icon("eye"),
+            title = getOption("scb_labels", scb_labels)$show_edit_title,
+            class = paste("cb_show_step btn-xs", shinyGizmo::activatorClass),
+            icon = getOption("scb_icons", scb_icons)$show_edit,
             onclick = shinyGizmo::accordionEnrollOnClick(),
-            disabled = if (active) NA else NULL,
-            type = "btn-outline-dark btn-xs"
+            disabled = if (active) NA else NULL
           ),
           if (!is_none(run_button)) {
             button_style <- ""
@@ -253,16 +254,15 @@ render_step <- function(cohort, step_id, active, allow_rm, input, output, sessio
               button_style <- "display: none;"
             }
             button(
-              title = "Run", class = "cb_run_step",
-              icon = shiny::icon("play"),
+              title = getOption("scb_labels", scb_labels)$run_single_step_title, class = "cb_run_step btn-xs",
+              icon = getOption("scb_icons", scb_icons)$run_single_step,
               onclick = .trigger_action_js(
                 "run_step",
                 list(step_id = step_id, run_flow = TRUE, reset = FALSE, update = c("input", "plot")),
                 ns = ns
               ),
               disabled = NA,
-              style = button_style,
-              type = "btn-outline-dark btn-xs"
+              style = button_style
             )
           }
         )
@@ -326,7 +326,8 @@ insert_global_run_button <- function(session) {
         false = htmlwidgets::JS("$(this).prop('disabled', false).removeClass('up-to-date');")
       ),
       button(
-        "Run Step", class = "cb_trigger_run", icon = shiny::icon("play"),
+        getOption("scb_labels", scb_labels)$run_steps_global, class = "cb_trigger_run btn-sm",
+        icon = getOption("scb_icons", scb_icons)$run_steps_global,
         disabled = NA,
         onclick = htmlwidgets::JS(glue::glue(
           "$(\'#{ns('cb_steps')} .cb_step:not(.collapsed) .cb_run_step\').click();"
@@ -766,28 +767,33 @@ cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition =
         shiny::div(
           class = no_state_class,
           button(
-            "Set state", icon = shiny::icon("sliders-h"),
+            getOption("scb_labels", scb_labels)$set_state,
+            icon = getOption("scb_icons", scb_icons)$get_state,
             onclick = .trigger_action_js("input_state", ns = ns),
-            style = "width: 49%"
+            style = "width: 49%", class = "btn-sm"
           ),
           button(
-            "Get state", icon = shiny::icon("stream"),
+            getOption("scb_labels", scb_labels)$get_state,
+            icon = getOption("scb_icons", scb_icons)$set_state,
             onclick = .trigger_action_js("show_state", ns = ns),
-            style = "width: 49%"
+            style = "width: 49%", class = "btn-sm"
           )
         ),
         button(
-          "Show Reproducible Code", icon = shiny::icon("code"),
+          getOption("scb_labels", scb_labels)$show_repro_code,
+          icon = getOption("scb_icons", scb_icons)$show_repro_code,
           onclick = .trigger_action_js("show_repro_code", ns = ns),
-          class = no_code_class
+          class = paste(no_code_class, "btn-sm")
         ),
         button(
-          "Show attrition data", icon = shiny::icon("project-diagram"),
+          getOption("scb_labels", scb_labels)$show_attrition,
+          icon = getOption("scb_icons", scb_icons)$show_attrition,
           onclick = .trigger_action_js("show_attrition", ns = ns),
-          class = no_attrition_class
+          class = paste(no_attrition_class, "btn-sm")
         ),
         button(
-          "Add Step", class = "cb_add_step", icon = shiny::icon("plus"),
+          getOption("scb_labels", scb_labels)$add_step, class = "cb_add_step btn-sm",
+          icon = getOption("scb_icons", scb_icons)$add_step,
           onclick = .trigger_action_js(add_step_action, ns = ns)
         )
       ),

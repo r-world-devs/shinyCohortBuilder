@@ -134,10 +134,13 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
     input = function(input_id, cohort) {
       input_params <- query_input_params(filter, input_id, cohort, ...)
       input_params$inputId <- paste0(input_id, "_selected")
+      modal_dialog_id <- paste0(input_id, "modal_in")
+      move_dialog_to_body_js <- move_modal_dialog_js(modal_dialog_id, input_id, "body")
+      move_dialog_back_js <- move_modal_dialog_js(modal_dialog_id, input_id, "container")
 
       shiny::tagList(
         shinyGizmo::modalDialogUI(
-          paste0(input_id, "modal_in"),
+          modal_dialog_id,
           do.call(shinyQueryBuilder::queryBuilderInput, input_params),
           backdrop = FALSE,
           size = "l",
@@ -147,18 +150,24 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
                 inputId = input_id,
                 label = "Accept",
                 selector = paste0("#", input_params$inputId),
-                `data-dismiss` = "modal", `data-bs-dismiss` = "modal"
+                `data-dismiss` = "modal", `data-bs-dismiss` = "modal",
+                onclick = move_dialog_back_js
               ),
               filter$input_param,
               style = "display: inline-block;"
             ),
-            shiny::modalButton("Dismiss")
+            shiny::modalButton("Dismiss") %>%
+              htmltools::tagAppendAttributes(
+                onclick = move_dialog_back_js
+              )
           ),
           button = button(
-            "Set rules",
-            icon = shiny::icon("keyboard"), style = "width: 100%; margin-top: 0.5em; margin-bottom: 0.5em;",
-            `data-toggle` = "modal", `data-target` = paste0("#", paste0(input_id, "modal_in")),
-            `data-bs-toggle` = "modal", `data-bs-target` = paste0("#", paste0(input_id, "modal_in"))
+            getOption("scb_labels", scb_labels)$filter_query_bttn_label,
+            icon = getOption("scb_icons", scb_icons)$filter_query_bttn_icon,
+            style = "width: 100%; margin-top: 0.5em; margin-bottom: 0.5em;",
+            `data-toggle` = "modal", `data-target` = paste0("#", modal_dialog_id),
+            `data-bs-toggle` = "modal", `data-bs-target` = paste0("#", modal_dialog_id),
+            onclick = move_dialog_to_body_js
           )
         ),
         .cb_input(
@@ -176,18 +185,28 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
             if(empty) { # when no data in parent step
               return(NULL)
             }
+            ns <- cohort$attributes$session$ns
             filter_val <- queryBuilder::queryToExpr(filter$get_params("value"))
-            modal_id <- shiny::NS(input_id, "query_modal")
+            modal_dialog_id <- shiny::NS(ns(input_id), "query_modal")
+            plot_id <- shiny::NS(ns(input_id), "feedback_plot")
+            move_dialog_to_body_js <- move_modal_dialog_js(modal_dialog_id, ns(input_id), "body")
+            move_dialog_back_js <- move_modal_dialog_js(modal_dialog_id, ns(input_id), paste0("#", plot_id))
             return(
               shinyGizmo::modalDialogUI(
-                modal_id,
-                htmltools::pre(htmltools::code(utils::capture.output(filter_val))),
+                modal_dialog_id,
+                htmltools::pre(htmltools::code(utils::capture.output(filter_val), .noWS = no_ws), .noWS = no_ws),
+                backdrop = FALSE,
+                size = "l",
                 button = button(
-                  "Show query",
-                  icon = shiny::icon("keyboard"), style = "width: 100%; margin-top: 0.5em; margin-bottom: 0.5em;",
-                  `data-toggle` = "modal", `data-target` = paste0("#", modal_id),
-                  `data-bs-toggle` = "modal", `data-bs-target` = paste0("#", modal_id)
-                )
+                  getOption("scb_labels", scb_labels)$filter_show_query_bttn_label,
+                  icon = getOption("scb_icons", scb_icons)$filter_show_query_bttn_icon,
+                  style = "width: 100%; margin-top: 0.5em; margin-bottom: 0.5em;",
+                  `data-toggle` = "modal", `data-target` = paste0("#", modal_dialog_id),
+                  `data-bs-toggle` = "modal", `data-bs-target` = paste0("#", modal_dialog_id),
+                  onclick = move_dialog_to_body_js
+                ),
+                footer = shiny::modalButton("Dismiss") %>%
+                  htmltools::tagAppendAttributes(onclick = move_dialog_back_js)
               )
             )
           })

@@ -1,6 +1,5 @@
 library(magrittr)
 library(cohortBuilder)
-library(shinyCohortBuilder)
 pkgload::load_all()
 options(scb_minified = FALSE)
 coh <- cohort(
@@ -18,4 +17,4 @@ coh <- cohort(
       active = FALSE
     )
   )
-gui(coh)
+gui(coh, run_button = "global")

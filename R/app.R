@@ -36,7 +36,7 @@
 #' @export
 demo_app <- function(
   steps = TRUE, stats = c("pre", "post"), run_button = "none", feedback = TRUE, state = TRUE,
-  bootstrap = 3, enable_bookmarking = TRUE, code = TRUE, attrition = TRUE, show_help = TRUE,
+  bootstrap = 5, enable_bookmarking = TRUE, code = TRUE, attrition = TRUE, show_help = TRUE,
   new_step = c("clone", "configure"), ...) {
 
   if (is.logical(run_button)) {
@@ -82,11 +82,11 @@ demo_app <- function(
         biom3 = c("A", "B", "A", "B", "A", "B", "A", "B", "A", "B", "A", "B", "A", "B", "B")
       ),
       therapy = data.frame(
-        patient_id = c(1:15, 1:5),
-        line_id = c(rep(1, 15), rep(2, 5)),
+        patient_id = c(1:15, 1:5, 1:3),
+        line_id = c(rep(1, 15), rep(2, 5), rep(3, 3)),
         treatment = c(
-          "Atezo", "Chemo", "Nebul", "Atezo", "Chemo", "Nebul", "Atezo", "Chemo", "Atezo", "Atezo",
-          "Nebul", "Atezo", "Chemo", "Atezo", "Atezo", "Nebul", "Atezo", "Chemo", "Nebul", "Atezo"
+          "Atezo", "Chemo", "Nebul", "Atezo", "Chemo", "Nebul", "Atezo", "Chemo", "Atezo", "Atezo", "Atezo", "Nebul",
+          "Nebul", "Atezo", "Chemo", "Atezo", "Atezo", "Nebul", "Atezo", "Chemo", "Nebul", "Atezo", "Atezo"
         )
       ) %>%
         dplyr::mutate(id = paste(patient_id, line_id, sep = "_")) %>%
@@ -96,7 +96,7 @@ demo_app <- function(
 
   shiny::runApp(list(
     ui = function(req) {
-      shiny::fluidPage(
+      bslib::page_fluid(
         theme = bslib::bs_theme(version = bootstrap),
         if (isTRUE(enable_bookmarking)) shiny::bookmarkButton() else NULL,
         shiny::radioButtons("dataset", "Source", c("No binding keys" = "01", "Binding keys" = "02")),
@@ -126,9 +126,20 @@ demo_app <- function(
         description = "The Age field is an length of time that a person has lived or a thing has existed.",
         feedback = FALSE
       )
-      treatment_filter <- cohortBuilder::filter(
-        type = "discrete", id = "treatment", name = "Treatment", variable = "treatment",
-        dataset = "therapy", value = "Atezo", gui_input = "vs", stats = "post"
+      treatment_filter = list(
+        "01" = cohortBuilder::filter(
+          type = "discrete", id = "treatment", name = "Treatment", variable = "treatment",
+          dataset = "therapy", value = "Atezo", gui_input = "vs", stats = "post"
+        ),
+        "02" = cohortBuilder::filter(
+          type = "query", id = "treatment", name = "Treatment",
+          variables = c("treatment", "line_id"), dataset = "therapy",
+          value = queryBuilder::queryGroup(
+            condition = "AND",
+            queryBuilder::queryRule("treatment", "equal", "Atezo"),
+            queryBuilder::queryRule("line_id", "less_or_equal", 3)
+          )
+        )
       )
       visit_filter <- cohortBuilder::filter(
         "date_range", name = "Visit", variable = "visit", dataset = "patients"
@@ -165,7 +176,7 @@ demo_app <- function(
         available_filters = list(
           gender_filter,
           age_filter,
-          treatment_filter
+          treatment_filter[["01"]]
         ),
         primary_keys = cohortBuilder::primary_keys(
           cohortBuilder::data_key("patients", "id"),
@@ -190,13 +201,14 @@ demo_app <- function(
         )
         coh$restore(url_state)
       } else {
+
         coh <- cohortBuilder::cohort(
           patients_source,
           cohortBuilder::step(
             group_filter,
             gender_filter,
             age_filter,
-            treatment_filter,
+            treatment_filter[["01"]],
             visit_filter,
             biom_filter
           )
@@ -214,7 +226,7 @@ demo_app <- function(
           available_filters = list(
             gender_filter,
             age_filter,
-            treatment_filter
+            treatment_filter[[input$dataset]]
           ),
           value_mappings = list(
             gender_mapping = gender_mapping
@@ -237,7 +249,7 @@ demo_app <- function(
               group_filter,
               gender_filter,
               age_filter,
-              treatment_filter,
+              treatment_filter[[input$dataset]],
               visit_filter
             )
           )

@@ -1,6 +1,6 @@
 library(magrittr)
 library(cohortBuilder)
-library(shinyCohortBuilder)
+pkgload::load_all()
 library(bs4Dash)
 options("cb_active_filter" = FALSE)
 
@@ -39,6 +39,16 @@ treatment_filter <- cohortBuilder::filter(
 visit_filter <- cohortBuilder::filter(
   "date_range", name = "Visit", variable = "visit", dataset = "patients"
 )
+biom_filter <- cohortBuilder::filter(
+  "multi_discrete", name = "Biomarkers", variables = c("biom1", "biom2"), dataset = "patients",
+  values = NA
+)
+query_filter <- cohortBuilder::filter(
+  "query", id = "iris_query", dataset = "patients", variables = c("group", "gender"),
+  value = queryBuilder::queryGroup(
+    queryBuilder::queryRule("group", "equal", "B")
+  )
+)
 
 pin_controlbar <- function(controlbar, ...) {
   controlbar[[2]] <- controlbar[[2]] %>%
@@ -67,12 +77,13 @@ shiny::runApp(list(
     coh <- cohortBuilder::cohort(
       raw_source,
       cohortBuilder::step(
-        group_filter#,
-        # gender_filter,
-        # age_filter,
-        # treatment_filter,
-        # visit_filter#,
-        #biom_filter
+        group_filter,
+        gender_filter,
+        age_filter,
+        treatment_filter,
+        visit_filter,
+        biom_filter,
+        query_filter
       )
     )
     # or below if initialized without default data source

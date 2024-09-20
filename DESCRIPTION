@@ -1,7 +1,7 @@
 Package: shinyCohortBuilder
 Type: Package
 Title: Modular Cohort-Building Framework for Analytical Dashboards
-Version: 0.1.2.9000
+Version: 0.2.1.9003
 Authors@R: 
     c(person('Krystian', 'Igras', 
              email = 'krystian8207@gmail.com', 
@@ -57,6 +57,8 @@ Suggests:
 Encoding: UTF-8
 RoxygenNote: 7.3.1
 VignetteBuilder: knitr
+URL: https://r-world-devs.github.io/shinyCohortBuilder/, https://github.com/r-world-devs/shinyCohortBuilder
+BugReports: https://github.com/r-world-devs/shinyCohortBuilder/issues
 Collate:
     'shinyCohortBuilder-package.R'
     'ui_utils.R'

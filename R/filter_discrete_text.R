@@ -11,7 +11,8 @@ plot_feedback_text_bar <- function(plot_data) {
     gg_object <- ggplot2::ggplot()
   } else {
 
-    color_palette <- c("#f5f5f5", "#d1d1d1")
+    chart_palette <- getOption("scb_chart_palette", scb_chart_palette)
+    color_palette <- c(chart_palette$no_data, chart_palette$discrete[1])
 
     gg_object <- feedback_data %>%
       ggplot2::ggplot(ggplot2::aes(x = "I", y = n, fill = level)) +
@@ -110,6 +111,7 @@ discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, 
   return(params)
 }
 
+
 #' @rdname gui-filter-layer
 #' @export
 .gui_filter.discrete_text <- function(filter, ...) {
@@ -123,13 +125,17 @@ discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, 
         discrete_text_input_params(filter, input_id, cohort, ...)
       )
       parent <- input_params$all
+      modal_dialog_id <- paste0(input_id, "modal_in")
+      # fixes overlapping modal dialog by backdrop
+      move_dialog_to_body_js <- paste0("$('#", modal_dialog_id, "').appendTo('body');")
+      move_dialog_back_js <- paste0("$('#", modal_dialog_id, "').appendTo('#", input_id, " .cb_inputs');")
 
       shiny::tagList(
         shinyGizmo::modalDialogUI(
-          paste0(input_id, "modal_in"),
+          modal_dialog_id,
           do.call(shinyGizmo::textArea, input_params),
           shinyGizmo::textArea(paste0(input_id, "show_all"), parent, "Possible values", readonly = TRUE),
-          backdrop = FALSE,
+          backdrop = TRUE,
           size = "l",
           footer = shiny::tagList(
             .cb_input(
@@ -138,17 +144,23 @@ discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, 
                 label = "Accept",
                 selector = paste0("#", input_params$inputId),
                 `data-dismiss` = "modal", `data-bs-dismiss` = "modal",
-                try_binding = FALSE
+                onclick = move_dialog_back_js, try_binding = FALSE
               ),
               filter$input_param,
               style = "display: inline-block;"
             ),
-            shiny::modalButton("Dismiss")
+            shiny::modalButton("Dismiss") %>%
+              htmltools::tagAppendAttributes(
+                onclick = move_dialog_back_js
+              )
           ),
           button = button(
-            "Set values",
-            icon = shiny::icon("keyboard"), style = "width: 100%; margin-top: 0.5em; margin-bottom: 0.5em;",
-            `data-toggle` = "modal", `data-target` = paste0("#", paste0(input_id, "modal_in"))
+            getOption("scb_icons", scb_labels)$filter_discrete_text_bttn_label,
+            icon = getOption("scb_icons", scb_icons)$filter_discrete_text_bttn_icon,
+            class = "btn-sm cb_filter_discrete_set_vals",
+            `data-toggle` = "modal", `data-target` = paste0("#", modal_dialog_id),
+            `data-bs-toggle` = "modal", `data-bs-target` = paste0("#", modal_dialog_id),
+            onclick = move_dialog_to_body_js
           )
         )
       )
