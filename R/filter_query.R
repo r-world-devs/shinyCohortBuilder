@@ -98,6 +98,7 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
 
   parent_specs <- cohort$get_cache(step_id, filter_id, state = "pre")$specs
   setting_from_stat <- base::get("setting_from_stat", envir = asNamespace("shinyQueryBuilder"), inherits = FALSE)
+
   filters <- filter$get_params("variables") %>%
     purrr::map(
       ~ setting_from_stat(

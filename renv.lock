@@ -225,9 +225,13 @@
     "cohortBuilder": {
       "Package": "cohortBuilder",
       "Version": "0.2.2",
-      "Source": "Local",
-      "RemoteType": "local",
-      "RemoteUrl": "../cohortBuilder",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "cohortBuilder",
+      "RemoteUsername": "r-world-devs",
+      "RemoteRef": "krystian.query_filter",
+      "RemoteSha": "42ab107da133bc228ed688238468c9975f43a471",
       "Requirements": [
         "R",
         "R6",
@@ -243,7 +247,7 @@
         "tibble",
         "tidyr"
       ],
-      "Hash": "1fd9287895b8aea7d3317891685def80"
+      "Hash": "100a45713ede68fde7da2ac845885dbd"
     },
     "colorspace": {
       "Package": "colorspace",
@@ -720,13 +724,13 @@
     },
     "jsonlite": {
       "Package": "jsonlite",
-      "Version": "1.8.8",
+      "Version": "1.8.9",
       "Source": "Repository",
-      "Repository": "RSPM",
+      "Repository": "CRAN",
       "Requirements": [
         "methods"
       ],
-      "Hash": "e1b9c55281c5adc4dd113652d9e26768"
+      "Hash": "4e993b65c2c3ffbffce7bb3e2c6f832b"
     },
     "knitr": {
       "Package": "knitr",
