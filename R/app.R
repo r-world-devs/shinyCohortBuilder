@@ -296,7 +296,7 @@ demo_app <- function(
 gui <- function(
   cohort,
   steps = TRUE, stats = c("pre", "post"), run_button = "none", feedback = TRUE, state = TRUE,
-  bootstrap = 3, enable_bookmarking = TRUE, code = TRUE, attrition = TRUE, show_help = TRUE,
+  bootstrap = 5, enable_bookmarking = TRUE, code = TRUE, attrition = TRUE, show_help = TRUE,
   new_step = c("clone", "configure")) {
 
   if (is.logical(run_button)) {
@@ -314,7 +314,7 @@ gui <- function(
   shiny::runApp(list(
     ui = function(req) {
       bslib::page_fluid(
-        shiny::tags$style("body {font-size: 12px;};"),
+        theme = bslib::bs_theme(version = bootstrap),
         cb_ui(
           id = "coh", style = "width: 300px; float: left;",
           steps = steps, state = state, code = code, attrition = attrition,

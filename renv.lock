@@ -224,14 +224,14 @@
     },
     "cohortBuilder": {
       "Package": "cohortBuilder",
-      "Version": "0.2.2",
+      "Version": "0.3.0",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
       "RemoteRepo": "cohortBuilder",
       "RemoteUsername": "r-world-devs",
       "RemoteRef": "krystian.query_filter",
-      "RemoteSha": "42ab107da133bc228ed688238468c9975f43a471",
+      "RemoteSha": "3983578be3a6a20b0202d842946b6ad039c8b68b",
       "Requirements": [
         "R",
         "R6",
@@ -242,12 +242,11 @@
         "jsonlite",
         "magrittr",
         "purrr",
-        "queryBuilder",
         "rlang",
         "tibble",
         "tidyr"
       ],
-      "Hash": "100a45713ede68fde7da2ac845885dbd"
+      "Hash": "eade54ed9045b5253f0dc74c33040510"
     },
     "colorspace": {
       "Package": "colorspace",
@@ -1057,9 +1056,13 @@
     "queryBuilder": {
       "Package": "queryBuilder",
       "Version": "0.1.0",
-      "Source": "Local",
-      "RemoteType": "local",
-      "RemoteUrl": "../queryBuilder",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "queryBuilder",
+      "RemoteUsername": "r-world-devs",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "0d2e065cb82afe6851e64522b92610fa88012dd3",
       "Requirements": [
         "dplyr",
         "glue",
@@ -1068,7 +1071,7 @@
         "rlang",
         "utils"
       ],
-      "Hash": "00fa863d29d337a4af7d6f05c6d59b28"
+      "Hash": "d93ad06ea0b77b51d3b7d74e485b01c6"
     },
     "ragg": {
       "Package": "ragg",
@@ -1275,9 +1278,13 @@
     "shinyQueryBuilder": {
       "Package": "shinyQueryBuilder",
       "Version": "0.1.0",
-      "Source": "Local",
-      "RemoteType": "local",
-      "RemoteUrl": "../shinyQueryBuilder",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "shinyQueryBuilder",
+      "RemoteUsername": "r-world-devs",
+      "RemoteRef": "HEAD",
+      "RemoteSha": "4072f8f6b08c8a0ad16fcb47a4fb272ee0f4cf0d",
       "Requirements": [
         "R6",
         "glue",
@@ -1289,7 +1296,7 @@
         "shiny",
         "shinyGizmo"
       ],
-      "Hash": "c31484d592267e46f22db46740987920"
+      "Hash": "ade22bf4c20f6405425330c09c700106"
     },
     "shinyWidgets": {
       "Package": "shinyWidgets",

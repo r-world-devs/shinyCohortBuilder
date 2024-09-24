@@ -1,6 +1,6 @@
 library(magrittr)
 library(cohortBuilder)
-pkgload::load_all()
+library(shinyCohortBuilder)
 options(scb_minified = FALSE)
 coh <- cohort(
   source = set_source(

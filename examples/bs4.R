@@ -1,6 +1,6 @@
 library(magrittr)
 library(cohortBuilder)
-pkgload::load_all()
+library(shinyCohortBuilder)
 library(bs4Dash)
 options("cb_active_filter" = FALSE)
 

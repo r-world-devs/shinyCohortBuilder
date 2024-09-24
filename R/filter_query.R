@@ -131,6 +131,9 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
 #' @rdname gui-filter-layer
 #' @export
 .gui_filter.query <- function(filter, ...) {
+  if (!requireNamespace("shinyQueryBuilder", quietly = TRUE)) {
+    stop("In order to use 'query' filter, please install 'shinyQueryBuilder' package.")
+  }
   list(
     input = function(input_id, cohort) {
       input_params <- query_input_params(filter, input_id, cohort, ...)
@@ -165,7 +168,7 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
           button = button(
             getOption("scb_labels", scb_labels)$filter_query_bttn_label,
             icon = getOption("scb_icons", scb_icons)$filter_query_bttn_icon,
-            style = "width: 100%; margin-top: 0.5em; margin-bottom: 0.5em;",
+            class = "btn-sm scb-input-button",
             `data-toggle` = "modal", `data-target` = paste0("#", modal_dialog_id),
             `data-bs-toggle` = "modal", `data-bs-target` = paste0("#", modal_dialog_id),
             onclick = move_dialog_to_body_js
@@ -201,7 +204,7 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
                 button = button(
                   getOption("scb_labels", scb_labels)$filter_show_query_bttn_label,
                   icon = getOption("scb_icons", scb_icons)$filter_show_query_bttn_icon,
-                  style = "width: 100%; margin-top: 0.5em; margin-bottom: 0.5em;",
+                  class = "btn-sm scb-input-button",
                   `data-toggle` = "modal", `data-target` = paste0("#", modal_dialog_id),
                   `data-bs-toggle` = "modal", `data-bs-target` = paste0("#", modal_dialog_id),
                   onclick = move_dialog_to_body_js

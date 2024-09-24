@@ -11,7 +11,7 @@ gui(
   run_button = "none",
   feedback = TRUE,
   state = TRUE,
-  bootstrap = 3,
+  bootstrap = 5,
   enable_bookmarking = TRUE,
   code = TRUE,
   attrition = TRUE,
