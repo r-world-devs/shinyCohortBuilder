@@ -40,7 +40,7 @@ Imports:
     shinyWidgets (>= 0.7.0),
     htmlwidgets,
     dplyr,
-    cohortBuilder (>= 0.2.2),
+    cohortBuilder (>= 0.3.0),
     tryCatchLog,
     highr,
     shinyGizmo (>= 0.4.2),
