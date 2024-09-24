@@ -22,7 +22,10 @@
 #'   "configure" - opening modal and allow to chose filters from available filters.
 #' @param ... Extra parameters passed to selected cohort methods.
 #'   Now only \link{code} arguments are supported.
-#' @return No return value, used for side effect which is running a Shiny application.
+#' @param run_app If 'TRUE' the application will run using \link[shiny]{runApp},
+#'   otherwise \link[shiny]{shinyApp} object is returned.
+#' @return In case of `run_app=TRUE` no return value, used for side effect which is running a Shiny application.
+#'   Otherwise \link[shiny]{shinyApp} object.
 #'
 #' @examples
 #' if (interactive()) {
@@ -37,10 +40,14 @@
 demo_app <- function(
   steps = TRUE, stats = c("pre", "post"), run_button = "none", feedback = TRUE, state = TRUE,
   bootstrap = 5, enable_bookmarking = TRUE, code = TRUE, attrition = TRUE, show_help = TRUE,
-  new_step = c("clone", "configure"), ...) {
+  new_step = c("clone", "configure"), ..., run_app = TRUE) {
 
   if (is.logical(run_button)) {
     lifecycle::deprecate_stop("0.2.0", "shinyCohorBuilder::demo_app(arg = 'must be a scalar character')")
+  }
+  run_method <- shiny::shinyApp
+  if (isTRUE(run_app)) {
+    run_method <- function(ui, server) shiny::runApp(list(ui = ui, server = server), ...)
   }
 
   old_opts <- options()
@@ -94,7 +101,7 @@ demo_app <- function(
     )
   )
 
-  shiny::runApp(list(
+  run_method(
     ui = function(req) {
       bslib::page_fluid(
         theme = bslib::bs_theme(version = bootstrap),
@@ -268,7 +275,7 @@ demo_app <- function(
         print(returned_data())
       })
     }
-  ))
+  )
 }
 
 # todo Make queue of actions and with delay execute them.

@@ -509,7 +509,8 @@ gui_show_state <- function(cohort, changed_input, session) {
     shiny::tags$code(
       cohort$get_state(json = TRUE) %>%
         shiny::HTML()
-    )
+    ),
+    easyClose = TRUE
   ))
 }
 
@@ -541,6 +542,7 @@ gui_input_state <- function(cohort, changed_input, session) {
       divider("OR"),
       shiny::textAreaInput(ns(string_id), "Paste json state")
     ),
+    easyClose = TRUE,
     footer = shiny::tagList(
       shiny::modalButton("Confirm") %>%
         shiny::tagAppendAttributes(
@@ -670,6 +672,7 @@ gui_show_step_filter_modal <- function(cohort, changed_input, session) {
           )
         )
       ),
+      easyClose = TRUE,
       footer = shiny::tagList(
         shinyGizmo::valueButton(
           inputId = ns("add_step_configured"),
@@ -759,6 +762,7 @@ gui_show_repro_code <- function(cohort, changed_input, session) {
           shiny::HTML()
       )
     ),
+    easyClose = TRUE,
     footer = shiny::tagList(
       button(
         id = "scb-copy-to-clipboard",
@@ -1011,7 +1015,8 @@ gui_show_attrition <- function(cohort, changed_input, session) {
   shiny::showModal(shiny::modalDialog(
     size = "l",
     title = "Cohort attrition",
-    ui
+    ui,
+    easyClose = TRUE
   ))
 }
 

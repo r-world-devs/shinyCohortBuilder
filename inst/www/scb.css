@@ -95,8 +95,6 @@ div.cb_container .cb_no_attrition {
 .cb_filter .filter_tooltip {
   float: right;
   clear: both;
-  margin-right: -0.8em;
-  margin-bottom: -2.0em;
 }
 
 .cb_filter .filter_tooltip > i {
