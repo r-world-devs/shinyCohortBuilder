@@ -16,7 +16,8 @@ demo_app(
   attrition = TRUE,
   show_help = TRUE,
   new_step = c("clone", "configure"),
-  ...
+  ...,
+  run_app = TRUE
 )
 }
 \arguments{
@@ -51,9 +52,13 @@ Possible options are: "clone" - copy filters from last step,
 
 \item{...}{Extra parameters passed to selected cohort methods.
 Now only \link{code} arguments are supported.}
+
+\item{run_app}{If 'TRUE' the application will run using \link[shiny]{runApp},
+otherwise \link[shiny]{shinyApp} object is returned.}
 }
 \value{
-No return value, used for side effect which is running a Shiny application.
+In case of `run_app=TRUE` no return value, used for side effect which is running a Shiny application.
+  Otherwise \link[shiny]{shinyApp} object.
 }
 \description{
 The demo presents available filters and toolbox features.

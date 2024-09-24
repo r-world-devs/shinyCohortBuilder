@@ -138,7 +138,7 @@ plot_feedback_multi_bar <- function(plot_data, n_missing) {
           y = value,
           fill = state,
           tooltip = paste0(variable, ": ", state, " (", format_number(value), ")"),
-          data_id = state
+          data_id = htmltools::htmlEscape(state, TRUE)
         )
       ) +
       ggplot2::coord_flip() +

@@ -142,7 +142,7 @@ discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, 
               shinyGizmo::valueButton(
                 inputId = input_id,
                 label = "Accept",
-                selector = paste0("#", input_params$inputId),
+                selector = paste0("[data-id=\"", input_params$inputId, "\""),
                 `data-dismiss` = "modal", `data-bs-dismiss` = "modal",
                 onclick = move_dialog_back_js, try_binding = FALSE
               ),

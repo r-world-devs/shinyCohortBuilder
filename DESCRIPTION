@@ -1,7 +1,7 @@
 Package: shinyCohortBuilder
 Type: Package
 Title: Modular Cohort-Building Framework for Analytical Dashboards
-Version: 0.2.1.9003
+Version: 0.3.0
 Authors@R: 
     c(person('Krystian', 'Igras', 
              email = 'krystian8207@gmail.com', 
@@ -48,7 +48,7 @@ Imports:
     tibble,
     lifecycle
 Suggests:
-    shinyQueryBuilder(>= 0.1.0)
+    shinyQueryBuilder(>= 0.1.0),
     pkgload,
     packer,
     sass,

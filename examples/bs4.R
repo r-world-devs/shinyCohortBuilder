@@ -3,6 +3,7 @@ library(cohortBuilder)
 library(shinyCohortBuilder)
 library(bs4Dash)
 options("cb_active_filter" = FALSE)
+options("scb_minified" = FALSE)
 
 raw_source <- set_source(
   tblist(
