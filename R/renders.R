@@ -1,4 +1,5 @@
 call_filter <- function(filter_id, step_id, cohort, input, output, session) {
+  ns <- session$ns
   filter <- cohort$get_filter(step_id, filter_id)
   no_data <- cohort$get_cache(step_id, filter_id, state = "pre")$n_data == 0
   show_feedback <- if_null_default(

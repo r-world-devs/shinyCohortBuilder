@@ -1,5 +1,6 @@
 # shinyCohortBuilder (development version)
 
+* Added new filter of type `query` based on 'shinyQueryBuilder' widget.
 * Added customization for filtering panel button classes via `scb_button_type` option.
 * Added customization for filtering panel labels via `scb_labels` option.
 * Added customization for filtering panel icons via `scb_icons` option.

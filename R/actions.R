@@ -364,15 +364,18 @@ update_next_step <- function(cohort, step_id, reset, session) {
   }
 }
 
-input_val_handler <- function(val) {
-  if (is.list(val)) {
+input_val_handler <- function(val, binding) {
+  handler <- NULL
+  if (length(binding) && binding != "" && !is.na(binding)) {
+    handler <- `%:::%`("shiny", "inputHandlers")$get(binding)
+  }
+  if (!is.null(handler)) {
+    return(handler(val))
+  } else if (is.list(val)) {
     if (is.null(names(val))) {
       return(unlist(val, recursive = TRUE))
     }
-    return(
-      val %>% purrr::map(unlist) %>%
-        purrr::map_if(~all(.x %in% c("TRUE", "FALSE", "NA")), as.logical)
-    )
+    return(val)
   } else {
     return(val)
   }
@@ -381,12 +384,10 @@ input_val_handler <- function(val) {
 convert_input_value <- function(changed_input, step_id, filter_id, cohort, update_active) {
   # todo handle case when no value parameter defined (some filters can work like that)
 
-  changed_input[changed_input$input_name] <- list(input_val_handler(changed_input$input_value))
-  is_date_filter <- inherits(cohort$get_filter(step_id, filter_id), "date_range")
+  changed_input[changed_input$input_name] <- list(
+    input_val_handler(changed_input$input_value, changed_input$binding)
+  )
   update_keep_na <- changed_input$input_name == "keep_na"
-  if (is_date_filter && !update_active && !update_keep_na) {
-    changed_input[[changed_input$input_name]] <- as.Date(changed_input[[changed_input$input_name]])
-  }
   changed_input$input_name <- NULL
   changed_input$input_value <- NULL
 

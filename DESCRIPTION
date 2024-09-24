@@ -1,7 +1,7 @@
 Package: shinyCohortBuilder
 Type: Package
 Title: Modular Cohort-Building Framework for Analytical Dashboards
-Version: 0.2.1.9002
+Version: 0.2.1.9003
 Authors@R: 
     c(person('Krystian', 'Igras', 
              email = 'krystian8207@gmail.com', 
@@ -40,7 +40,7 @@ Imports:
     shinyWidgets (>= 0.7.0),
     htmlwidgets,
     dplyr,
-    cohortBuilder (>= 0.2.0),
+    cohortBuilder (>= 0.3.0),
     tryCatchLog,
     highr,
     shinyGizmo (>= 0.4.2),
@@ -48,6 +48,7 @@ Imports:
     tibble,
     lifecycle
 Suggests:
+    shinyQueryBuilder(>= 0.1.0)
     pkgload,
     packer,
     sass,
@@ -70,6 +71,7 @@ Collate:
     'filter_date_range.R'
     'filter_discrete_text.R'
     'filter_multi_discrete.R'
+    'filter_query.R'
     'app.R'
     'cb_layer.R'
     'source.R'

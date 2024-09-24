@@ -111,6 +111,7 @@ discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, 
   return(params)
 }
 
+
 #' @rdname gui-filter-layer
 #' @export
 .gui_filter.discrete_text <- function(filter, ...) {
@@ -141,9 +142,9 @@ discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, 
               shinyGizmo::valueButton(
                 inputId = input_id,
                 label = "Accept",
-                selector = paste0("[data-id=\"", input_params$inputId, "\""), # todo update when new version of shinyGizmo
+                selector = paste0("#", input_params$inputId),
                 `data-dismiss` = "modal", `data-bs-dismiss` = "modal",
-                onclick = move_dialog_back_js
+                onclick = move_dialog_back_js, try_binding = FALSE
               ),
               filter$input_param,
               style = "display: inline-block;"
@@ -155,10 +156,10 @@ discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, 
           ),
           button = button(
             getOption("scb_icons", scb_labels)$filter_discrete_text_bttn_label,
-            icon = getOption("scb_icons", scb_labels)$filter_discrete_text_bttn_icon,
-            class = "btn-sm cb_filter_discrete_set_vals",
-            `data-toggle` = "modal", `data-target` = paste0("#", paste0(input_id, "modal_in")),
-            `data-bs-toggle` = "modal", `data-bs-target` = paste0("#", paste0(input_id, "modal_in")),
+            icon = getOption("scb_icons", scb_icons)$filter_discrete_text_bttn_icon,
+            class = "btn-sm scb-input-button",
+            `data-toggle` = "modal", `data-target` = paste0("#", modal_dialog_id),
+            `data-bs-toggle` = "modal", `data-bs-target` = paste0("#", modal_dialog_id),
             onclick = move_dialog_to_body_js
           )
         )

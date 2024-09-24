@@ -61,7 +61,9 @@ scb_labels <- list(
   "show_edit_title" = "Show / Edit",
   "keep_missing" = "Keep missing values",
   "step" = "Step",
-  "filter_discrete_text_bttn_label" = "Set Values"
+  "filter_discrete_text_bttn_label" = "Set Values",
+  "filter_query_bttn_label" = "Set Query",
+  "filter_show_query_bttn_label" = "Show Query"
 )
 
 #' Default filtering panel icons
@@ -82,6 +84,8 @@ scb_icons <- list(
   "show_edit" = shiny::icon("eye"),
   "filter_help" = shiny::icon("question-circle"),
   "filter_discrete_text_bttn_icon" = shiny::icon("keyboard"),
+  "filter_query_bttn_icon" = shiny::icon("arrow-pointer"),
+  "filter_show_query_bttn_icon" = shiny::icon("eye"),
   "dataset_help_icon" = shiny::icon("question-circle")
 )
 
@@ -121,4 +125,12 @@ scb_chart_palette <- list(
 cb_changed <- function(session, cohort_id) {
   ns <- session$ns
   session$input[[ns(paste0(cohort_id, "-cb_data_updated"))]]
+}
+
+
+move_modal_dialog_js <- function(dialog_id, container_id, where = "body") {
+  if (where == "container") {
+    return(paste0("$('#", dialog_id, "').appendTo('#", container_id, " .cb_inputs');"))
+  }
+  paste0("$('#", dialog_id, "').appendTo('", where, "');")
 }
