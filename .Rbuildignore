@@ -22,3 +22,4 @@ srcjs/*
 .Rprofile
 cran-comments.md
 meta_data.yaml
+inst/www/.sass_cache_keys
