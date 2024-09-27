@@ -40,13 +40,13 @@ List consisting filter metadata and methods that allow to perform filter based o
 For each filter type `.gui_filter` method should return a list of the below objects:
 
 \itemize{
-  \item{input}{ UI structure defining filter input controllers.}
-  \item{feedback}{ List defining feedback plot output.}
-  \item{server}{ Optional server-side expression attached to filter panel (e.g. filter specific observers).}
-  \item{update}{ An expression used for updating filter panel based on its configuration.}
-  \item{post_stats}{ TRUE if post statistics are displayed in filter controller (e.g. for discrete filter).
+  \item{\code{input} - UI structure defining filter input controllers.}
+  \item{\code{feedback} - List defining feedback plot output.}
+  \item{\code{server} - Optional server-side expression attached to filter panel (e.g. filter specific observers).}
+  \item{\code{update} - An expression used for updating filter panel based on its configuration.}
+  \item{\code{post_stats} - TRUE if post statistics are displayed in filter controller (e.g. for discrete filter).
     If FALSE, some operations are skipped which results with better performance.}
-  \item{multi_input}{ TRUE if multiple input controllers are used for providing
+  \item{\code{multi_input} - TRUE if multiple input controllers are used for providing
     filter value (e.g. range input where both numericInput and sliderInput are used).
     If FALSE, some operations are skipped which results with better performance.
   }

@@ -31,8 +31,8 @@ List of two objects: `render` and `output` defining rendering and
 \description{
 The method should return list of two object:
 \itemize{
-  \item{render}{ Rendering expression of attrition output.}
-  \item{output}{ Output expression related to rendering (with id equal to `id` parameter).}
+  \item{\code{render} - Rendering expression of attrition output.}
+  \item{\code{output} - Output expression related to rendering (with id equal to `id` parameter).}
 }
 For example:
 \preformatted{

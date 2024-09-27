@@ -15,9 +15,9 @@ It's a list of the following elements:
 }
 \details{
 \itemize{
-  \item{\code{discrete}}{ Discrete filter plot colors.}
-  \item{\code{histogram}}{ Range and date range histogram color.}
-  \item{\code{no_data}}{ Color used to mark missing variables on feedback plots.}
+  \item{\code{discrete} - Discrete filter plot colors.}
+  \item{\code{histogram} - Range and date range histogram color.}
+  \item{\code{no_data} - Color used to mark missing variables on feedback plots.}
 }
 
 The palette is used as default \code{scb_chart_palette} option, that can be overwritten with custom palettes.

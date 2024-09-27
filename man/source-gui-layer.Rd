@@ -19,12 +19,12 @@ or API service that allows to access and operate on data.
 In order to make new source type layer functioning, the following list of methods
 should be defined:
 \itemize{
-  \item{.render_filters}{ }
-  \item{.update_data_stats}{ }
-  \item{.step_attrition}{ }
-  \item{.custom_attrition}{ }
-  \item{.available_filter_choices}{ }
-  \item{autofilter}{ }
+  \item{\code{.render_filters}}
+  \item{\code{.update_data_stats}}
+  \item{\code{.step_attrition}}
+  \item{\code{.custom_attrition}}
+  \item{\code{.available_filter_choices}}
+  \item{\code{autofilter}}
 }
 Except from the above methods, you may extend the existing or new source with providing
 custom gui filtering methods. See \link{gui-filter-layer}.
