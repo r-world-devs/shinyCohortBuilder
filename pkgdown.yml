@@ -1,5 +1,5 @@
 pandoc: 2.19.2
-pkgdown: 2.0.7
+pkgdown: 2.0.9
 pkgdown_sha: ~
 articles:
   custom-gui-layer: custom-gui-layer.html
@@ -7,7 +7,7 @@ articles:
   package-options: package-options.html
   shinyCohortBuilder: shinyCohortBuilder.html
   updating-source: updating-source.html
-last_built: 2023-03-15T20:45Z
+last_built: 2024-09-27T09:58Z
 urls:
   reference: https://github.com/r-world-devs/shinyCohortBuilder/reference
   article: https://github.com/r-world-devs/shinyCohortBuilder/articles

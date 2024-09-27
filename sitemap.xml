@@ -43,6 +43,9 @@
     <loc>https://github.com/r-world-devs/shinyCohortBuilder/reference/available_filters_choices.html</loc>
   </url>
   <url>
+    <loc>https://github.com/r-world-devs/shinyCohortBuilder/reference/cb_changed.html</loc>
+  </url>
+  <url>
     <loc>https://github.com/r-world-devs/shinyCohortBuilder/reference/cb_ui.html</loc>
   </url>
   <url>
@@ -86,6 +89,15 @@
   </url>
   <url>
     <loc>https://github.com/r-world-devs/shinyCohortBuilder/reference/rendering-step-attrition.html</loc>
+  </url>
+  <url>
+    <loc>https://github.com/r-world-devs/shinyCohortBuilder/reference/scb_chart_palette.html</loc>
+  </url>
+  <url>
+    <loc>https://github.com/r-world-devs/shinyCohortBuilder/reference/scb_icons.html</loc>
+  </url>
+  <url>
+    <loc>https://github.com/r-world-devs/shinyCohortBuilder/reference/scb_labels.html</loc>
   </url>
   <url>
     <loc>https://github.com/r-world-devs/shinyCohortBuilder/reference/shinyCohortBuilder-package.html</loc>
