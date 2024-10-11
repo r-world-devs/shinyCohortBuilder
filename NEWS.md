@@ -1,3 +1,7 @@
+# shinyCohortBuilder 0.3.1
+
+* Fix compatibility with latest version of glue package (#61)
+
 # shinyCohortBuilder 0.3.0
 
 * Most of the modals have now `easyClosed` option turned on (#25).
