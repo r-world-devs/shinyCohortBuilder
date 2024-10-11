@@ -42,16 +42,16 @@ choice_name <- function(name, parent_stat, current_stat, stats) {
   pre_stat <- empty_if_false("pre" %in% stats, previous, FALSE, "")
   close_bracket <- empty_if_false(brackets && any(stats %in% c("pre", "post")), ")", FALSE, "")
   percent_open_bracket <- empty_if_false(percent && length(stats) == 2, " (", FALSE, "")
-  percent <- empty_if_false(
+  percentage <- empty_if_false(
     percent && length(stats) == 2,
     glue::glue("<span class = 'cb_delayed'>{round(100 * current / previous, 0)}%</span>"),
     FALSE, ""
   )
-  percent_close_bracket = empty_if_false(percent && length(stats) == 2, ")", FALSE, "")
+  percent_close_bracket <- empty_if_false(percent && length(stats) == 2, ")", FALSE, "")
   glue::glue(
     "<span>",
     "{name}{open_bracket}{post_stat}{slash}{pre_stat}{close_bracket}",
-    "{percent_open_bracket}{percent}{percent_close_bracket}",
+    "{percent_open_bracket}{percentage}{percent_close_bracket}",
     "</span>"
   )
 }
