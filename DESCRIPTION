@@ -48,7 +48,8 @@ Imports:
     tibble,
     lifecycle
 Suggests:
-    shinyQueryBuilder(>= 0.1.0),
+    queryBuilder (>= 0.1.0),
+    shinyQueryBuilder (>= 0.1.0),
     pkgload,
     packer,
     sass,

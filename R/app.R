@@ -21,7 +21,7 @@
 #'   Possible options are: "clone" - copy filters from last step,
 #'   "configure" - opening modal and allow to chose filters from available filters.
 #' @param ... Extra parameters passed to selected cohort methods.
-#'   Now only \link{code} arguments are supported.
+#'   Currently unused.
 #' @param run_app If 'TRUE' the application will run using \link[shiny]{runApp},
 #'   otherwise \link[shiny]{shinyApp} object is returned.
 #' @return In case of `run_app=TRUE` no return value, used for side effect which is running a Shiny application.

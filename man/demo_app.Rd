@@ -51,7 +51,7 @@ Possible options are: "clone" - copy filters from last step,
 "configure" - opening modal and allow to chose filters from available filters.}
 
 \item{...}{Extra parameters passed to selected cohort methods.
-Now only \link{code} arguments are supported.}
+Currently unused.}
 
 \item{run_app}{If 'TRUE' the application will run using \link[shiny]{runApp},
 otherwise \link[shiny]{shinyApp} object is returned.}

@@ -8,3 +8,5 @@ docs
 inst/doc
 inst/www/.sass_cache_keys
 .Rprofile
+*.Rcheck
+*.tar.gz

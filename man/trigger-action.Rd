@@ -34,18 +34,18 @@ Check Details section to see possible options.
 The list of possible actions:
 
 \itemize{
-\item{update_filter}{ Calls `shinyCohortBuilder:::gui_update_filter` that triggers filter arguments update.}
-\item{add_step}{ Calls `shinyCohortBuilder:::gui_add_step` that triggers adding a new filtering step (based on configuration of the previous one).}
-\item{rm_step}{ Calls `shinyCohortBuilder:::gui_rm_step` used to remove a selected filtering step.},
-\item{clear_step}{ Calls `shinyCohortBuilder:::gui_clear_step` used to clear filters configuration in selected step.}
-\item{update_step}{ Calls `shinyCohortBuilder:::gui_update_step` used to update filters and feedback plots for the specific filter GUI panel.}
-\item{update_data_stats}{ Calls `shinyCohortBuilder:::gui_update_data_stats` that is called to update data statistics. }
-\item{show_repro_code}{ Calls `shinyCohortBuilder:::gui_show_repro_code` that is used to show reproducible code. }
-\item{run_step}{ Calls `shinyCohortBuilder:::gui_run_step` used to trigger specific step data calculation. }
-\item{show_state}{ Calls `shinyCohortBuilder:::gui_show_state` that is used to show filtering panel state json. }
-\item{input_state}{ Calls `shinyCohortBuilder:::gui_input_state` that is used to generate modal in which filtering panel state can be provided (as json). }
-\item{restore_state}{ Calls `shinyCohortBuilder:::gui_restore_state` used for restoring filtering panel state based on provided json. }
-\item{show_attrition}{ Calls `shinyCohortBuilder:::gui_show_attrition` a method used to show attrition data plot(s).}
+\item{\code{update_filter} - Calls `shinyCohortBuilder:::gui_update_filter` that triggers filter arguments update.}
+\item{\code{add_step} - Calls `shinyCohortBuilder:::gui_add_step` that triggers adding a new filtering step (based on configuration of the previous one).}
+\item{\code{rm_step} - Calls `shinyCohortBuilder:::gui_rm_step` used to remove a selected filtering step.},
+\item{\code{clear_step} - Calls `shinyCohortBuilder:::gui_clear_step` used to clear filters configuration in selected step.}
+\item{\code{update_step} - Calls `shinyCohortBuilder:::gui_update_step` used to update filters and feedback plots for the specific filter GUI panel.}
+\item{\code{update_data_stats} - Calls `shinyCohortBuilder:::gui_update_data_stats` that is called to update data statistics. }
+\item{\code{show_repro_code} - Calls `shinyCohortBuilder:::gui_show_repro_code` that is used to show reproducible code. }
+\item{\code{run_step} - Calls `shinyCohortBuilder:::gui_run_step` used to trigger specific step data calculation. }
+\item{\code{show_state} - Calls `shinyCohortBuilder:::gui_show_state` that is used to show filtering panel state json. }
+\item{\code{input_state} - Calls `shinyCohortBuilder:::gui_input_state` that is used to generate modal in which filtering panel state can be provided (as json). }
+\item{\code{restore_state} - Calls `shinyCohortBuilder:::gui_restore_state` used for restoring filtering panel state based on provided json. }
+\item{\code{show_attrition} - Calls `shinyCohortBuilder:::gui_show_attrition` a method used to show attrition data plot(s).}
 }
 
 Both `.trigger_action` and `.trigger_action_js` methods are exported for advanced use only.
