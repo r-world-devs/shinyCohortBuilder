@@ -31,30 +31,28 @@ choice_name <- function(name, parent_stat, current_stat, stats) {
 #' @export
 .pre_post_stats_text <- function(current, previous, name, brackets = TRUE,
                                  percent = FALSE, stats = c("pre", "post")) {
+  name <- empty_if_false(!missing(name), paste0(name, " "), FALSE, "")
+  open_bracket <- empty_if_false(brackets && any(stats %in% c("pre", "post")), "(", FALSE, "")
+  post_stat <- empty_if_false(
+    "post" %in% stats,
+    glue::glue("<span class = 'cb_delayed'>{current}</span>"),
+    FALSE, ""
+  )
+  slash <- empty_if_false(length(stats) == 2, " / ", FALSE, "")
+  pre_stat <- empty_if_false("pre" %in% stats, previous, FALSE, "")
+  close_bracket <- empty_if_false(brackets && any(stats %in% c("pre", "post")), ")", FALSE, "")
+  percent_open_bracket <- empty_if_false(percent && length(stats) == 2, " (", FALSE, "")
+  percentage <- empty_if_false(
+    percent && length(stats) == 2,
+    glue::glue("<span class = 'cb_delayed'>{round(100 * current / previous, 0)}%</span>"),
+    FALSE, ""
+  )
+  percent_close_bracket <- empty_if_false(percent && length(stats) == 2, ")", FALSE, "")
   glue::glue(
     "<span>",
     "{name}{open_bracket}{post_stat}{slash}{pre_stat}{close_bracket}",
-    "{percent_open_bracket}{percent}{percent_close_bracket}",
-    "</span>",
-    .envir = list(
-      name = empty_if_false(!missing(name), paste0(name, " "), FALSE, ""),
-      open_bracket = empty_if_false(brackets && any(stats %in% c("pre", "post")), "(", FALSE, ""),
-      post_stat = empty_if_false(
-        "post" %in% stats,
-        glue::glue("<span class = 'cb_delayed'>{current}</span>"),
-        FALSE, ""
-      ),
-      slash = empty_if_false(length(stats) == 2, " / ", FALSE, ""),
-      pre_stat = empty_if_false("pre" %in% stats, previous, FALSE, ""),
-      close_bracket = empty_if_false(brackets && any(stats %in% c("pre", "post")), ")", FALSE, ""),
-      percent_open_bracket = empty_if_false(percent && length(stats) == 2, " (", FALSE, ""),
-      percent = empty_if_false(
-        percent && length(stats) == 2,
-        glue::glue("<span class = 'cb_delayed'>{round(100 * current / previous, 0)}%</span>"),
-        FALSE, ""
-      ),
-      percent_close_bracket = empty_if_false(percent && length(stats) == 2, ")", FALSE, "")
-    )
+    "{percent_open_bracket}{percentage}{percent_close_bracket}",
+    "</span>"
   )
 }
 
