@@ -95,6 +95,7 @@ div.cb_container .cb_no_attrition {
   .filter_tooltip {
     float: right;
     clear: both;
+    margin-bottom: -2.0em;
     > i {
       color: var(--bs-gray, gray);
     }
