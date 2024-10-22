@@ -672,7 +672,6 @@ gui_show_step_filter_modal <- function(cohort, changed_input, session) {
           )
         )
       ),
-      easyClose = TRUE,
       footer = shiny::tagList(
         shinyGizmo::valueButton(
           inputId = ns("add_step_configured"),
@@ -686,7 +685,7 @@ gui_show_step_filter_modal <- function(cohort, changed_input, session) {
       ),
       title = "Configure new step",
       size = "m",
-      easyClose = FALSE
+      easyClose = TRUE
     )
   )
 
