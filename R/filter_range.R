@@ -1,16 +1,15 @@
-extract_selected_range <- function(range, parent_range, reset) {
-  if (inherits(range, "character") || inherits(range, "POSIXct")) {
-    range <- as.POSIXct(range)
-    parent_range <- as.POSIXct(parent_range)
-  }
-  
+extract_selected_range <- function(filter, range, parent_range, reset) {
+  UseMethod("extract_selected_range", filter)
+}
+
+extract_selected_range.default <- function(filter, range, parent_range, reset) {
   if (reset || identical(range, NA) || !any(dplyr::between(range, parent_range[1], parent_range[2]))) {
     return(parent_range)
   }
-  if (range[1] < parent_range[1]) {
+  if (anyNA(range[1]) || range[1] < parent_range[1]) {
     range[1] <- parent_range[1]
   }
-  if (range[2] > parent_range[2]) {
+  if (anyNA(range[2]) || range[2] > parent_range[2]) {
     range[2] <- parent_range[2]
   }
 
@@ -76,6 +75,7 @@ range_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
   parent_range <- freq_range(parent_filter_stats)
 
   selected_range <- extract_selected_range(
+    filter,
     filter$get_params("range"),
     parent_range, reset
   )
@@ -219,6 +219,7 @@ is_gui_type <- function(filter, type) {
 
             filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
             filter_range <- extract_selected_range(
+              filter,
               filter$get_params("range"),
               freq_range(filter_cache$frequencies),
               FALSE

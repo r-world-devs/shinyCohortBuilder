@@ -1,21 +1,69 @@
+extract_selected_range.date_time_range <- function(filter, range, parent_range, reset) {
+  if (identical(range, NULL)) {
+    range <- c(Inf, -Inf) %>% as.POSIXct()
+  }
+  
+  if (inherits(range, "character") || inherits(range, "POSIXct")) {
+    end_range <- range[2]
+    if (identical(end_range, NULL) || anyNA(end_range, NA) || identical(end_range, "Inf")) {
+      end_range <- Inf
+    }
+    
+    range <- c(as.POSIXct(range[1]), as.POSIXct(end_range))
+    parent_range <- as.POSIXct(parent_range)
+  }
+  
+  if (reset || identical(range, NA) || !any(dplyr::between(range, parent_range[1], parent_range[2]))) {
+    return(parent_range)
+  }
+  if (anyNA(range[1]) || range[1] < parent_range[1]) {
+    range[1] <- parent_range[1]
+  }
+  if (anyNA(range[2]) || range[2] > parent_range[2]) {
+    range[2] <- parent_range[2]
+  }
+  
+  return(range)
+}
+
 #' @rdname gui-filter-layer
 #' @export
 .gui_filter.date_time_range <- function(filter, ...) {
   list(
     input = function(input_id, cohort) {
       input_params <- range_input_params(filter, input_id, cohort, ...)
-      
       shiny::tagList(
-        .cb_input(
-          do.call(
-            shiny::sliderInput,
-            modify_list(
-              list(ticks = FALSE, round = 1),
-              suff_id(input_params, "slider")
-            )
-          ),
-          filter$input_param
-        ),
+        if (is_gui_type(filter, "datetimepicker")) {
+          input_params$minDate <- input_params$min
+          input_params$min <- NULL
+          input_params$maxDate <- input_params$max
+          input_params$max <- NULL
+          input_params$step <- NULL
+          .cb_input(
+            do.call(
+              shinyWidgets::airDatepickerInput,
+              modify_list(
+                list(
+                  range = TRUE, timepicker = TRUE, update_on = "close",
+                  autoClose = TRUE, addon = "none"
+                ),
+                suff_id(input_params, "datetimepicker")
+              )
+            ),
+            filter$input_param
+          )
+        } else if (is_gui_type(filter, "slider")) {
+          .cb_input(
+            do.call(
+              shiny::sliderInput,
+              modify_list(
+                list(ticks = FALSE, round = 1),
+                suff_id(input_params, "slider")
+              )
+            ),
+            filter$input_param
+          )
+        },
         .cb_input(
           .keep_na_input(input_id, filter, cohort),
           "keep_na"
@@ -29,7 +77,7 @@
         output_fun = shiny::plotOutput,
         render_fun = if (!is.null(empty)) {
           shiny::renderPlot(bg = "transparent", height = 60, {
-            if(empty) { # when no data in parent step
+            if(empty || is.null(filter$get_params("range"))) { # when no data in parent step
               return(
                 ggplot2::ggplot()
               )
@@ -38,7 +86,9 @@
             filter_id <- filter$id
             
             filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
+
             filter_range <- extract_selected_range(
+              filter,
               filter$get_params("range"),
               freq_range(filter_cache$frequencies),
               FALSE
@@ -65,10 +115,20 @@
         list(session = session),
         range_input_params(filter, input_id, cohort, reset, TRUE, ...)
       )
-      do.call(
-        shiny::updateSliderInput,
-        suff_id(input_params, "slider")
-      )
+      if (is_gui_type(filter, "datetimepicker")) {
+        input_params$min <- NULL
+        input_params$max <- NULL
+        input_params$step <- NULL
+        do.call(
+          shinyWidgets::updateAirDateInput,
+          suff_id(input_params, "slider")
+        )
+      } else if (is_gui_type(filter, "slider")) {
+        do.call(
+          shiny::updateSliderInput,
+          suff_id(input_params, "slider")
+        )
+      }  
       .update_keep_na_input(session, input_id, filter, cohort)
     },
     
