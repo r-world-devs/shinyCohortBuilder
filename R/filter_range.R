@@ -1,5 +1,9 @@
 extract_selected_range <- function(range, parent_range, reset) {
-
+  if (inherits(range, "character") || inherits(range, "POSIXct")) {
+    range <- as.POSIXct(range)
+    parent_range <- as.POSIXct(parent_range)
+  }
+  
   if (reset || identical(range, NA) || !any(dplyr::between(range, parent_range[1], parent_range[2]))) {
     return(parent_range)
   }
@@ -98,12 +102,21 @@ range_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
     params$start <- params$value[1]
     params$end <- params$value[2]
     params$value <- NULL
+  } else if (inherits(filter, "date_time_range")) {
+    if (!is.null(filter$get_params("step"))) {
+      params$step <- filter$get_params("step")
+    } else {
+      params$step <- freq_step(parent_filter_stats)
+    }
+    params$min <- as.POSIXct(params$min)
+    params$max <- as.POSIXct(params$max)
+    params$value <- c(as.POSIXct(params$value[1]), as.POSIXct(params$value[2]))
   }
 
   if (update) {
     params$width <- NULL
   }
-
+  
   return(params)
 }
 
