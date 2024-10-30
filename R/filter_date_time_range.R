@@ -1,6 +1,7 @@
 extract_selected_range.date_time_range <- function(filter, range, parent_range, reset) {
-  if (identical(range, NULL)) {
+  if (identical(range, NULL) || length(range) == 0) {
     range <- c(Inf, -Inf) %>% as.POSIXct()
+    return(range)
   }
   
   if (inherits(range, "character") || inherits(range, "POSIXct")) {
