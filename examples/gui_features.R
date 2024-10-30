@@ -18,7 +18,8 @@ librarian_cohort <- cohort(
     "discrete",
     id = "program",
     dataset = "borrowers",
-    variable = "program"
+    variable = "program",
+    stats = "pre"
   )
 )
 gui(librarian_cohort, attrition = TRUE, steps = TRUE, state = FALSE, code = FALSE)

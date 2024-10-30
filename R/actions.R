@@ -264,16 +264,19 @@ update_filter_gui <- function(cohort, step_id, filter_id, update, reset, session
   if (("multi_input" %in% update) && filter$gui$multi_input) {
     update <- c(update, "input")
   }
+  if ("force_input" %in% update) {
+    update <- c(update, "input")
+  }
 
   if ("input" %in% update) {
-    updated_input <- TRUE
-
     filter$gui$update(
       session,
       sf_id(step_id, filter_id),
       cohort,
       reset = reset
     )
+
+    updated_input <- TRUE
   }
   if ("plot" %in% update) {
     show <- TRUE
@@ -390,6 +393,7 @@ convert_input_value <- function(changed_input, step_id, filter_id, cohort, updat
   update_keep_na <- changed_input$input_name == "keep_na"
   changed_input$input_name <- NULL
   changed_input$input_value <- NULL
+  changed_input$update <- NULL
 
   return(changed_input)
 }
@@ -398,6 +402,7 @@ gui_update_filter <- function(cohort, changed_input, session) {
 
   run_on_request <- !is_none(cohort$attributes$run_button)
   update_active <- changed_input$input_name == "active"
+  update <- changed_input$update
 
   step_id <- changed_input$step_id
   filter_id <- changed_input$filter_id
@@ -431,7 +436,7 @@ gui_update_filter <- function(cohort, changed_input, session) {
   )
   post_stats_visible <- "post" %in% filter_stats
   if (run_update) {
-    update <- c("plot", "multi_input")
+    update <- c(update, "plot", "multi_input")
     if (!run_on_request && post_stats_visible) {
       update <- c(update, "post_input")
     }
