@@ -353,7 +353,7 @@ plot_feedback_bar <- function(plot_data, n_missing) {
           .trigger_action(session, "update_filter", params = list(
             step_id = filter$step_id, filter_id = filter$id,
             input_name = filter$input_param, input_value = value,
-            run_flow = FALSE
+            update = "force_input", run_flow = FALSE
           ))
         }
       }, ignoreInit = TRUE) %>% .save_observer(input_id, session)
