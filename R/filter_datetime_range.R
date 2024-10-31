@@ -111,6 +111,7 @@ extract_selected_datetime_range <- function(range, parent_range, reset) {
     },
     server = function(input_id, input, output, session, cohort) {},
     update = function(session, input_id, cohort, reset = FALSE, ...) {
+      browser()
       input_params <- append(
         list(session = session),
         range_input_params(filter, input_id, cohort, reset, TRUE, ...)
