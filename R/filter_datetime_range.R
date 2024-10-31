@@ -1,16 +1,12 @@
 extract_selected_datetime_range <- function(range, parent_range, reset) {
-  if (identical(range, NULL) || length(range) == 0) {
-    range <- c(Inf, -Inf) %>% as.POSIXct(origin = "1970-01-01 UTC")
+  if (identical(range, c(Inf, -Inf)) || length(range) == 0) {
     return(range)
   }
   
   if (inherits(range, "character") || inherits(range, "POSIXct")) {
-    end_range <- range[2]
-    if (identical(end_range, NULL) || anyNA(end_range, NA) || identical(end_range, "Inf")) {
-      end_range <- Inf
-    }
+    if (length(range) == 1) range <- c(range, Inf)
     
-    range <- c(as.POSIXct(range[1], origin = "1970-01-01 UTC"), as.POSIXct(end_range, origin = "1970-01-01 UTC"))
+    range <- as.POSIXct(range, origin = "1970-01-01 UTC")
     parent_range <- as.POSIXct(parent_range, origin = "1970-01-01 UTC")
   }
   

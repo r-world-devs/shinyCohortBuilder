@@ -368,10 +368,6 @@ update_next_step <- function(cohort, step_id, reset, session) {
 }
 
 input_val_handler <- function(val, binding) {
-  browser()
-  
-  # NULL to c(Inf, -Inf)
-  # lenght(1) to c(val, Inf)
   handler <- NULL
   if (length(binding) && binding != "" && !is.na(binding)) {
     handler <- `%:::%`("shiny", "inputHandlers")$get(binding)
