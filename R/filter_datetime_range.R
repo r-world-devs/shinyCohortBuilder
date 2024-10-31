@@ -1,4 +1,4 @@
-extract_selected_range.date_time_range <- function(filter, range, parent_range, reset) {
+extract_selected_datetime_range <- function(range, parent_range, reset) {
   if (identical(range, NULL) || length(range) == 0) {
     range <- c(Inf, -Inf) %>% as.POSIXct(origin = "1970-01-01 UTC")
     return(range)
@@ -29,7 +29,7 @@ extract_selected_range.date_time_range <- function(filter, range, parent_range, 
 
 #' @rdname gui-filter-layer
 #' @export
-.gui_filter.date_time_range <- function(filter, ...) {
+.gui_filter.datetime_range <- function(filter, ...) {
   list(
     input = function(input_id, cohort) {
       input_params <- range_input_params(filter, input_id, cohort, ...)
@@ -88,8 +88,7 @@ extract_selected_range.date_time_range <- function(filter, range, parent_range, 
             
             filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
 
-            filter_range <- extract_selected_range(
-              filter,
+            filter_range <- extract_selected_datetime_range(
               filter$get_params("range"),
               freq_range(filter_cache$frequencies),
               FALSE

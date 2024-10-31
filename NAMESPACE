@@ -3,7 +3,7 @@
 S3method(.available_filters_choices,default)
 S3method(.available_filters_choices,tblist)
 S3method(.gui_filter,date_range)
-S3method(.gui_filter,date_time_range)
+S3method(.gui_filter,datetime_range)
 S3method(.gui_filter,discrete)
 S3method(.gui_filter,discrete_text)
 S3method(.gui_filter,multi_discrete)
