@@ -173,6 +173,18 @@ rule_Date <- function(column, name, dataset_name) {
   )
 }
 
+rule_POSIXct <- function(column, name, dataset_name) {
+  list(
+    type = "datetime_range",
+    #id = name,
+    name = name,
+    variable = name,
+    dataset = dataset_name,
+    range = NA,
+    keep_na = TRUE
+  )
+}
+
 filter_rule <- function(column, name, dataset_name) {
   rule_method <- paste0("rule_", class(column)[[1]])
   do.call(
