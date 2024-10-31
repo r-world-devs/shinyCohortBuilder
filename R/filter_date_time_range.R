@@ -1,6 +1,6 @@
 extract_selected_range.date_time_range <- function(filter, range, parent_range, reset) {
   if (identical(range, NULL) || length(range) == 0) {
-    range <- c(Inf, -Inf) %>% as.POSIXct()
+    range <- c(Inf, -Inf) %>% as.POSIXct(origin = "1970-01-01 UTC")
     return(range)
   }
   
@@ -10,8 +10,8 @@ extract_selected_range.date_time_range <- function(filter, range, parent_range, 
       end_range <- Inf
     }
     
-    range <- c(as.POSIXct(range[1]), as.POSIXct(end_range))
-    parent_range <- as.POSIXct(parent_range)
+    range <- c(as.POSIXct(range[1], origin = "1970-01-01 UTC"), as.POSIXct(end_range, origin = "1970-01-01 UTC"))
+    parent_range <- as.POSIXct(parent_range, origin = "1970-01-01 UTC")
   }
   
   if (reset || identical(range, NA) || !any(dplyr::between(range, parent_range[1], parent_range[2]))) {

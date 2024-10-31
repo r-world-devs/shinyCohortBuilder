@@ -108,9 +108,12 @@ range_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
     } else {
       params$step <- freq_step(parent_filter_stats)
     }
-    params$min <- as.POSIXct(params$min)
-    params$max <- as.POSIXct(params$max)
-    params$value <- c(as.POSIXct(params$value[1]), as.POSIXct(params$value[2]))
+    params$min <- as.POSIXct(params$min, origin = "1970-01-01 UTC")
+    params$max <- as.POSIXct(params$max, origin = "1970-01-01 UTC")
+    params$value <- c(
+      as.POSIXct(params$value[1], origin = "1970-01-01 UTC"),
+      as.POSIXct(params$value[2], origin = "1970-01-01 UTC")
+    )
   }
 
   if (update) {
