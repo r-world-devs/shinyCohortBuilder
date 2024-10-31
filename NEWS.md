@@ -1,3 +1,7 @@
+# shinyCohortBuilder (development version)
+
+* Fix updating discrete filter through its feedback plot when post stats are turned off.
+
 # shinyCohortBuilder 0.3.1
 
 * Fix compatibility with latest version of glue package (#61)
