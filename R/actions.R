@@ -373,7 +373,12 @@ input_val_handler <- function(val, binding) {
     handler <- `%:::%`("shiny", "inputHandlers")$get(binding)
   }
   if (!is.null(handler)) {
-    return(handler(val))
+    val <- handler(val)
+    if ("air.datetime" %in% binding) {
+      if (is.null(val)) return(c(Inf, -Inf))
+      if (length(val) == 1) return(c(val, val))
+    }
+    return(val)
   } else if (is.list(val)) {
     if (is.null(names(val))) {
       return(unlist(val, recursive = TRUE))

@@ -70,6 +70,7 @@ Collate:
     'filter_discrete.R'
     'filter_range.R'
     'filter_date_range.R'
+    'filter_datetime_range.R'
     'filter_discrete_text.R'
     'filter_multi_discrete.R'
     'filter_query.R'

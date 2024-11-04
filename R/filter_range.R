@@ -1,12 +1,11 @@
 extract_selected_range <- function(range, parent_range, reset) {
-
   if (reset || identical(range, NA) || !any(dplyr::between(range, parent_range[1], parent_range[2]))) {
     return(parent_range)
   }
-  if (range[1] < parent_range[1]) {
+  if (anyNA(range[1]) || range[1] < parent_range[1]) {
     range[1] <- parent_range[1]
   }
-  if (range[2] > parent_range[2]) {
+  if (anyNA(range[2]) || range[2] > parent_range[2]) {
     range[2] <- parent_range[2]
   }
 
@@ -71,10 +70,18 @@ range_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
   parent_filter_stats <- cohort$get_cache(step_id, filter_id, state = "pre")$frequencies
   parent_range <- freq_range(parent_filter_stats)
 
-  selected_range <- extract_selected_range(
-    filter$get_params("range"),
-    parent_range, reset
-  )
+  if (inherits(filter, "datetime_range")) {
+    selected_range <- extract_selected_datetime_range(
+      filter$get_params("range"),
+      parent_range, reset
+    )
+  } else {
+    selected_range <- extract_selected_range(
+      filter$get_params("range"),
+      parent_range, reset
+    )
+  }
+  
 
   params <- list(
     inputId = input_id,
@@ -99,11 +106,25 @@ range_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
     params$end <- params$value[2]
     params$value <- NULL
   }
+  
+  if (inherits(filter, "datetime_range")) {
+    if (!is.null(filter$get_params("step"))) {
+      params$step <- filter$get_params("step")
+    } else {
+      params$step <- freq_step(parent_filter_stats)
+    }
+    params$min <- as.POSIXct(params$min, origin = "1970-01-01 UTC")
+    params$max <- as.POSIXct(params$max, origin = "1970-01-01 UTC")
+    params$value <- c(
+      as.POSIXct(params$value[1], origin = "1970-01-01 UTC"),
+      as.POSIXct(params$value[2], origin = "1970-01-01 UTC")
+    )
+  }
 
   if (update) {
     params$width <- NULL
   }
-
+  
   return(params)
 }
 
