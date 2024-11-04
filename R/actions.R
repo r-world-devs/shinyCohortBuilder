@@ -376,7 +376,7 @@ input_val_handler <- function(val, binding) {
     val <- handler(val)
     if ("air.datetime" %in% binding) {
       if (is.null(val)) return(c(Inf, -Inf))
-      if (length(val) == 1) return(c(val, Inf))
+      if (length(val) == 1) return(c(val, val))
     }
     return(val)
   } else if (is.list(val)) {
