@@ -224,7 +224,7 @@ render_step <- function(cohort, step_id, active, allow_rm, input, output, sessio
       class = "cb_step panel panel-default card",
       header_class = "panel-heading card-header",
       header = shiny::tagList(
-        shiny::tags$strong(class = "cb_step_name", glue::glue("Step {step_id}")),
+        shiny::tags$strong(class = "cb_step_name", glue::glue("{getOption('scb_labels', scb_labels)$step} {step_id}")),
         shiny::tags$div(style = "float: right;",
           button(
             title = getOption("scb_labels", scb_labels)$delete_step_title, class = "cb_rm_step btn-xs",
