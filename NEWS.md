@@ -1,5 +1,6 @@
 # shinyCohortBuilder (development version)
 
+* Add an option to manage (add / remove) last step filters.
 * Fix updating discrete filter through its feedback plot when post stats are turned off.
 * Add gui support for `datatime_filter`.
 
