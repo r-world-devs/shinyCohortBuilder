@@ -96,6 +96,7 @@ div.cb_container .cb_no_attrition {
   float: right;
   clear: both;
   margin-bottom: -2.0em;
+  position: relative;
 }
 
 .cb_filter .filter_tooltip > i {

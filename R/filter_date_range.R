@@ -36,7 +36,6 @@
 
             filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
             filter_range <- extract_selected_range(
-              filter,
               filter$get_params("range"),
               freq_range(filter_cache$frequencies),
               FALSE

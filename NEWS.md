@@ -1,7 +1,7 @@
 # shinyCohortBuilder (development version)
 
 * Fix updating discrete filter through its feedback plot when post stats are turned off.
-* Add gui support for `data_time_filter`.
+* Add gui support for `datatime_filter`.
 
 # shinyCohortBuilder 0.3.1
 
