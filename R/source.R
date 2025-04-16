@@ -44,3 +44,14 @@ autofilter <- function(source, attach_as = c("step", "meta"), ...) {
 autofilter.default <- function(source, ...) {
   return(source)
 }
+
+#' @export
+.filter_position <- function(source, step_id, filter, ...) {
+  UseMethod(".filter_position", source)
+}
+
+#' @rdname .filter_position
+#' @export
+.filter_position.default <- function(source, step_id, filter, ...) {
+  return(step_id)
+}

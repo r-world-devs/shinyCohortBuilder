@@ -12,7 +12,8 @@ cb_ui(
   steps = TRUE,
   code = TRUE,
   attrition = TRUE,
-  new_step = c("clone", "configure")
+  new_step = c("clone", "configure"),
+  manage_step = FALSE
 )
 
 cb_server(

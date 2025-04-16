@@ -304,7 +304,7 @@ gui <- function(
   cohort,
   steps = TRUE, stats = c("pre", "post"), run_button = "none", feedback = TRUE, state = TRUE,
   bootstrap = 5, enable_bookmarking = TRUE, code = TRUE, attrition = TRUE, show_help = TRUE,
-  new_step = c("clone", "configure")) {
+  new_step = c("clone", "configure"), manage_step = FALSE) {
 
   if (is.logical(run_button)) {
     lifecycle::deprecate_stop("0.2.0", "shinyCohorBuilder::gui(arg = 'must be a scalar character')")
@@ -325,7 +325,7 @@ gui <- function(
         cb_ui(
           id = "coh", style = "width: 300px; float: left;",
           steps = steps, state = state, code = code, attrition = attrition,
-          new_step = new_step
+          new_step = new_step, manage_step = manage_step
         ),
         shiny::div(
           style = "float: right; width: calc(100% - 300px);",

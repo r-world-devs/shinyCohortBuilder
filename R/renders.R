@@ -377,6 +377,8 @@ render_steps <- function(cohort, session, init = TRUE) {
         add_step_modal = gui_show_step_filter_modal,
         add_step_configure = gui_add_step_configured,
         rm_step = gui_rm_step,
+        manage_step_modal = gui_manage_step_modal,
+        manage_step_configure = gui_manage_step_configured,
         clear_step = gui_clear_step,
         update_step = gui_update_step,
         update_data_stats = gui_update_data_stats,
@@ -719,7 +721,8 @@ restore_attribute <- function(cohort, attribute, value) {
 #' }
 #'
 #' @export
-cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition = TRUE, new_step = c("clone", "configure")) {
+cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition = TRUE,
+                  new_step = c("clone", "configure"), manage_step = FALSE) {
   ns <- shiny::NS(id)
   no_steps_class <- if (steps) "" else "cb_no_steps"
   no_state_class <- if (state) "" else "cb_no_state"
@@ -795,6 +798,11 @@ cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition =
           getOption("scb_labels", scb_labels)$add_step, class = "cb_add_step btn-sm",
           icon = getOption("scb_icons", scb_icons)$add_step,
           onclick = .trigger_action_js(add_step_action, ns = ns)
+        ),
+        button(
+          getOption("scb_labels", scb_labels)$manage_step, class = "cb_manage_step btn-sm",
+          icon = getOption("scb_icons", scb_icons)$manage_step,
+          onclick = .trigger_action_js("manage_step_modal", ns = ns)
         )
       ),
       shinyGizmo::accordion(
@@ -869,6 +877,7 @@ cb_server <- function(id, cohort, run_button = "none", stats = c("pre", "post"),
       }
 
       shiny::onStop(function() {
+
         cohort$attributes$session <- NULL
         cohort$attributes$run_button <- NULL
         cohort$attributes$stats <- NULL

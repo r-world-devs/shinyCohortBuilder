@@ -34,7 +34,7 @@ dataset_help_icon <- function(cohort, dataset_name, ns) {
 dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
   stats_id <- ns(paste0(step_id, "-stats_", dataset_name))
   shiny::div(
-    class = "cb_filters_group",
+    class = c("cb_filters_group", dataset_name),
     shiny::tags$strong(dataset_name),
     dataset_help_icon(cohort, dataset_name, ns),
     shiny::htmlOutput(stats_id, inline = TRUE, style = "float: right; "),
@@ -235,4 +235,9 @@ autofilter.tblist <- function(source, attach_as = c("step", "meta"), ...) {
   choices$name <- gsub("\"", "'", choices$name) # prevents invalid interpolation for setting labels
 
   shinyWidgets::prepare_choices(choices, name, id, dataset)
+}
+
+
+.filter_position.tblist <- function(source, step_id, filter, ns, ...) {
+  return(glue::glue('#{ns(step_id)} .{filter$get_params("dataset")}'))
 }
