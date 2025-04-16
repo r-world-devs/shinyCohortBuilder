@@ -544,8 +544,8 @@ gui_rm_step <- function(cohort, changed_input, session) {
 gui_manage_step_modal <- function(cohort, changed_input, session) {
   ns <- session$ns
 
-  print_state("add_step_modal", changed_input)
-  input_state("add_step_modal", changed_input)
+  print_state("manage_step_modal", changed_input)
+  input_state("manage_step_modal", changed_input)
 
   available_filters <- cohort$attributes$available_filters
 
@@ -603,7 +603,6 @@ gui_manage_step_modal <- function(cohort, changed_input, session) {
 gui_manage_step_configured <- function(cohort, changed_input, session) {
 
   run_on_request <- !is_none(cohort$attributes$run_button)
-  force_render <- getOption("scb_render_all", default = FALSE)
 
   print_state("manage_step", changed_input)
   input_state("manage_step", changed_input)
@@ -630,6 +629,7 @@ gui_manage_step_configured <- function(cohort, changed_input, session) {
       step_id = step_id,
       run_flow = FALSE
     )
+    cohort$update_cache(step_id, filter$id, state = "pre")
   }
 
   for (filter_id in to_rm_ids) {

@@ -41,4 +41,4 @@ librarian_cohort <- cohort(
   )
 )
 
-gui(librarian_cohort, manage_step = TRUE)
+gui(librarian_cohort, manage_step = TRUE, run_button = "global")
