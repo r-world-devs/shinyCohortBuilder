@@ -44,6 +44,9 @@ cb_server(
 Possible options are: "clone" - copy filters from last step,
 "configure" - opening modal and allow to chose filters from available filters.}
 
+\item{manage_step}{When `TRUE`, enables feature, that alows to modify the latest step filters (add/remove them).
+Available list of filters used by the feature should be stores as `source$attributes$available_filters` object.}
+
 \item{cohort}{Cohort object storing filtering steps configuration.}
 
 \item{run_button}{Should Run button be displayed? If so, the current step computations are run only when clicked.
@@ -110,5 +113,62 @@ if (interactive()) {
 
   shinyApp(ui, server)
 }
+if (interactive()) {
+  # enabling latest step filters management
+  library(cohortBuilder)
+  library(shiny)
+  library(shinyCohortBuilder)
 
+  librarian_source <- set_source(as.tblist(librarian))
+  librarian_source$attributes$available_filters <- list(
+    filter(
+      "discrete", id = "author", dataset = "books",
+      variable = "author", value = "Dan Brown",
+      active = FALSE
+    ),
+    filter(
+      "range", id = "copies", dataset = "books",
+      variable = "copies", range = c(5, 10),
+      active = FALSE
+    ),
+    filter(
+      "date_range", id = "registered", dataset = "borrowers",
+      variable = "registered", range = c(as.Date("2010-01-01"), Inf),
+      active = FALSE
+    ),
+    filter(
+      "discrete", id = "program", dataset = "borrowers",
+      variable = "program", value = NA,
+      active = FALSE
+    )
+  )
+  librarian_cohort <- cohort(
+    librarian_source,
+    filter(
+      "range", id = "copies", dataset = "books",
+      variable = "copies", range = c(5, 10),
+      active = FALSE
+    ),
+    filter(
+      "date_range", id = "registered", dataset = "borrowers",
+      variable = "registered", range = c(as.Date("2010-01-01"), Inf),
+      active = FALSE
+    )
+  )
+
+  ui <- fluidPage(
+    sidebarLayout(
+      sidebarPanel(
+        cb_ui("librarian", manage_step = TRUE)
+      ),
+      mainPanel()
+    )
+  )
+
+  server <- function(input, output, session) {
+    cb_server("librarian", librarian_cohort)
+  }
+
+  shinyApp(ui, server)
+}
 }

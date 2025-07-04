@@ -676,6 +676,8 @@ restore_attribute <- function(cohort, attribute, value) {
 #' @inheritParams demo_app
 #' @param id Id of the module used to render the panel.
 #' @param ... Extra attributes passed to the panel div container.
+#' @param manage_step When `TRUE`, enables feature, that alows to modify the latest step filters (add/remove them).
+#'   Available list of filters used by the feature should be stores as `source$attributes$available_filters` object.
 #' @return Nested list of `shiny.tag` objects - html structure of filtering panel module.
 #'
 #' @examples
@@ -719,7 +721,64 @@ restore_attribute <- function(cohort, attribute, value) {
 #'
 #'   shinyApp(ui, server)
 #' }
+#' if (interactive()) {
+#'   # enabling latest step filters management
+#'   library(cohortBuilder)
+#'   library(shiny)
+#'   library(shinyCohortBuilder)
 #'
+#'   librarian_source <- set_source(as.tblist(librarian))
+#'   librarian_source$attributes$available_filters <- list(
+#'     filter(
+#'       "discrete", id = "author", dataset = "books",
+#'       variable = "author", value = "Dan Brown",
+#'       active = FALSE
+#'     ),
+#'     filter(
+#'       "range", id = "copies", dataset = "books",
+#'       variable = "copies", range = c(5, 10),
+#'       active = FALSE
+#'     ),
+#'     filter(
+#'       "date_range", id = "registered", dataset = "borrowers",
+#'       variable = "registered", range = c(as.Date("2010-01-01"), Inf),
+#'       active = FALSE
+#'     ),
+#'     filter(
+#'       "discrete", id = "program", dataset = "borrowers",
+#'       variable = "program", value = NA,
+#'       active = FALSE
+#'     )
+#'   )
+#'   librarian_cohort <- cohort(
+#'     librarian_source,
+#'     filter(
+#'       "range", id = "copies", dataset = "books",
+#'       variable = "copies", range = c(5, 10),
+#'       active = FALSE
+#'     ),
+#'     filter(
+#'       "date_range", id = "registered", dataset = "borrowers",
+#'       variable = "registered", range = c(as.Date("2010-01-01"), Inf),
+#'       active = FALSE
+#'     )
+#'   )
+#'
+#'   ui <- fluidPage(
+#'     sidebarLayout(
+#'       sidebarPanel(
+#'         cb_ui("librarian", manage_step = TRUE)
+#'       ),
+#'       mainPanel()
+#'     )
+#'   )
+#'
+#'   server <- function(input, output, session) {
+#'     cb_server("librarian", librarian_cohort)
+#'   }
+#'
+#'   shinyApp(ui, server)
+#' }
 #' @export
 cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition = TRUE,
                   new_step = c("clone", "configure"), manage_step = FALSE) {

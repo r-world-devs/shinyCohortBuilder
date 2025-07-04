@@ -64,7 +64,7 @@ scb_labels <- list(
   "filter_discrete_text_bttn_label" = "Set Values",
   "filter_query_bttn_label" = "Set Query",
   "filter_show_query_bttn_label" = "Show Query",
-  "manage_step" = "Manage Step"
+  "manage_step" = "Manage Last Step"
 )
 
 #' Default filtering panel icons

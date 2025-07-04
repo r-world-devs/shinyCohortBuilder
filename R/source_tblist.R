@@ -249,7 +249,7 @@ autofilter.tblist <- function(source, attach_as = c("step", "meta"), ...) {
   shinyWidgets::prepare_choices(choices, name, id, dataset)
 }
 
-
+#' @rdname filter-position
 .filter_position.tblist <- function(source, step_id, filter, ns, ...) {
   return(glue::glue('#{ns(step_id)} .{filter$get_params("dataset")}'))
 }

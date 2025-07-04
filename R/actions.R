@@ -504,6 +504,7 @@ gui_add_step_filter <- function(step_id, filter_id, cohort, session) {
   step_filter_target_id <- .filter_position(cohort$get_source(), step_id = step_id, filter = filter, ns = ns)
 
   filter_ui <- .render_filter(filter, step_id, cohort, ns)
+
   shiny::insertUI(
     selector = step_filter_target_id,
     where = "beforeEnd",
@@ -593,7 +594,7 @@ gui_manage_step_modal <- function(cohort, changed_input, session) {
         ),
         shiny::modalButton("Dismiss")
       ),
-      title = "Manage step filters",
+      title = "Manage last step filters",
       size = "m",
       easyClose = TRUE
     )
