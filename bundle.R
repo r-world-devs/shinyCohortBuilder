@@ -1,4 +1,4 @@
-packer::bundle()
+packer::bundle() # or run npm run production
 
 output_js <- "./inst/www/scb.js"
 

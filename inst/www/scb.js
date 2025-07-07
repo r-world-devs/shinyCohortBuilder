@@ -81,6 +81,19 @@ const update_class = function(message) {
 };
 Shiny.addCustomMessageHandler('update_class', update_class);
 
+const validate_filter_groups = function(message) {
+  var group_selectors = $('#' + message.ns_prefix + message.step_id + ' .cb_filters_group');
+  group_selectors.each(function() {
+    $el = $(this);
+    if ($el.find('.cb_filter').length > 0) {
+      $el.removeClass('no-filters');
+    } else {
+      $el.addClass('no-filters');
+    }
+  });
+};
+Shiny.addCustomMessageHandler('validate_filter_groups', validate_filter_groups);
+
 var exec_event = {};
 $(document).on('shiny:inputchanged', function(event) {
   var event_el = event.target;
