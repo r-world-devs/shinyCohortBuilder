@@ -5,7 +5,6 @@ get_filter_dataset <- function(filter) {
 group_filters <- function(source, filters) {
   datasets <- names(source$dtconn)
   data_filters <- purrr::map_chr(filters, get_filter_dataset)
-  datasets <- intersect(datasets, data_filters)
   ordered_filters <- list()
   for (dataset in datasets) {
     ordered_filters <- append(
@@ -33,8 +32,12 @@ dataset_help_icon <- function(cohort, dataset_name, ns) {
 
 dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
   stats_id <- ns(paste0(step_id, "-stats_", dataset_name))
+  no_filters_class <- ""
+  if (length(filters) == 0) {
+    no_filters_class <- "no-filters"
+  }
   shiny::div(
-    class = "cb_filters_group",
+    class = c("cb_filters_group", dataset_name, no_filters_class),
     shiny::tags$strong(dataset_name),
     dataset_help_icon(cohort, dataset_name, ns),
     shiny::htmlOutput(stats_id, inline = TRUE, style = "float: right; "),
@@ -247,4 +250,9 @@ autofilter.tblist <- function(source, attach_as = c("step", "meta"), ...) {
   choices$name <- gsub("\"", "'", choices$name) # prevents invalid interpolation for setting labels
 
   shinyWidgets::prepare_choices(choices, name, id, dataset)
+}
+
+#' @rdname filter-position
+.filter_position.tblist <- function(source, step_id, filter, ns, ...) {
+  return(glue::glue('#{ns(step_id)} .{filter$get_params("dataset")}'))
 }

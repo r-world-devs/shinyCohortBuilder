@@ -72,6 +72,14 @@ div.cb_container .cb_no_attrition {
   padding: 1px 5px;
 }
 
+.cb_filters_group.no-filters {
+  visibility: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  max-height: 0 !important;
+}
+
 .cb_filter_content.cb_no_data {
   margin-bottom: 0.5em;
 }

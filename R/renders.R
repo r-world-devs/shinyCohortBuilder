@@ -377,6 +377,8 @@ render_steps <- function(cohort, session, init = TRUE) {
         add_step_modal = gui_show_step_filter_modal,
         add_step_configure = gui_add_step_configured,
         rm_step = gui_rm_step,
+        manage_step_modal = gui_manage_step_modal,
+        manage_step_configure = gui_manage_step_configured,
         clear_step = gui_clear_step,
         update_step = gui_update_step,
         update_data_stats = gui_update_data_stats,
@@ -674,6 +676,8 @@ restore_attribute <- function(cohort, attribute, value) {
 #' @inheritParams demo_app
 #' @param id Id of the module used to render the panel.
 #' @param ... Extra attributes passed to the panel div container.
+#' @param manage_step When `TRUE`, enables feature, that alows to modify the latest step filters (add/remove them).
+#'   Available list of filters used by the feature should be stores as `source$attributes$available_filters` object.
 #' @return Nested list of `shiny.tag` objects - html structure of filtering panel module.
 #'
 #' @examples
@@ -717,9 +721,67 @@ restore_attribute <- function(cohort, attribute, value) {
 #'
 #'   shinyApp(ui, server)
 #' }
+#' if (interactive()) {
+#'   # enabling latest step filters management
+#'   library(cohortBuilder)
+#'   library(shiny)
+#'   library(shinyCohortBuilder)
 #'
+#'   librarian_source <- set_source(as.tblist(librarian))
+#'   librarian_source$attributes$available_filters <- list(
+#'     filter(
+#'       "discrete", id = "author", dataset = "books",
+#'       variable = "author", value = "Dan Brown",
+#'       active = FALSE
+#'     ),
+#'     filter(
+#'       "range", id = "copies", dataset = "books",
+#'       variable = "copies", range = c(5, 10),
+#'       active = FALSE
+#'     ),
+#'     filter(
+#'       "date_range", id = "registered", dataset = "borrowers",
+#'       variable = "registered", range = c(as.Date("2010-01-01"), Inf),
+#'       active = FALSE
+#'     ),
+#'     filter(
+#'       "discrete", id = "program", dataset = "borrowers",
+#'       variable = "program", value = NA,
+#'       active = FALSE
+#'     )
+#'   )
+#'   librarian_cohort <- cohort(
+#'     librarian_source,
+#'     filter(
+#'       "range", id = "copies", dataset = "books",
+#'       variable = "copies", range = c(5, 10),
+#'       active = FALSE
+#'     ),
+#'     filter(
+#'       "date_range", id = "registered", dataset = "borrowers",
+#'       variable = "registered", range = c(as.Date("2010-01-01"), Inf),
+#'       active = FALSE
+#'     )
+#'   )
+#'
+#'   ui <- fluidPage(
+#'     sidebarLayout(
+#'       sidebarPanel(
+#'         cb_ui("librarian", manage_step = TRUE)
+#'       ),
+#'       mainPanel()
+#'     )
+#'   )
+#'
+#'   server <- function(input, output, session) {
+#'     cb_server("librarian", librarian_cohort)
+#'   }
+#'
+#'   shinyApp(ui, server)
+#' }
 #' @export
-cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition = TRUE, new_step = c("clone", "configure")) {
+cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition = TRUE,
+                  new_step = c("clone", "configure"), manage_step = FALSE) {
   ns <- shiny::NS(id)
   no_steps_class <- if (steps) "" else "cb_no_steps"
   no_state_class <- if (state) "" else "cb_no_state"
@@ -795,6 +857,11 @@ cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition =
           getOption("scb_labels", scb_labels)$add_step, class = "cb_add_step btn-sm",
           icon = getOption("scb_icons", scb_icons)$add_step,
           onclick = .trigger_action_js(add_step_action, ns = ns)
+        ),
+        button(
+          getOption("scb_labels", scb_labels)$manage_step, class = "cb_manage_step btn-sm",
+          icon = getOption("scb_icons", scb_icons)$manage_step,
+          onclick = .trigger_action_js("manage_step_modal", ns = ns)
         )
       ),
       shinyGizmo::accordion(
@@ -869,6 +936,7 @@ cb_server <- function(id, cohort, run_button = "none", stats = c("pre", "post"),
       }
 
       shiny::onStop(function() {
+
         cohort$attributes$session <- NULL
         cohort$attributes$run_button <- NULL
         cohort$attributes$stats <- NULL

@@ -16,7 +16,8 @@ gui(
   code = TRUE,
   attrition = TRUE,
   show_help = TRUE,
-  new_step = c("clone", "configure")
+  new_step = c("clone", "configure"),
+  manage_step = FALSE
 )
 }
 \arguments{

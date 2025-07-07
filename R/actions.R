@@ -367,9 +367,15 @@ update_next_step <- function(cohort, step_id, reset, session) {
   }
 }
 
+overwrite_input_handler <- list(
+  "sw.airdatepicker" = function() ...
+)
+
 input_val_handler <- function(val, binding) {
   handler <- NULL
-  if (length(binding) && binding != "" && !is.na(binding)) {
+  if (binding %in% names(overwrite_input_handler)) {
+    handler <- overwrite_input_handler
+  } else if (length(binding) && binding != "" && !is.na(binding)) {
     handler <- `%:::%`("shiny", "inputHandlers")$get(binding)
   }
   if (!is.null(handler)) {
@@ -484,6 +490,45 @@ insert_filter <- function(step_id, filter_id, cohort, session) {
   return(invisible(TRUE))
 }
 
+gui_add_step_filter <- function(step_id, filter_id, cohort, session) {
+
+  ns <- session$ns
+  step_filter_id <- sf_id(step_id, filter_id)
+
+  cohort$modify(function(public, private) {
+    private$steps[[step_id]]$filters[[filter_id]] <- attach_filter_gui(
+      private$steps[[step_id]]$filters[[filter_id]]
+    )
+  })
+  filter <- cohort$get_filter(step_id, filter_id)
+  step_filter_target_id <- .filter_position(cohort$get_source(), step_id = step_id, filter = filter, ns = ns)
+
+  filter_ui <- .render_filter(filter, step_id, cohort, ns)
+
+  shiny::insertUI(
+    selector = step_filter_target_id,
+    where = "beforeEnd",
+    ui = filter_ui,
+    immediate = TRUE,
+    session = session
+  )
+}
+
+gui_rm_step_filter <- function(step_id, filter_id, cohort, session) {
+  ns <- session$ns
+  step_filter_id <- sf_id(step_id, filter_id)
+  session$userData$rendered_filters <- setdiff(
+    session$userData$rendered_filters,
+    ns(step_filter_id)
+  )
+
+  shiny::removeUI(
+    selector = glue::glue("#{ns(step_filter_id)}"),
+    immediate = TRUE,
+    session = session
+  )
+}
+
 gui_rm_step <- function(cohort, changed_input, session) {
   ns <- session$ns
 
@@ -495,6 +540,125 @@ gui_rm_step <- function(cohort, changed_input, session) {
   clear_step_data(changed_input$step_id, session)
   shiny::removeUI(glue::glue("#{ns(changed_input$step_id)}"), session = session, immediate = TRUE)
   session$sendCustomMessage("post_rm_step_action", list(id = changed_input$step_id, ns_prefix = ns("")))
+}
+
+gui_manage_step_modal <- function(cohort, changed_input, session) {
+  ns <- session$ns
+
+  print_state("manage_step_modal", changed_input)
+  input_state("manage_step_modal", changed_input)
+
+  available_filters <- cohort$attributes$available_filters
+
+  if (length(available_filters) == 0) {
+    warning_nl("`available_filters` was not defined, configure step will not be working. Cloning last step.")
+    return(gui_add_step(cohort, changed_input, session))
+  }
+
+  choices <- .available_filters_choices(cohort$get_source(), cohort)
+  selected <- cohort$get_step(cohort$last_step_id())$filters |>
+    purrr::map_chr("id")
+  if (length(selected) == 0) {
+    selected <- NULL
+  }
+
+  shiny::showModal(
+    shiny::modalDialog(
+      shinyWidgets::virtualSelectInput(
+        ns("manage_step"),
+        label = "Choose filters",
+        choices = choices,
+        selected = selected,
+        multiple = TRUE,
+        html = TRUE,
+        search =  TRUE,
+        selectAllOnlyVisible = TRUE,
+        zIndex = 9999
+      ),
+      shiny::tags$script(
+        shiny::HTML(
+          glue::glue(
+            "$('#{ns('manage_step')}').change(function() {{",
+            "$('#{ns('manage_step_configured')}').attr('disabled', !(this.value.length > 0))}})"
+          )
+        )
+      ),
+      footer = shiny::tagList(
+        shinyGizmo::valueButton(
+          inputId = ns("manage_step_configured"),
+          label = "Accept",
+          selector = paste0("[data-id=\"", ns("manage_step"), "\"]"),
+          onclick = .trigger_action_js("manage_step_configure", ns = ns),
+          `data-dismiss` = "modal", `data-bs-dismiss` = "modal",
+          disabled = NA
+        ),
+        shiny::modalButton("Dismiss")
+      ),
+      title = "Manage last step filters",
+      size = "m",
+      easyClose = TRUE
+    )
+  )
+}
+
+gui_manage_step_configured <- function(cohort, changed_input, session) {
+
+  run_on_request <- !is_none(cohort$attributes$run_button)
+
+  print_state("manage_step", changed_input)
+  input_state("manage_step", changed_input)
+
+  step_id <- cohort$last_step_id()
+  chosen_ids <- session$input[["manage_step"]]
+  current_ids <- cohort$get_filter(step_id) |> purrr::map_chr("id")
+  to_rm_ids <- setdiff(current_ids, chosen_ids)
+  to_add_ids <- setdiff(chosen_ids, current_ids)
+
+  available_filters <- cohort$attributes$available_filters
+  available_filter_ids <- purrr::map_chr(available_filters, "id")
+  available_filters <- stats::setNames(available_filters, available_filter_ids)
+
+  if (length(available_filters) == 0) {
+    stop("`available_filters` is not defined, configuring step will not be working.")
+  }
+
+  to_add_filters <- available_filters[to_add_ids]
+  for (filter in to_add_filters) {
+    filter_state <- cohortBuilder:::get_filter_state(filter, extra_fields = NULL)
+    cohort$add_filter(
+      filter = do.call(cohortBuilder::filter, filter_state),
+      step_id = step_id,
+      run_flow = FALSE
+    )
+    cohort$update_cache(step_id, filter$id, state = "pre")
+  }
+
+  for (filter_id in to_rm_ids) {
+    cohort$remove_filter(
+      filter_id = filter_id,
+      step_id = step_id,
+      run_flow = FALSE
+    )
+  }
+
+  if (run_on_request) {
+    trigger_pending_state(step_id, "add", session)
+  }
+
+  if (!run_on_request) {
+    cohort$run_step(step_id)
+  }
+
+  for (filter in to_add_filters) {
+    gui_add_step_filter(step_id = step_id, filter_id = filter$id, cohort = cohort, session = session)
+  }
+  for (filter_id in to_rm_ids) {
+    gui_rm_step_filter(step_id = step_id, filter_id = filter_id, cohort = cohort, session = session)
+  }
+  session$sendCustomMessage(
+    "validate_filter_groups",
+    list(step_id = step_id, ns_prefix = session$ns(""))
+  )
 }
 
 gui_run_step <- function(cohort, changed_input, session) {
@@ -666,7 +830,7 @@ gui_show_step_filter_modal <- function(cohort, changed_input, session) {
     shiny::modalDialog(
       shinyWidgets::virtualSelectInput(
         ns("configure_step"),
-        label = "Chose filters",
+        label = "Choose filters",
         choices = choices,
         multiple = TRUE,
         html = TRUE,
@@ -698,7 +862,6 @@ gui_show_step_filter_modal <- function(cohort, changed_input, session) {
       easyClose = TRUE
     )
   )
-
 }
 
 trigger_pending_state <- function(step_id, action, session) {
