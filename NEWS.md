@@ -1,4 +1,4 @@
-# shinyCohortBuilder (development version)
+# shinyCohortBuilder 0.4.0
 
 * Add an option to manage (add / remove) last step filters.
 * Fix updating discrete filter through its feedback plot when post stats are turned off.
