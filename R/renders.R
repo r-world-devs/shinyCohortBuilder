@@ -677,7 +677,8 @@ restore_attribute <- function(cohort, attribute, value) {
 #' @param id Id of the module used to render the panel.
 #' @param ... Extra attributes passed to the panel div container.
 #' @param manage_step When `TRUE`, enables feature, that alows to modify the latest step filters (add/remove them).
-#'   Available list of filters used by the feature should be stores as `source$attributes$available_filters` object.
+#'   Available list of filters used by the feature should be stored as `source$available_filters` object (can be
+#'   defined with `available_filters` argument for \link{set_source}).
 #' @return Nested list of `shiny.tag` objects - html structure of filtering panel module.
 #'
 #' @examples
@@ -727,27 +728,29 @@ restore_attribute <- function(cohort, attribute, value) {
 #'   library(shiny)
 #'   library(shinyCohortBuilder)
 #'
-#'   librarian_source <- set_source(as.tblist(librarian))
-#'   librarian_source$attributes$available_filters <- list(
-#'     filter(
-#'       "discrete", id = "author", dataset = "books",
-#'       variable = "author", value = "Dan Brown",
-#'       active = FALSE
-#'     ),
-#'     filter(
-#'       "range", id = "copies", dataset = "books",
-#'       variable = "copies", range = c(5, 10),
-#'       active = FALSE
-#'     ),
-#'     filter(
-#'       "date_range", id = "registered", dataset = "borrowers",
-#'       variable = "registered", range = c(as.Date("2010-01-01"), Inf),
-#'       active = FALSE
-#'     ),
-#'     filter(
-#'       "discrete", id = "program", dataset = "borrowers",
-#'       variable = "program", value = NA,
-#'       active = FALSE
+#'   librarian_source <- set_source(
+#'     as.tblist(librarian),
+#'     available_filters = list(
+#'       filter(
+#'         "discrete", id = "author", dataset = "books",
+#'         variable = "author", value = "Dan Brown",
+#'         active = FALSE
+#'       ),
+#'       filter(
+#'         "range", id = "copies", dataset = "books",
+#'         variable = "copies", range = c(5, 10),
+#'         active = FALSE
+#'       ),
+#'       filter(
+#'         "date_range", id = "registered", dataset = "borrowers",
+#'         variable = "registered", range = c(as.Date("2010-01-01"), Inf),
+#'         active = FALSE
+#'       ),
+#'       filter(
+#'         "discrete", id = "program", dataset = "borrowers",
+#'         variable = "program", value = NA,
+#'         active = FALSE
+#'       )
 #'     )
 #'   )
 #'   librarian_cohort <- cohort(
@@ -781,12 +784,15 @@ restore_attribute <- function(cohort, attribute, value) {
 #' }
 #' @export
 cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition = TRUE,
-                  new_step = c("clone", "configure"), manage_step = FALSE) {
+                  new_step = c("clone", "configure"), manage_step = FALSE, assistant = FALSE) {
   ns <- shiny::NS(id)
   no_steps_class <- if (steps) "" else "cb_no_steps"
   no_state_class <- if (state) "" else "cb_no_state"
   no_code_class <- if (code) "" else "cb_no_code"
   no_attrition_class <- if (attrition) "" else "cb_no_attrition"
+  no_manage_step_class <- if (manage_step) "" else "cb_no_manage_step"
+  no_assistant_class <- if (assistant) "" else "cb_no_assistant"
+  assistant_modal_id <- ns("cohort-assistant")
 
   new_step <- rlang::arg_match(new_step)
   add_step_action <- switch(new_step,
@@ -859,9 +865,23 @@ cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition =
           onclick = .trigger_action_js(add_step_action, ns = ns)
         ),
         button(
-          getOption("scb_labels", scb_labels)$manage_step, class = "cb_manage_step btn-sm",
+          getOption("scb_labels", scb_labels)$manage_step,
+          class = c("cb_manage_step btn-sm", no_manage_step_class),
           icon = getOption("scb_icons", scb_icons)$manage_step,
           onclick = .trigger_action_js("manage_step_modal", ns = ns)
+        ),
+        button(
+          getOption("scb_labels", scb_labels)$show_assistant,
+          class = c("cb_show_assistant btn-sm", no_assistant_class),
+          icon = getOption("scb_icons", scb_icons)$show_assistant,
+          `data-bs-toggle` = "modal", `data-bs-target` = glue::glue("#{assistant_modal_id}")
+        ),
+        shinyGizmo::modalDialogUI(
+          modalId = assistant_modal_id,
+          button = NULL,
+          cb_chat_ui(ns("chat")),
+          easyClose = TRUE,
+          footer = shiny::modalButton("Close")
         )
       ),
       shinyGizmo::accordion(

@@ -194,7 +194,7 @@ Details:
 
 - Generate filters based on Source data (i.e. column types) using `cohortBuilder::filter`.
 - When `attach_as = "step"` wrap them with `cohortBuilder::step` and attach to the Source using `add_step` method.
-- When `attach_as = "meta"` attach filters to the `available_filters` Source attribute (`source$attributes$available_filters`).
+- When `attach_as = "meta"` attach filters to the `available_filters` Source element (`source$available_filters`).
 - The method should return Source object.
 
 Examples:
@@ -211,7 +211,7 @@ autofilter.tblist <- function(source, attach_as = c("step", "meta"), ...) {
     unname()
 
   if (identical(attach_as, "meta")) {
-    source$attributes$available_filters <- step_rule
+    source$available_filters <- step_rule
   } else {
     source %>%
       cohortBuilder::add_step(do.call(cohortBuilder::step, step_rule))

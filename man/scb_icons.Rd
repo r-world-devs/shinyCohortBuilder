@@ -5,7 +5,7 @@
 \alias{scb_icons}
 \title{Default filtering panel icons}
 \format{
-An object of class \code{list} of length 16.
+An object of class \code{list} of length 17.
 }
 \usage{
 scb_icons

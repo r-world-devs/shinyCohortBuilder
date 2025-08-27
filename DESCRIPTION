@@ -78,4 +78,5 @@ Collate:
     'cb_layer.R'
     'source.R'
     'source_tblist.R'
+    'chat.R'
 Config/testthat/edition: 3

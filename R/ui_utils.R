@@ -64,7 +64,8 @@ scb_labels <- list(
   "filter_discrete_text_bttn_label" = "Set Values",
   "filter_query_bttn_label" = "Set Query",
   "filter_show_query_bttn_label" = "Show Query",
-  "manage_step" = "Manage Last Step"
+  "manage_step" = "Manage Last Step",
+  "show_assistant" = "Open Assistant"
 )
 
 #' Default filtering panel icons
@@ -88,7 +89,8 @@ scb_icons <- list(
   "filter_query_bttn_icon" = shiny::icon("arrow-pointer"),
   "filter_show_query_bttn_icon" = shiny::icon("eye"),
   "dataset_help_icon" = shiny::icon("question-circle"),
-  "manage_step" = shiny::icon("pen-to-square")
+  "manage_step" = shiny::icon("pen-to-square"),
+  "show_assistant" = shiny::icon("user")
 )
 
 #' Default color palette used for filter feedback plots

@@ -314,7 +314,7 @@ gui <- function(
     stop("Message - gui can be used in interactive mode only.")
   }
   new_step <- rlang::arg_match(new_step)
-  if (identical(new_step, "configure") && length(cohort$get_source()$get("available_filters")) == 0) {
+  if (identical(new_step, "configure") && length(cohort$get_source()$available_filters) == 0) {
     stop("The `available_filters` in the cohort source wasn't defined.")
   }
 

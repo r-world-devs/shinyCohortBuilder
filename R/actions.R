@@ -417,9 +417,6 @@ gui_update_filter <- function(cohort, changed_input, session) {
 
   step_id <- changed_input$step_id
   filter_id <- changed_input$filter_id
-  data_filter <- cohort$get_filter(step_id, filter_id)
-
-  force_render <- getOption("scb_render_all", default = FALSE)
 
   print_state("update_filter", changed_input)
   input_state("update_filter", changed_input)
@@ -431,42 +428,12 @@ gui_update_filter <- function(cohort, changed_input, session) {
   changed_input <- convert_input_value(changed_input, step_id, filter_id, cohort, update_active)
   do.call(
     cohort$update_filter,
-    changed_input
+    changed_input,
+    hook_args = list(
+      pre = list(),
+      post = list(update_active = update_active, update = update)
+    )
   )
-  if (!run_on_request) {
-    cohort$run_step(step_id)
-  }
-
-  run_update <- TRUE
-  if (!force_render && !is.null(changed_input$active)) {
-    run_update <- !insert_filter(step_id, filter_id, cohort, session)
-  }
-  filter_stats <- if_null_default(
-    data_filter$get_params("stats"),
-    cohort$attributes$stats
-  )
-  post_stats_visible <- "post" %in% filter_stats
-  if (run_update) {
-    update <- c(update, "plot", "multi_input")
-    if (!run_on_request && post_stats_visible) {
-      update <- c(update, "post_input")
-    }
-    update_filter_gui(cohort, step_id, filter_id, update, FALSE, session)
-  }
-
-  if (!run_on_request && ("post" %in% cohort$attributes$stats)) {
-    update <- "post_input"
-    gui_update_filters_loop(cohort, step_id, FALSE, update, exclude = filter_id, session)
-  }
-
-  if (update_active) {
-    gui_update_filter_class(step_id, filter_id, changed_input$active, "hidden-input", session)
-  }
-
-  if (is_none(cohort$attributes$run_button)) {
-    gui_update_data_stats(cohort, list(step_id = step_id), session)
-    update_next_step(cohort, step_id, FALSE, session)
-  }
 }
 
 insert_filter <- function(step_id, filter_id, cohort, session) {
@@ -764,17 +731,8 @@ gui_add_step <- function(cohort, changed_input, session) {
     cohort$copy_step(run_flow = TRUE)
   }
 
-  last_step_id <- cohort$last_step_id()
+  # gui actions are handled via post_add_step_hook hook
 
-  session$sendCustomMessage("pre_add_step_action", list(id = last_step_id, ns_prefix = ns("")))
-
-  render_step(
-    cohort,
-    last_step_id,
-    active = TRUE,
-    allow_rm = TRUE,
-    session$input, session$output, session
-  )
 }
 
 gui_add_step_configured <- function(cohort, changed_input, session) {
@@ -799,16 +757,7 @@ gui_add_step_configured <- function(cohort, changed_input, session) {
     run_flow = TRUE
   )
 
-  last_step_id <- cohort$last_step_id()
-  session$sendCustomMessage("pre_add_step_action", list(id = last_step_id, ns_prefix = ns("")))
-
-  render_step(
-    cohort,
-    last_step_id,
-    active = TRUE,
-    allow_rm = TRUE,
-    session$input, session$output, session
-  )
+  # gui actions are handled via post_add_step_hook hook
 }
 
 gui_show_step_filter_modal <- function(cohort, changed_input, session) {
