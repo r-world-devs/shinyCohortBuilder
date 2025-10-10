@@ -157,7 +157,7 @@ plot_feedback_multi_bar <- function(plot_data, n_missing) {
         panel.border = ggplot2::element_rect(
           colour = "grey50",
           fill = NA,
-          size = 1
+          linewidth = 1
         ),
         panel.spacing = ggplot2::unit(c(0, 0, 0, 0), "mm")
       ) +
