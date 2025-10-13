@@ -30,7 +30,7 @@ plot_feedback_text_bar <- function(plot_data) {
         plot.background  = ggplot2::element_blank(),
         legend.position = "none",
         plot.margin = ggplot2::unit(c(1, 0, 0, 0),"mm"),
-        panel.border = ggplot2::element_rect(colour = "grey50", fill = NA, size = 1),
+        panel.border = ggplot2::element_rect(colour = "grey50", fill = NA, linewidth = 1),
         panel.spacing = ggplot2::unit(c(0, 0, 0, 0), "mm"),
         plot.subtitle = ggplot2::element_text(color = "dimgray", size = 10, face = "plain")) +
       ggplot2::labs(

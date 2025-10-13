@@ -3,6 +3,7 @@
 * Add an option to manage (add / remove) last step filters.
 * Fix updating discrete filter through its feedback plot when post stats are turned off.
 * Add gui support for `datatime_filter`.
+* Update `ggplot2` version and ajust parameter name.
 
 # shinyCohortBuilder 0.3.1
 
