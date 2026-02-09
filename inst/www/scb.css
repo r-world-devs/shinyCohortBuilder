@@ -80,11 +80,8 @@ div.cb_container .cb_no_attrition {
   max-height: 0 !important;
 }
 
-.cb_filter_content.cb_no_data {
-  margin-bottom: 0.5em;
-}
-
-.cb_filter_content.cb_no_data .cb_inputs, .cb_filter_content.cb_no_data .cb_feedback {
+.cb_no_data_placeholder.cb_no_data ~ .cb_inputs,
+.cb_no_data_placeholder.cb_no_data ~ .cb_feedback {
   visibility: hidden !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -92,8 +89,12 @@ div.cb_container .cb_no_attrition {
   max-height: 0 !important;
 }
 
-.cb_filter_content.cb_no_data:before {
-  content: 'No data in previous step';
+.cb_no_data_placeholder:not(.cb_no_data) {
+  visibility: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  max-height: 0 !important;
 }
 
 .cb_filters .dataset_tooltip > i {

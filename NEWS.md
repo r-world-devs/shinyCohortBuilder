@@ -1,9 +1,10 @@
-# shinyCohortBuilder (development version)
+# shinyCohortBuilder 0.4.0
 
+* Fix running flow (and functionality of Run Button) when at least one non-active step is stale.
 * Add an option to manage (add / remove) last step filters.
 * Fix updating discrete filter through its feedback plot when post stats are turned off.
 * Add gui support for `datatime_filter`.
-* Update `ggplot2` version and ajust parameter name.
+* Update `ggplot2` version and adjust parameter name.
 
 # shinyCohortBuilder 0.3.1
 

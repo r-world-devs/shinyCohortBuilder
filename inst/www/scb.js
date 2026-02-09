@@ -46,7 +46,7 @@ Shiny.addCustomMessageHandler('up_state', up_state);
 const update_filter_class = function(message) {
   var step_selector = '#' + message.ns_prefix + message.step_id;
   var filter_content = $(step_selector)
-    .find('div.cb_filter[data-filter_id="' + message.filter_id +'"] ' + '.cb_filter_content');
+    .find('div.cb_filter[data-filter_id="' + message.filter_id +'"] ' + message.child);
   if (message.show) {
     filter_content.removeClass(message.class);
   } else {
@@ -139,3 +139,33 @@ $(document).on('shiny:updateinput', function(event) {
     exec_event[event.target.id] = "_update-mode_";
   }
 });
+
+var are_steps_idle = function(steps_set) {
+  var $active_step_run_button = steps_set;
+  if ($active_step_run_button.length == 0) { // no existing steps means run button disabled
+    return true;
+  }
+  var local_buttons_states = $active_step_run_button.map(
+    function(index, element) {
+      return !!$(element).prop('disabled');
+    }).get();
+
+  return local_buttons_states;
+}
+
+var scb_is_idle = function(steps_container) {
+
+  var $steps_set = $(steps_container + ' .cb_run_step');
+  var steps_idle_state = are_steps_idle($steps_set);
+  var any_to_run = steps_idle_state.includes(false);
+  return !any_to_run;
+}
+
+var click_first_busy = function(steps_container) {
+  var $steps_set = $(steps_container + ' .cb_run_step');
+  var steps_busy_index = are_steps_idle($steps_set).indexOf(false);
+  var first_busy_step = $steps_set[steps_busy_index];
+  if (!!first_busy_step) {
+    $(first_busy_step).click();
+  }
+}

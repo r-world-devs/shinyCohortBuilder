@@ -46,7 +46,7 @@ Shiny.addCustomMessageHandler('up_state', up_state);
 const update_filter_class = function(message) {
   var step_selector = '#' + message.ns_prefix + message.step_id;
   var filter_content = $(step_selector)
-    .find('div.cb_filter[data-filter_id="' + message.filter_id +'"] ' + '.cb_filter_content');
+    .find('div.cb_filter[data-filter_id="' + message.filter_id +'"] ' + message.child);
   if (message.show) {
     filter_content.removeClass(message.class);
   } else {

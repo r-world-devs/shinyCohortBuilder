@@ -243,12 +243,13 @@ clear_step_data <- function(id, .session) {
   session$output[[name]] <- function() value
 }
 
-gui_update_filter_class <- function(step_id, filter_id, show, class, session) {
+gui_update_filter_class <- function(step_id, filter_id, show, class, session, child = ".cb_filter_content") {
   session$sendCustomMessage(
     "update_filter_class",
     list(
       step_id = step_id, filter_id = filter_id,
-      show = show, ns_prefix = session$ns(""), class = class
+      show = show, ns_prefix = session$ns(""),
+      class = class, child = child
     )
   )
 }
@@ -283,7 +284,10 @@ update_filter_gui <- function(cohort, step_id, filter_id, update, reset, session
     if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
       show <- FALSE
     }
-    gui_update_filter_class(step_id, filter_id, show, "cb_no_data", session)
+    gui_update_filter_class(
+      step_id, filter_id, show, "cb_no_data", session,
+      child = ".cb_filter_content .cb_no_data_placeholder"
+    )
     show_feedback <- if_null_default(
       filter$get_params("feedback"),
       cohort$attributes$feedback
@@ -668,7 +672,6 @@ gui_run_step <- function(cohort, changed_input, session) {
   input_state("run_step", changed_input)
 
   gui_update_step(cohort, changed_input, session)
-  trigger_pending_state(changed_input$step_id, "remove", session)
 }
 
 gui_show_state <- function(cohort, changed_input, session) {
@@ -899,6 +902,8 @@ gui_update_step <- function(cohort, changed_input, session) {
     changed_input$update, session = session
   )
   gui_update_data_stats(cohort, list(step_id = changed_input$step_id), session)
+
+  trigger_pending_state(changed_input$step_id, "remove", session)
 
   if (changed_input$run_flow) {
     update_next_step(cohort, changed_input$step_id, FALSE, session)
