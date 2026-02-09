@@ -140,7 +140,7 @@ $(document).on('shiny:updateinput', function(event) {
   }
 });
 
-var are_steps_idle = function(steps_set) {
+const are_steps_idle = function(steps_set) {
   var $active_step_run_button = steps_set;
   if ($active_step_run_button.length == 0) { // no existing steps means run button disabled
     return true;
@@ -151,21 +151,25 @@ var are_steps_idle = function(steps_set) {
     }).get();
 
   return local_buttons_states;
-}
+};
 
-var scb_is_idle = function(steps_container) {
+const scb_is_idle = function(steps_container) {
 
   var $steps_set = $(steps_container + ' .cb_run_step');
   var steps_idle_state = are_steps_idle($steps_set);
   var any_to_run = steps_idle_state.includes(false);
   return !any_to_run;
-}
+};
 
-var click_first_busy = function(steps_container) {
+const click_first_busy = function(steps_container) {
   var $steps_set = $(steps_container + ' .cb_run_step');
   var steps_busy_index = are_steps_idle($steps_set).indexOf(false);
   var first_busy_step = $steps_set[steps_busy_index];
   if (!!first_busy_step) {
     $(first_busy_step).click();
   }
-}
+};
+
+window.are_steps_idle = are_steps_idle;
+window.scb_is_idle = scb_is_idle;
+window.click_first_busy = click_first_busy;

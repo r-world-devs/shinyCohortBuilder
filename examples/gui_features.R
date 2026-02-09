@@ -4,7 +4,7 @@ library(shinyCohortBuilder)
 options("cb_active_filter" = FALSE)
 options("tibble.print_max" = 3)
 options("tibble.print_min" = 3)
-options("scb_minified" = FALSE)
+#options("scb_minified" = FALSE)
 librarian$books$copies[1:3] <- NA
 librarian_source <- set_source(
   as.tblist(librarian)
