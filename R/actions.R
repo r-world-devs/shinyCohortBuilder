@@ -377,9 +377,12 @@ overwrite_input_handler <- list(
 
 input_val_handler <- function(val, binding) {
   handler <- NULL
+  if (!length(binding)) {
+    binding <- ""
+  }
   if (binding %in% names(overwrite_input_handler)) {
     handler <- overwrite_input_handler
-  } else if (length(binding) && binding != "" && !is.na(binding)) {
+  } else if (binding != "" && !is.na(binding)) {
     handler <- `%:::%`("shiny", "inputHandlers")$get(binding)
   }
   if (!is.null(handler)) {
@@ -389,14 +392,15 @@ input_val_handler <- function(val, binding) {
       if (length(val) == 1) return(c(val, val))
     }
     return(val)
-  } else if (is.list(val)) {
+  }
+  if (is.list(val)) {
     if (is.null(names(val))) {
       return(unlist(val, recursive = TRUE))
     }
     return(val)
-  } else {
-    return(val)
   }
+
+  val
 }
 
 convert_input_value <- function(changed_input, step_id, filter_id, cohort, update_active) {

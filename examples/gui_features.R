@@ -33,4 +33,4 @@ librarian_cohort <- cohort(
 # librarian_cohort$get_data("1", state = "post")
 # librarian_cohort$get_code()
 
-gui(librarian_cohort, attrition = TRUE, steps = TRUE, state = TRUE, code = TRUE, run_button = "global", feedback = FALSE)
+gui(librarian_cohort, attrition = TRUE, steps = TRUE, state = TRUE, code = TRUE, run_button = "global")

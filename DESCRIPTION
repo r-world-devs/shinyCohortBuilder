@@ -34,7 +34,7 @@ Imports:
     jsonlite,
     purrr,
     ggplot2 (>= 3.4.0),
-    ggiraph,
+    ggiraph (>= 0.9.1),
     htmltools,
     shiny (>= 1.7.0),
     shinyWidgets (>= 0.7.0),
