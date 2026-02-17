@@ -28,7 +28,11 @@ const post_rm_step_action = function(message) {
 Shiny.addCustomMessageHandler('post_rm_step_action', post_rm_step_action);
 
 const inform_data_updated = function(message) {
-  Shiny.setInputValue(message.ns_prefix + 'cb_data_updated', message, {priority: 'event'});
+  step_id = '';
+  if (!!message.step_id) {
+    step_id = '_' + message.step_id;
+  }
+  Shiny.setInputValue(message.ns_prefix + 'cb_data_updated' + step_id, message, {priority: 'event'});
 };
 Shiny.addCustomMessageHandler('inform_data_updated', inform_data_updated);
 
@@ -140,7 +144,7 @@ $(document).on('shiny:updateinput', function(event) {
   }
 });
 
-const are_steps_idle = function(steps_set) {
+var are_steps_idle = function(steps_set) {
   var $active_step_run_button = steps_set;
   if ($active_step_run_button.length == 0) { // no existing steps means run button disabled
     return true;
@@ -153,15 +157,18 @@ const are_steps_idle = function(steps_set) {
   return local_buttons_states;
 };
 
-const scb_is_idle = function(steps_container) {
+var scb_is_idle = function(steps_container) {
 
   var $steps_set = $(steps_container + ' .cb_run_step');
+  if ($steps_set.length == 0) {
+    return true;
+  }
   var steps_idle_state = are_steps_idle($steps_set);
   var any_to_run = steps_idle_state.includes(false);
   return !any_to_run;
 };
 
-const click_first_busy = function(steps_container) {
+var click_first_busy = function(steps_container) {
   var $steps_set = $(steps_container + ' .cb_run_step');
   var steps_busy_index = are_steps_idle($steps_set).indexOf(false);
   var first_busy_step = $steps_set[steps_busy_index];

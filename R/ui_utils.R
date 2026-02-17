@@ -124,9 +124,12 @@ scb_chart_palette <- list(
 #' @param cohort_id Id of the cohort.
 #'
 #' @export
-cb_changed <- function(session, cohort_id) {
+cb_changed <- function(session, cohort_id, step_id = NULL) {
   ns <- session$ns
-  session$input[[ns(paste0(cohort_id, "-cb_data_updated"))]]
+  if (!is.null(step_id)) {
+    step_id <- paste0("_", step_id)
+  }
+  session$input[[ns(paste0(cohort_id, "-cb_data_updated", step_id))]]
 }
 
 

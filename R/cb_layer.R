@@ -92,6 +92,11 @@ post_run_step_hook <- function(public, private, step_id) {
     return(invisible(FALSE))
   }
 
+  session$sendCustomMessage(
+    "inform_data_updated",
+    list(step_id = step_id, ns_prefix = session$ns(""))
+  )
+
   if (step_id == public$last_step_id()) {
     session$sendCustomMessage(
       "inform_data_updated",

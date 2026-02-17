@@ -156,6 +156,9 @@ const are_steps_idle = function(steps_set) {
 const scb_is_idle = function(steps_container) {
 
   var $steps_set = $(steps_container + ' .cb_run_step');
+  if ($steps_set.length == 0) {
+    return true;
+  }
   var steps_idle_state = are_steps_idle($steps_set);
   var any_to_run = steps_idle_state.includes(false);
   return !any_to_run;
