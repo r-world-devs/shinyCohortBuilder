@@ -1307,7 +1307,9 @@ gui_clear_step <- function(cohort, changed_input, session) {
   print_state("clear_step", changed_input)
   input_state("clear_step", changed_input)
 
-  reset_filters(cohort, changed_input$step_id)
+  if (isTRUE(changed_input$reset)) {
+    reset_filters(cohort, changed_input$step_id)
+  }
 
   if (!is_none(cohort$attributes$run_button)) {
     trigger_pending_state(changed_input$step_id, "add", session)

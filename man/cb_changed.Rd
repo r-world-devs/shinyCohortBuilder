@@ -4,7 +4,7 @@
 \alias{cb_changed}
 \title{Track changes of cohort data in Shiny}
 \usage{
-cb_changed(session, cohort_id)
+cb_changed(session, cohort_id, step_id = NULL)
 }
 \arguments{
 \item{session}{Shiny session object.}
