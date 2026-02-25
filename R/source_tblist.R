@@ -253,6 +253,7 @@ autofilter.tblist <- function(source, attach_as = c("step", "meta"), ...) {
 }
 
 #' @rdname filter-position
+#' @export
 .filter_position.tblist <- function(source, step_id, filter, ns, ...) {
   return(glue::glue('#{ns(step_id)} .{filter$get_params("dataset")}'))
 }
