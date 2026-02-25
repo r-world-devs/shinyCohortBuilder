@@ -195,7 +195,7 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
       shinyWidgets::prettySwitch(
         inputId = ns(active_id), label = filter$name,
         value = active_filter, inline = TRUE
-      ) |> htmltools::tagAppendAttributes(class = "cb_activate_filter"),
+      ) %>% htmltools::tagAppendAttributes(class = "cb_activate_filter"),
       "active"
     ),
     shiny::div(

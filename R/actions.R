@@ -564,7 +564,7 @@ gui_manage_step_modal <- function(cohort, changed_input, session) {
   }
 
   choices <- .available_filters_choices(cohort$get_source(), cohort)
-  selected <- cohort$get_step(cohort$last_step_id())$filters |>
+  selected <- cohort$get_step(cohort$last_step_id())$filters %>%
     purrr::map_chr("id")
   if (length(selected) == 0) {
     selected <- NULL
@@ -618,7 +618,7 @@ gui_manage_step_configured <- function(cohort, changed_input, session) {
 
   step_id <- cohort$last_step_id()
   chosen_ids <- session$input[["manage_step"]]
-  current_ids <- cohort$get_filter(step_id) |> purrr::map_chr("id")
+  current_ids <- cohort$get_filter(step_id) %>% purrr::map_chr("id")
   to_rm_ids <- setdiff(current_ids, chosen_ids)
   to_add_ids <- setdiff(chosen_ids, current_ids)
 

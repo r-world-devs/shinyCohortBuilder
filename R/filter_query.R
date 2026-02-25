@@ -105,7 +105,7 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
         parent_specs[[.x]], .x, !!!gui_args$filters[[.x]],
         .queryBuilderConfig = queryBuilder::queryBuilderConfig
       )
-    ) |>
+    ) %>%
     purrr::map(~rlang::inject(shinyQueryBuilder::queryFilter(!!!.x)))
   gui_args$filters <- NULL
   selected_value <- adapt_rules_to_limits(
