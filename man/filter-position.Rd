@@ -7,20 +7,22 @@
 \alias{.filter_position.tblist}
 \title{Create target filter position in UI panel}
 \usage{
-.filter_position(source, step_id, filter, ...)
+.filter_position(source, step_id, filter, ns, ...)
 
-\method{.filter_position}{default}(source, step_id, filter, ...)
+\method{.filter_position}{default}(source, step_id, filter, ns, ...)
 
 \method{.filter_position}{tblist}(source, step_id, filter, ns, ...)
 }
 \arguments{
+\item{source}{Source object.}
+
 \item{step_id}{Id of the step that filter belong to.}
 
+\item{filter}{Filter object.}
+
+\item{ns}{Namespace function.}
+
 \item{...}{Extra arguments passed to related method.}
-
-\item{Source}{Source object.}
-
-\item{name}{filter Filter object.}
 }
 \description{
 Create target filter position in UI panel

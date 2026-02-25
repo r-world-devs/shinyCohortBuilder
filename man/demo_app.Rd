@@ -16,6 +16,7 @@ demo_app(
   attrition = TRUE,
   show_help = TRUE,
   new_step = c("clone", "configure"),
+  manage_step = FALSE,
   ...,
   run_app = TRUE
 )
@@ -49,6 +50,8 @@ See \link[bslib]{bs_theme} version argument.}
 \item{new_step}{Choose which add step method should be used for creating new step.
 Possible options are: "clone" - copy filters from last step,
 "configure" - opening modal and allow to chose filters from available filters.}
+
+\item{manage_step}{Set to TRUE to enable managing filters tool.}
 
 \item{...}{Extra parameters passed to selected cohort methods.
 Currently unused.}

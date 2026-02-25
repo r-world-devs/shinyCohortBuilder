@@ -243,12 +243,13 @@ clear_step_data <- function(id, .session) {
   session$output[[name]] <- function() value
 }
 
-gui_update_filter_class <- function(step_id, filter_id, show, class, session) {
+gui_update_filter_class <- function(step_id, filter_id, show, class, session, child = ".cb_filter_content") {
   session$sendCustomMessage(
     "update_filter_class",
     list(
       step_id = step_id, filter_id = filter_id,
-      show = show, ns_prefix = session$ns(""), class = class
+      show = show, ns_prefix = session$ns(""),
+      class = class, child = child
     )
   )
 }
@@ -283,7 +284,10 @@ update_filter_gui <- function(cohort, step_id, filter_id, update, reset, session
     if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
       show <- FALSE
     }
-    gui_update_filter_class(step_id, filter_id, show, "cb_no_data", session)
+    gui_update_filter_class(
+      step_id, filter_id, show, "cb_no_data", session,
+      child = ".cb_filter_content .cb_no_data_placeholder"
+    )
     show_feedback <- if_null_default(
       filter$get_params("feedback"),
       cohort$attributes$feedback
@@ -373,9 +377,12 @@ overwrite_input_handler <- list(
 
 input_val_handler <- function(val, binding) {
   handler <- NULL
+  if (!length(binding)) {
+    binding <- ""
+  }
   if (binding %in% names(overwrite_input_handler)) {
     handler <- overwrite_input_handler
-  } else if (length(binding) && binding != "" && !is.na(binding)) {
+  } else if (binding != "" && !is.na(binding)) {
     handler <- `%:::%`("shiny", "inputHandlers")$get(binding)
   }
   if (!is.null(handler)) {
@@ -385,14 +392,15 @@ input_val_handler <- function(val, binding) {
       if (length(val) == 1) return(c(val, val))
     }
     return(val)
-  } else if (is.list(val)) {
+  }
+  if (is.list(val)) {
     if (is.null(names(val))) {
       return(unlist(val, recursive = TRUE))
     }
     return(val)
-  } else {
-    return(val)
   }
+
+  val
 }
 
 convert_input_value <- function(changed_input, step_id, filter_id, cohort, update_active) {
@@ -556,7 +564,7 @@ gui_manage_step_modal <- function(cohort, changed_input, session) {
   }
 
   choices <- .available_filters_choices(cohort$get_source(), cohort)
-  selected <- cohort$get_step(cohort$last_step_id())$filters |>
+  selected <- cohort$get_step(cohort$last_step_id())$filters %>%
     purrr::map_chr("id")
   if (length(selected) == 0) {
     selected <- NULL
@@ -610,7 +618,7 @@ gui_manage_step_configured <- function(cohort, changed_input, session) {
 
   step_id <- cohort$last_step_id()
   chosen_ids <- session$input[["manage_step"]]
-  current_ids <- cohort$get_filter(step_id) |> purrr::map_chr("id")
+  current_ids <- cohort$get_filter(step_id) %>% purrr::map_chr("id")
   to_rm_ids <- setdiff(current_ids, chosen_ids)
   to_add_ids <- setdiff(chosen_ids, current_ids)
 
@@ -668,7 +676,6 @@ gui_run_step <- function(cohort, changed_input, session) {
   input_state("run_step", changed_input)
 
   gui_update_step(cohort, changed_input, session)
-  trigger_pending_state(changed_input$step_id, "remove", session)
 }
 
 gui_show_state <- function(cohort, changed_input, session) {
@@ -899,6 +906,8 @@ gui_update_step <- function(cohort, changed_input, session) {
     changed_input$update, session = session
   )
   gui_update_data_stats(cohort, list(step_id = changed_input$step_id), session)
+
+  trigger_pending_state(changed_input$step_id, "remove", session)
 
   if (changed_input$run_flow) {
     update_next_step(cohort, changed_input$step_id, FALSE, session)
@@ -1298,7 +1307,9 @@ gui_clear_step <- function(cohort, changed_input, session) {
   print_state("clear_step", changed_input)
   input_state("clear_step", changed_input)
 
-  reset_filters(cohort, changed_input$step_id)
+  if (isTRUE(changed_input$reset)) {
+    reset_filters(cohort, changed_input$step_id)
+  }
 
   if (!is_none(cohort$attributes$run_button)) {
     trigger_pending_state(changed_input$step_id, "add", session)

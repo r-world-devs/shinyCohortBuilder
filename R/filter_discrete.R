@@ -237,7 +237,7 @@ plot_feedback_bar <- function(plot_data, n_missing) {
       feedback_data %>%
       dplyr::mutate(
         tooltip = htmltools::htmlEscape(paste0(level, " (", format_number(n), ")"), TRUE)
-      ) |>
+      ) %>%
       ggplot2::ggplot(
         ggplot2::aes(
           x = "I", y = n, fill = level,

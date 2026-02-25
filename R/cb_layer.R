@@ -1,4 +1,7 @@
 attach_filter_gui <- function(filter) {
+  if (!is.null(filter$gui)) {
+    return(filter)
+  }
   filter$gui <- rlang::exec(.gui_filter, filter, !!!filter$get_params("gui_args"))
   return(filter)
 }
@@ -92,6 +95,11 @@ post_run_step_hook <- function(public, private, step_id) {
     return(invisible(FALSE))
   }
 
+  session$sendCustomMessage(
+    "inform_data_updated",
+    list(step_id = step_id, ns_prefix = session$ns(""))
+  )
+
   if (step_id == public$last_step_id()) {
     session$sendCustomMessage(
       "inform_data_updated",
@@ -128,6 +136,14 @@ post_cohort_hook <- function(public, private, ...) {
   }
 }
 
+post_init_source_hook <- function(public, private, ...) {
+  for (a_step in private$steps) {
+    public$modify(function(public, private) {
+      step_id <- a_step$id
+      private$steps[[step_id]] <- attach_filters_gui(private$steps[[step_id]])
+    })
+  }
+}
 
 .onLoad <- function(libname, pkgname){
   cohortBuilder::add_hook("pre_update_source_hook", pre_update_source_hook)
@@ -138,6 +154,7 @@ post_cohort_hook <- function(public, private, ...) {
   cohortBuilder::add_hook("post_restore_hook", post_restore_hook)
   cohortBuilder::add_hook("post_cohort_hook", post_cohort_hook)
   cohortBuilder::add_hook("post_update_source_hook", post_cohort_hook)
+  cohortBuilder::add_hook("post_init_source_hook", post_init_source_hook)
 }
 
 .onUnload <- function(libpath) {
@@ -149,4 +166,5 @@ post_cohort_hook <- function(public, private, ...) {
   options("post_restore_hook" = NULL)
   options("post_cohort_hook" = NULL)
   options("post_update_source_hook" = NULL)
+  options("post_init_source_hook" = NULL)
 }

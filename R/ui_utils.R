@@ -122,11 +122,15 @@ scb_chart_palette <- list(
 #'
 #' @param session Shiny session object.
 #' @param cohort_id Id of the cohort.
+#' @param step_id Id of the step to check. When NULL (default) all the steps are checked for changes.
 #'
 #' @export
-cb_changed <- function(session, cohort_id) {
+cb_changed <- function(session, cohort_id, step_id = NULL) {
   ns <- session$ns
-  session$input[[ns(paste0(cohort_id, "-cb_data_updated"))]]
+  if (!is.null(step_id)) {
+    step_id <- paste0("_", step_id)
+  }
+  session$input[[ns(paste0(cohort_id, "-cb_data_updated", step_id))]]
 }
 
 
