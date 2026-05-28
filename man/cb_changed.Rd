@@ -4,12 +4,14 @@
 \alias{cb_changed}
 \title{Track changes of cohort data in Shiny}
 \usage{
-cb_changed(session, cohort_id)
+cb_changed(session, cohort_id, step_id = NULL)
 }
 \arguments{
 \item{session}{Shiny session object.}
 
 \item{cohort_id}{Id of the cohort.}
+
+\item{step_id}{Id of the step to check. When NULL (default) all the steps are checked for changes.}
 }
 \description{
 The function returns Shiny input object related to selected cohort that is triggered whenever

@@ -51,6 +51,8 @@ See \link[bslib]{bs_theme} version argument.}
 \item{new_step}{Choose which add step method should be used for creating new step.
 Possible options are: "clone" - copy filters from last step,
 "configure" - opening modal and allow to chose filters from available filters.}
+
+\item{manage_step}{Set to TRUE to enable managing filters tool.}
 }
 \value{
 No return value, used for side effect which is running a Shiny application.

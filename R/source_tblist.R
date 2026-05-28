@@ -128,6 +128,7 @@ dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
 }
 
 #' @rdname filter-position
+#' @export
 .filter_position.tblist <- function(source, step_id, filter, ns, ...) {
   return(glue::glue('#{ns(step_id)} .{filter$get_params("dataset")}'))
 }

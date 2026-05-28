@@ -237,7 +237,7 @@ plot_feedback_bar <- function(plot_data, n_missing) {
       feedback_data %>%
       dplyr::mutate(
         tooltip = htmltools::htmlEscape(paste0(level, " (", format_number(n), ")"), TRUE)
-      ) |>
+      ) %>%
       ggplot2::ggplot(
         ggplot2::aes(
           x = "I", y = n, fill = level,
@@ -259,7 +259,7 @@ plot_feedback_bar <- function(plot_data, n_missing) {
         plot.background  = ggplot2::element_blank(),
         legend.position = "none",
         plot.margin = ggplot2::unit(c(0, 0, 0, 0),"mm"),
-        panel.border = ggplot2::element_rect(colour = "grey50", fill = NA, size = 1),
+        panel.border = ggplot2::element_rect(colour = "grey50", fill = NA, linewidth = 1),
         panel.spacing = ggplot2::unit(c(0, 0, 0, 0), "mm")) +
       ggplot2::scale_fill_manual(name = NULL, values = chart_cols) +
       ggiraph::geom_col_interactive(

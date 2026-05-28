@@ -33,8 +33,8 @@ Imports:
     bslib,
     jsonlite,
     purrr,
-    ggplot2,
-    ggiraph,
+    ggplot2 (>= 3.4.0),
+    ggiraph (>= 0.9.1),
     htmltools,
     shiny (>= 1.7.0),
     shinyWidgets (>= 0.7.0),
@@ -57,7 +57,7 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0)
 Encoding: UTF-8
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 VignetteBuilder: knitr
 URL: https://r-world-devs.github.io/shinyCohortBuilder/, https://github.com/r-world-devs/shinyCohortBuilder
 BugReports: https://github.com/r-world-devs/shinyCohortBuilder/issues

@@ -20,6 +20,7 @@
 #' @param new_step Choose which add step method should be used for creating new step.
 #'   Possible options are: "clone" - copy filters from last step,
 #'   "configure" - opening modal and allow to chose filters from available filters.
+#' @param manage_step Set to TRUE to enable managing filters tool.
 #' @param ... Extra parameters passed to selected cohort methods.
 #'   Currently unused.
 #' @param run_app If 'TRUE' the application will run using \link[shiny]{runApp},
@@ -40,7 +41,7 @@
 demo_app <- function(
   steps = TRUE, stats = c("pre", "post"), run_button = "none", feedback = TRUE, state = TRUE,
   bootstrap = 5, enable_bookmarking = TRUE, code = TRUE, attrition = TRUE, show_help = TRUE,
-  new_step = c("clone", "configure"), ..., run_app = TRUE) {
+  new_step = c("clone", "configure"), manage_step = FALSE, ..., run_app = TRUE) {
 
   if (is.logical(run_button)) {
     lifecycle::deprecate_stop("0.2.0", "shinyCohorBuilder::demo_app(arg = 'must be a scalar character')")
@@ -109,7 +110,8 @@ demo_app <- function(
         shiny::radioButtons("dataset", "Source", c("No binding keys" = "01", "Binding keys" = "02")),
         cb_ui(
           id = "ptnts", style = "width: 300px; float: left;", steps = steps,
-          state = state, code = code, attrition = attrition, new_step = new_step
+          state = state, code = code, attrition = attrition, new_step = new_step,
+          manage_step = manage_step
         ),
         shiny::div(style = "float: right; width: calc(100% - 300px);",
           shiny::verbatimTextOutput("datasets")
@@ -314,7 +316,8 @@ gui <- function(
     stop("Message - gui can be used in interactive mode only.")
   }
   new_step <- rlang::arg_match(new_step)
-  if (identical(new_step, "configure") && length(cohort$get_source()$available_filters) == 0) {
+  require_meta_filters <- identical(new_step, "configure") || manage_step
+  if (require_meta_filters && length(cohort$get_source()$get("available_filters")) == 0) {
     stop("The `available_filters` in the cohort source wasn't defined.")
   }
 
