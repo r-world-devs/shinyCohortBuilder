@@ -1,6 +1,4 @@
-#' @rdname gui-filter-layer
-#' @export
-.gui_filter.date_range <- function(filter, ...) {
+S7::method(.gui_filter, cohortBuilder::CbFilterDateRange) <- function(filter, ...) {
   list(
     input = function(input_id, cohort) {
       shiny::tagList(
@@ -12,7 +10,7 @@
               range_input_params(filter, input_id, cohort, ...)
             )
           ),
-          filter$input_param
+          filter@input_param
         ),
         .cb_input(
           .keep_na_input(input_id, filter, cohort),
@@ -31,33 +29,33 @@
                 empty_plot()
               )
             }
-            step_id <- filter$step_id
-            filter_id <- filter$id
+            step_id <- filter@step_id
+            filter_id <- filter@id
 
             filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
             filter_range <- extract_selected_range(
-              filter$get_params("range"),
+              get_filter_params(filter, "range"),
               freq_range(filter_cache$frequencies),
               FALSE
             )
 
-            plot_data <- filter_cache$frequencies %>%
+            plot_data <- filter_cache$frequencies |>
               dplyr::mutate(# we take l_bound to limit upper cause last break have l_bound == u_bound
                 count = ifelse(l_bound >= filter_range[1] & l_bound <= filter_range[2], count, 0)
               )
 
-            if (!is.null(filter$get_params("n_bins"))) {
-              intervals <- seq.Date(plot_data$l_bound[1], rev(plot_data$u_bound)[1], length.out = filter$get_params("n_bins"))
-              plot_data <- plot_data %>%
-                dplyr::mutate(level = findInterval(l_bound, intervals)) %>%
-                dplyr::group_by(level) %>%
+            if (!is.null(get_filter_params(filter, "n_bins"))) {
+              intervals <- seq.Date(plot_data$l_bound[1], rev(plot_data$u_bound)[1], length.out = get_filter_params(filter, "n_bins"))
+              plot_data <- plot_data |>
+                dplyr::mutate(level = findInterval(l_bound, intervals)) |>
+                dplyr::group_by(level) |>
                 dplyr::summarise(count = sum(count))
             }
 
             # todo possibly add modifier to lower number of bars
             n_missing <- filter_cache$n_missing
             n_total <- filter_cache$n_data
-            if (identical(filter$get_params("keep_na"), FALSE)) {
+            if (identical(get_filter_params(filter, "keep_na"), FALSE)) {
               n_missing <- 0
             }
 

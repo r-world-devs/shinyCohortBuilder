@@ -69,7 +69,7 @@ if (interactive()) {
   mtcars_cohort <- cohort(
     mtcars_source,
     filter("discrete", id = "am", dataset = "mtcars", variable = "am", value = 1)
-  ) \%>\% run()
+  ) |> run()
   gui(mtcars_cohort)
 }
 

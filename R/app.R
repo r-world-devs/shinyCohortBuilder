@@ -96,8 +96,8 @@ demo_app <- function(
           "Atezo", "Chemo", "Nebul", "Atezo", "Chemo", "Nebul", "Atezo", "Chemo", "Atezo", "Atezo", "Atezo", "Nebul",
           "Nebul", "Atezo", "Chemo", "Atezo", "Atezo", "Nebul", "Atezo", "Chemo", "Nebul", "Atezo", "Atezo"
         )
-      ) %>%
-        dplyr::mutate(id = paste(patient_id, line_id, sep = "_")) %>%
+      ) |>
+        dplyr::mutate(id = paste(patient_id, line_id, sep = "_")) |>
         dplyr::relocate(id, .before = "patient_id")
     )
   )
@@ -252,7 +252,7 @@ demo_app <- function(
               datasets_value = datasets[[input$dataset]]
             )
           )
-        ) %>%
+        ) |>
           cohortBuilder::add_step(
             cohortBuilder::step(
               group_filter,
@@ -297,7 +297,7 @@ demo_app <- function(
 #'   mtcars_cohort <- cohort(
 #'     mtcars_source,
 #'     filter("discrete", id = "am", dataset = "mtcars", variable = "am", value = 1)
-#'   ) %>% run()
+#'   ) |> run()
 #'   gui(mtcars_cohort)
 #' }
 #'

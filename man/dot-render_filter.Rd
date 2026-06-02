@@ -46,7 +46,7 @@ if (interactive()) {
         "range", id = "copies", name = "Copies", dataset = "books",
         variable = "copies", range = c(5, 12)
       )
-    ) \%>\% run()
+    ) |> run()
     coh$attributes$session <- session
     coh$attributes$feedback <- TRUE
 

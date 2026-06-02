@@ -45,7 +45,6 @@ Use `.update_keep_na_input` inside filter's GUI update method to update the
 output based on the filter state.
 }
 \examples{
-library(magrittr)
 library(cohortBuilder)
 
 librarian_source <- set_source(as.tblist(librarian))
@@ -55,7 +54,7 @@ coh <- cohort(
     "range", id = "copies", name = "Copies", dataset = "books",
     variable = "copies", range = c(5, 12)
   )
-) \%>\% run()
+) |> run()
 .keep_na_input("keep_na", coh$get_filter("1", "copies"), coh)
 
 }

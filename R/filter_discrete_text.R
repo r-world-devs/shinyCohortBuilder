@@ -14,7 +14,7 @@ plot_feedback_text_bar <- function(plot_data) {
     chart_palette <- getOption("scb_chart_palette", scb_chart_palette)
     color_palette <- c(chart_palette$no_data, chart_palette$discrete[1])
 
-    gg_object <- feedback_data %>%
+    gg_object <- feedback_data |>
       ggplot2::ggplot(ggplot2::aes(x = "I", y = n, fill = level)) +
       ggplot2::geom_col(position = ggplot2::position_stack(reverse = FALSE)) +
       ggplot2::coord_flip() +
@@ -80,8 +80,8 @@ get_n_matching_vals <- function(selected, original) {
 
 discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
 
-  step_id <- filter$step_id
-  filter_id <- filter$id
+  step_id <- filter@step_id
+  filter_id <- filter@id
 
   if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
     return(
@@ -91,7 +91,7 @@ discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, 
 
   parent_choices <- cohort$get_cache(step_id, filter_id, state = "pre")$choices
   selected_value <- get_matching_vals(
-    filter$get_params("value"),
+    get_filter_params(filter, "value"),
     parent_choices,
     reset
   )
@@ -112,9 +112,7 @@ discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, 
 }
 
 
-#' @rdname gui-filter-layer
-#' @export
-.gui_filter.discrete_text <- function(filter, ...) {
+S7::method(.gui_filter, cohortBuilder::CbFilterDiscreteText) <- function(filter, ...) {
   list(
     input = function(input_id, cohort) {
       input_params <- modify_list(
@@ -146,10 +144,10 @@ discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, 
                 `data-dismiss` = "modal", `data-bs-dismiss` = "modal",
                 onclick = move_dialog_back_js, try_binding = FALSE
               ),
-              filter$input_param,
+              filter@input_param,
               style = "display: inline-block;"
             ),
-            shiny::modalButton("Dismiss") %>%
+            shiny::modalButton("Dismiss") |>
               htmltools::tagAppendAttributes(
                 onclick = move_dialog_back_js
               )
@@ -174,13 +172,13 @@ discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, 
             if(empty) {
               return(ggplot2::ggplot())
             }
-            step_id <- filter$step_id
-            filter_id <- filter$id
+            step_id <- filter@step_id
+            filter_id <- filter@id
 
             filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
             n_total <- filter_cache$n_data
 
-            n_selected <- get_n_matching_vals(filter$get_params("value"), filter_cache$choices)
+            n_selected <- get_n_matching_vals(get_filter_params(filter, "value"), filter_cache$choices)
             plot_data <- c("selected" = n_selected, "not_seleced" = n_total - n_selected)
 
             plot_feedback_text_bar(plot_data)

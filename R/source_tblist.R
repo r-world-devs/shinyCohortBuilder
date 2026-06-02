@@ -1,5 +1,5 @@
 get_filter_dataset <- function(filter) {
-  environment(filter$filter_data)$dataset
+  filter@dataset
 }
 
 group_filters <- function(source, filters) {
@@ -23,7 +23,7 @@ dataset_help_icon <- function(cohort, dataset_name, ns) {
   shiny::a(
     href = "#",
     class = "dataset_tooltip",
-    getOption("scb_icons", scb_icons)$dataset_help_icon %>%
+    getOption("scb_icons", scb_icons)$dataset_help_icon |>
       shiny::tagAppendAttributes(
         onclick = .trigger_action_js("show_help", list(field = dataset_name), ns = ns)
       )
@@ -41,7 +41,7 @@ dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
     shiny::tags$strong(dataset_name),
     dataset_help_icon(cohort, dataset_name, ns),
     shiny::htmlOutput(stats_id, inline = TRUE, style = "float: right; "),
-    filters %>%
+    filters |>
       purrr::map(
         ~ .render_filter(.x, step_id, cohort, ns = ns)
       )
@@ -53,8 +53,8 @@ dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
 .render_filters.tblist <- function(source, cohort, step_id, ns, ...) {
   step <- cohort$get_step(step_id)
 
-  group_filters(cohort$get_source(), step$filters) %>%
-    purrr::imap(~ dataset_filters(.x, .y, step_id, cohort, ns = ns)) %>%
+  group_filters(cohort$get_source(), step$filters) |>
+    purrr::imap(~ dataset_filters(.x, .y, step_id, cohort, ns = ns)) |>
     shiny::div(class = "cb_filters", `data-step_id` = step_id)
 }
 
@@ -68,7 +68,7 @@ dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
   data_filters <- purrr::map_chr(step$filters, get_filter_dataset)
   dataset_names <- intersect(dataset_names, data_filters)
 
-  dataset_names %>% purrr::walk(
+  dataset_names |> purrr::walk(
     ~ .sendOutput(
       paste0(step_id, "-stats_", .x),
       shiny::renderUI({
@@ -112,16 +112,16 @@ dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
       name = as.character(
         shiny::div(
           `data-tooltip-z-index` = 9999,
-          `data-tooltip` = x$get_params("description"),
+          `data-tooltip` = get_filter_params(x, "description"),
           `data-tooltip-position` = "top right",
           `data-tooltip-allow-html` = "true",
-          x$name
+          x@name
         )
       ),
-      id = x$id,
-      dataset = x$get_params("dataset")
+      id = x@id,
+      dataset = get_filter_params(x, "dataset")
     )
-  }) %>% dplyr::bind_rows()
+  }) |> dplyr::bind_rows()
   choices$name <- gsub("\"", "'", choices$name) # prevents invalid interpolation for setting labels
 
   shinyWidgets::prepare_choices(choices, name, id, dataset)
@@ -130,5 +130,5 @@ dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
 #' @rdname filter-position
 #' @export
 .filter_position.tblist <- function(source, step_id, filter, ns, ...) {
-  return(glue::glue('#{ns(step_id)} .{filter$get_params("dataset")}'))
+  return(glue::glue('#{ns(step_id)} .{get_filter_params(filter, "dataset")}'))
 }

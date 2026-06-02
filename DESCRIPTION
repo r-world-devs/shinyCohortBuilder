@@ -25,10 +25,9 @@ Description: You can easily add advanced cohort-building component
     The GUI panel is not only compatible with native shiny
     bookmarking, but also provides reproducible R code.
 License: MIT + file LICENSE
-Depends: 
-    R (>= 3.5.0)
-Imports: 
-    magrittr,
+Depends:
+    R (>= 4.1.0)
+Imports:
     glue,
     bslib,
     jsonlite,
@@ -41,6 +40,7 @@ Imports:
     htmlwidgets,
     dplyr,
     cohortBuilder (>= 0.4.0),
+    S7,
     tryCatchLog,
     highr,
     shinyGizmo (>= 0.4.2),
@@ -57,7 +57,6 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0)
 Encoding: UTF-8
-RoxygenNote: 7.3.3
 VignetteBuilder: knitr
 URL: https://r-world-devs.github.io/shinyCohortBuilder/, https://github.com/r-world-devs/shinyCohortBuilder
 BugReports: https://github.com/r-world-devs/shinyCohortBuilder/issues
@@ -80,3 +79,5 @@ Collate:
     'source_tblist.R'
     'chat.R'
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0
+RoxygenNote: 7.3.1

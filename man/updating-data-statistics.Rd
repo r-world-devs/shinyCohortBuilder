@@ -64,7 +64,7 @@ if (interactive()) {
           variable = "copies", range = c(6, 8)
         )
       )
-    ) \%>\% run()
+    ) |> run()
     coh$attributes$stats <- c("pre", "post")
     observeEvent(input$step_two_max, {
       coh$update_filter("copies", step_id = 2, range = c(6, input$step_two_max))

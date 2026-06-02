@@ -57,7 +57,7 @@ choice_name <- function(name, parent_stat, current_stat, stats) {
 }
 
 is_vs <- function(filter) {
-  !is.null(filter$get_params("gui_input")) && filter$get_params("gui_input") == "vs"
+  !is.null(get_filter_params(filter, "gui_input")) && get_filter_params(filter, "gui_input") == "vs"
 }
 
 #' Generate NA's filter selection GUI input
@@ -70,7 +70,6 @@ is_vs <- function(filter) {
 #' output based on the filter state.
 #'
 #' @examples
-#' library(magrittr)
 #' library(cohortBuilder)
 #'
 #' librarian_source <- set_source(as.tblist(librarian))
@@ -80,7 +79,7 @@ is_vs <- function(filter) {
 #'     "range", id = "copies", name = "Copies", dataset = "books",
 #'     variable = "copies", range = c(5, 12)
 #'   )
-#' ) %>% run()
+#' ) |> run()
 #' .keep_na_input("keep_na", coh$get_filter("1", "copies"), coh)
 #'
 #' @param input_id Id of the keep na input.
@@ -97,17 +96,17 @@ is_vs <- function(filter) {
 .keep_na_input <- function(input_id, filter, cohort,
                            msg_fun = function(x) glue::glue("Keep missing values ({x})")) {
 
-  filter_id <- filter$id
-  step_id <- filter$step_id
-  na_message <- cohort$get_cache(step_id, filter_id, state = "pre")$n_missing %>%
+  filter_id <- filter@id
+  step_id <- filter@step_id
+  na_message <- cohort$get_cache(step_id, filter_id, state = "pre")$n_missing |>
     msg_fun()
 
   shiny::tagList(
     shiny::checkboxInput(
       paste0(input_id, "-keep_na"),
       label = na_message,
-      filter$get_params("keep_na")
-    ) %>%
+      get_filter_params(filter, "keep_na")
+    ) |>
       shiny::tagAppendAttributes(class = "cb_na_input")
   )
 }
@@ -117,14 +116,14 @@ is_vs <- function(filter) {
 .update_keep_na_input <- function(session, input_id, filter, cohort,
                                   msg_fun = function(x) glue::glue("Keep missing values ({x})")) {
 
-  filter_id <- filter$id
-  step_id <- filter$step_id
-  na_message <- cohort$get_cache(step_id, filter_id, state = "pre")$n_missing %>%
+  filter_id <- filter@id
+  step_id <- filter@step_id
+  na_message <- cohort$get_cache(step_id, filter_id, state = "pre")$n_missing |>
     msg_fun()
   shiny::updateCheckboxInput(
     session,
     inputId = paste0(input_id, "-keep_na"),
-    value = filter$get_params("keep_na"),
+    value = get_filter_params(filter, "keep_na"),
     label = na_message
   )
 }
@@ -141,9 +140,9 @@ inherit_parent_stats <- function(filter_values, parent_options, is_cached) {
 }
 
 discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
-  step_id <- filter$step_id
-  filter_id <- filter$id
-  filter_params <- filter$get_params()
+  step_id <- filter@step_id
+  filter_id <- filter@id
+  filter_params <- get_filter_params(filter)
 
   if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
     return(
@@ -162,7 +161,7 @@ discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, updat
     )
   )
   selected_value <- extract_selected_value(
-    filter$get_params("value"),
+    get_filter_params(filter, "value"),
     parent_filter_stats, reset
   )
   value_mapping <- function(x, cohort) x
@@ -178,7 +177,7 @@ discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, updat
       current = filter_stats,
       previous = parent_filter_stats,
       stats = if_null_default(
-        filter$get_params("stats"),
+        get_filter_params(filter, "stats"),
         cohort$attributes$stats
       )
 
@@ -190,13 +189,13 @@ discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, updat
   )
 
   if(is_vs(filter)) {
-    params$choices <- params$choiceValues %>%
+    params$choices <- params$choiceValues |>
       stats::setNames(params$choiceNames)
     params$choiceValues <- NULL
     params$choiceNames <- NULL
     params$inline <- FALSE
   } else {
-    params$choiceNames <- params$choiceNames %>% purrr::map(shiny::HTML)
+    params$choiceNames <- params$choiceNames |> purrr::map(shiny::HTML)
   }
 
   return(params)
@@ -234,10 +233,10 @@ plot_feedback_bar <- function(plot_data, n_missing) {
     gg_object <- ggplot2::ggplot()
   } else {
     gg_object <-
-      feedback_data %>%
+      feedback_data |>
       dplyr::mutate(
         tooltip = htmltools::htmlEscape(paste0(level, " (", format_number(n), ")"), TRUE)
-      ) %>%
+      ) |>
       ggplot2::ggplot(
         ggplot2::aes(
           x = "I", y = n, fill = level,
@@ -280,9 +279,7 @@ plot_feedback_bar <- function(plot_data, n_missing) {
   )
 }
 
-#' @rdname gui-filter-layer
-#' @export
-.gui_filter.discrete <- function(filter, ...) {
+S7::method(.gui_filter, cohortBuilder::CbFilterDiscrete) <- function(filter, ...) {
   list(
     input = function(input_id, cohort) {
       input_fun <- shiny::checkboxGroupInput
@@ -306,7 +303,7 @@ plot_feedback_bar <- function(plot_data, n_missing) {
               discrete_input_params(filter, input_id, cohort, ...)
             )
           ),
-          filter$input_param
+          filter@input_param
         ),
         .cb_input(
           .keep_na_input(input_id, filter, cohort),
@@ -329,14 +326,14 @@ plot_feedback_bar <- function(plot_data, n_missing) {
                 )
               )
             }
-            step_id <- filter$step_id
-            filter_id <- filter$id
+            step_id <- filter@step_id
+            filter_id <- filter@id
 
             filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
-            filter_value <- extract_selected_value(filter$get_params("value"), filter_cache$choices, FALSE)
+            filter_value <- extract_selected_value(get_filter_params(filter, "value"), filter_cache$choices, FALSE)
             plot_data <- filter_cache$choices[filter_value]
             n_missing <- filter_cache$n_missing
-            if (identical(filter$get_params("keep_na"), FALSE)) {
+            if (identical(get_filter_params(filter, "keep_na"), FALSE)) {
               n_missing <- 0
             }
 
@@ -351,12 +348,12 @@ plot_feedback_bar <- function(plot_data, n_missing) {
 
         if (!is.na(value)) {
           .trigger_action(session, "update_filter", params = list(
-            step_id = filter$step_id, filter_id = filter$id,
-            input_name = filter$input_param, input_value = value,
+            step_id = filter@step_id, filter_id = filter@id,
+            input_name = filter@input_param, input_value = value,
             update = "force_input", run_flow = FALSE
           ))
         }
-      }, ignoreInit = TRUE) %>% .save_observer(input_id, session)
+      }, ignoreInit = TRUE) |> .save_observer(input_id, session)
     },
     update = function(session, input_id, cohort, reset = FALSE, ...) {
       input_fun <- shiny::updateCheckboxGroupInput
@@ -374,7 +371,7 @@ plot_feedback_bar <- function(plot_data, n_missing) {
       )
       .update_keep_na_input(session, input_id, filter, cohort)
     },
-    post_stats = if (is.null(filter$get_params("stats"))) NULL else "post" %in% filter$get_params("stats"),
+    post_stats = if (is.null(get_filter_params(filter, "stats"))) NULL else "post" %in% get_filter_params(filter, "stats"),
     multi_input = FALSE
   )
 }

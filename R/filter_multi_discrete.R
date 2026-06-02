@@ -4,7 +4,7 @@ extract_selected_values <- function(values, parent_filter_stats, reset) {
   if (reset) {
     return(all_choices)
   }
-  filtered_selection <- values %>% purrr::keep(~!identical(., NA))
+  filtered_selection <- values |> purrr::keep(~!identical(., NA))
   if (!length(filtered_selection)) {
     filtered_selection <- list()
   }
@@ -44,9 +44,9 @@ attach_list_names <- function(list_vals, list_names) {
 }
 
 multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
-  step_id <- filter$step_id
-  filter_id <- filter$id
-  filter_params <- filter$get_params()
+  step_id <- filter@step_id
+  filter_id <- filter@id
+  filter_params <- get_filter_params(filter)
 
   max_groups <- length(cohort$get_cache("1", filter_id, state = "pre")$choices)
 
@@ -60,14 +60,14 @@ multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE,
   filter_stats <- complete_stats_list(
     cohort$get_cache(step_id, filter_id, state = "post")$choices,
     parent_filter_stats
-  ) %>%
+  ) |>
     purrr::map2(parent_filter_stats, extend_stats)
 
   selected_value <- extract_selected_values(
-    filter$get_params("values"),
+    get_filter_params(filter, "values"),
     parent_filter_stats, reset
   )
-  choices <- parent_filter_stats %>% purrr::map(names)
+  choices <- parent_filter_stats |> purrr::map(names)
   choices_names <- shinyGizmo::pickCheckboxNames(choices)
 
   value_mapping <- function(x, cohort) x
@@ -88,7 +88,7 @@ multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE,
     ),
     choice_names,
     stats = if_null_default(
-      filter$get_params("stats"),
+      get_filter_params(filter, "stats"),
       cohort$attributes$stats
     )
   )
@@ -131,7 +131,7 @@ plot_feedback_multi_bar <- function(plot_data, n_missing) {
       )
     }
 
-    gg_object <- plot_data %>%
+    gg_object <- plot_data |>
       ggplot2::ggplot(
         ggplot2::aes(
           x = variable,
@@ -181,16 +181,14 @@ plot_feedback_multi_bar <- function(plot_data, n_missing) {
 }
 
 grouped_list_to_df <- function(grouped_list) {
-  grouped_list %>%
-    purrr::keep(~length(.) > 0) %>%
+  grouped_list |>
+    purrr::keep(~length(.) > 0) |>
     purrr::imap(
       function(x, y) data.frame(variable = y, data.frame(state = names(x), value = unlist(x)))
     )
 }
 
-#' @rdname gui-filter-layer
-#' @export
-.gui_filter.multi_discrete <- function(filter, ...) {
+S7::method(.gui_filter, cohortBuilder::CbFilterMultiDiscrete) <- function(filter, ...) {
   list(
     input = function(input_id, cohort) {
       shiny::tagList(
@@ -210,7 +208,7 @@ grouped_list_to_df <- function(grouped_list) {
               multi_discrete_input_params(filter, input_id, cohort, ...)
             )
           ),
-          filter$input_param
+          filter@input_param
         ),
         .cb_input(
           .keep_na_input(
@@ -236,15 +234,15 @@ grouped_list_to_df <- function(grouped_list) {
                 )
               )
             }
-            step_id <- filter$step_id
-            filter_id <- filter$id
+            step_id <- filter@step_id
+            filter_id <- filter@id
             filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
-            orig_values <- filter$get_params("values")
+            orig_values <- get_filter_params(filter, "values")
             if (is.null(orig_values)) {
-              orig_values <- filter_cache$choices %>%
+              orig_values <- filter_cache$choices |>
                 purrr::map(names)
             } else {
-              orig_values <- orig_values %>%
+              orig_values <- orig_values |>
                 purrr::map(~as.character(unlist(.)))
             }
             filter_value <- purrr::map2(
@@ -252,17 +250,17 @@ grouped_list_to_df <- function(grouped_list) {
               filter_cache$choices,
               ~extract_selected_value(.x, .y, FALSE)
             )
-            plot_data <- filter_cache$choices %>%
-              purrr::imap(function(x, y) {x[unlist(filter_value[y])]}) %>%
-              grouped_list_to_df() %>%
+            plot_data <- filter_cache$choices |>
+              purrr::imap(function(x, y) {x[unlist(filter_value[y])]}) |>
+              grouped_list_to_df() |>
               dplyr::bind_rows()
             n_missing <- data.frame(
               variable = names(filter_cache$n_missing),
               state = "(missing)",
               value = unlist(filter_cache$n_missing)
-            ) %>%
+            ) |>
               dplyr::filter(variable %in% plot_data$variable)
-            if (identical(filter$get_params("keep_na"), FALSE)) {
+            if (identical(get_filter_params(filter, "keep_na"), FALSE)) {
               n_missing$value <- 0
             }
 

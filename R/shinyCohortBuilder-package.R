@@ -1,8 +1,8 @@
 #' GUI layer for cohortBuilder package
 #'
 #' @name shinyCohortBuilder-package
-#' @importFrom magrittr %>%
 #' @importFrom dplyr sym
+#' @importFrom cohortBuilder get_filter_params
 
 globalVariables(c(
   ":=", "!!", ".data",

@@ -58,30 +58,30 @@ range_input_defaults <- function(id, type = "range") {
 }
 
 range_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
-  step_id <- filter$step_id
-  filter_id <- filter$id
+  step_id <- filter@step_id
+  filter_id <- filter@id
 
   if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
     return(
-      range_input_defaults(input_id, filter$type)
+      range_input_defaults(input_id, filter@type)
     )
   }
 
   parent_filter_stats <- cohort$get_cache(step_id, filter_id, state = "pre")$frequencies
   parent_range <- freq_range(parent_filter_stats)
 
-  if (inherits(filter, "datetime_range")) {
+  if (filter@type == "datetime_range") {
     selected_range <- extract_selected_datetime_range(
-      filter$get_params("range"),
+      get_filter_params(filter, "range"),
       parent_range, reset
     )
   } else {
     selected_range <- extract_selected_range(
-      filter$get_params("range"),
+      get_filter_params(filter, "range"),
       parent_range, reset
     )
   }
-  
+
 
   params <- list(
     inputId = input_id,
@@ -94,22 +94,22 @@ range_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
   )
 
   # Below should be deprecated now soon
-  if (inherits(filter, "range")) {
-    if (!is.null(filter$get_params("step"))) {
-      params$step <- filter$get_params("step")
+  if (filter@type == "range") {
+    if (!is.null(get_filter_params(filter, "step"))) {
+      params$step <- get_filter_params(filter, "step")
     } else {
       params$step <- freq_step(parent_filter_stats)
     }
   }
-  if (inherits(filter, "date_range")) {
+  if (filter@type == "date_range") {
     params$start <- params$value[1]
     params$end <- params$value[2]
     params$value <- NULL
   }
-  
-  if (inherits(filter, "datetime_range")) {
-    if (!is.null(filter$get_params("step"))) {
-      params$step <- filter$get_params("step")
+
+  if (filter@type == "datetime_range") {
+    if (!is.null(get_filter_params(filter, "step"))) {
+      params$step <- get_filter_params(filter, "step")
     } else {
       params$step <- freq_step(parent_filter_stats)
     }
@@ -124,7 +124,7 @@ range_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
   if (update) {
     params$width <- NULL
   }
-  
+
   return(params)
 }
 
@@ -132,7 +132,7 @@ plot_feedback_hist <- function(plot_data, n_missing, n_total) {
 
   choosen_color <- getOption("scb_chart_palette", scb_chart_palette)$discrete[1]
 
-  gg_object <- plot_data %>%
+  gg_object <- plot_data |>
     ggplot2::ggplot(ggplot2::aes(x = level, y = count)) +
     ggplot2::geom_bar(
       fill = choosen_color,
@@ -169,16 +169,14 @@ suff_id <- function(params_list, suffix) {
 }
 
 is_gui_type <- function(filter, type) {
-  gui_input <- filter$get_params("gui_input")
+  gui_input <- get_filter_params(filter, "gui_input")
   if (is.null(gui_input)) {
     return(TRUE)
   }
-  type %in% filter$get_params("gui_input")
+  type %in% get_filter_params(filter, "gui_input")
 }
 
-#' @rdname gui-filter-layer
-#' @export
-.gui_filter.range <- function(filter, ...) {
+S7::method(.gui_filter, cohortBuilder::CbFilterRange) <- function(filter, ...) {
   list(
     input = function(input_id, cohort) {
       input_params <- range_input_params(filter, input_id, cohort, ...)
@@ -193,7 +191,7 @@ is_gui_type <- function(filter, type) {
                 suff_id(input_params, "slider")
               )
             ),
-            filter$input_param
+            filter@input_param
           )
         },
         if (is_gui_type(filter, "numeric")) {
@@ -202,7 +200,7 @@ is_gui_type <- function(filter, type) {
               shinyWidgets::numericRangeInput,
               suff_id(input_params, "numrange")
             ),
-            filter$input_param
+            filter@input_param
           )
         },
         .cb_input(
@@ -222,23 +220,23 @@ is_gui_type <- function(filter, type) {
                 ggplot2::ggplot()
               )
             }
-            step_id <- filter$step_id
-            filter_id <- filter$id
+            step_id <- filter@step_id
+            filter_id <- filter@id
 
             filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
             filter_range <- extract_selected_range(
-              filter$get_params("range"),
+              get_filter_params(filter, "range"),
               freq_range(filter_cache$frequencies),
               FALSE
             )
 
-            plot_data <- filter_cache$frequencies %>%
+            plot_data <- filter_cache$frequencies |>
               dplyr::mutate(# we take l_bound to limit upper cause last break have l_bound == u_bound
                 count = ifelse(l_bound >= filter_range[1] & l_bound <= filter_range[2], count, 0)
               )
             n_missing <- filter_cache$n_missing
             n_total <- filter_cache$n_data
-            if (identical(filter$get_params("keep_na"), FALSE)) {
+            if (identical(get_filter_params(filter, "keep_na"), FALSE)) {
               n_missing <- 0
             }
 
@@ -268,6 +266,6 @@ is_gui_type <- function(filter, type) {
       .update_keep_na_input(session, input_id, filter, cohort)
     },
     post_stats = FALSE,
-    multi_input = length(filter$get_params("gui_input")) != 1
+    multi_input = length(get_filter_params(filter, "gui_input")) != 1
   )
 }

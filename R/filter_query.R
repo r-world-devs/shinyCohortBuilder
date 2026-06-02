@@ -82,8 +82,8 @@ adapt_rules_to_limits <- function(rules, filters, reset = FALSE) {
 
 query_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
 
-  step_id <- filter$step_id
-  filter_id <- filter$id
+  step_id <- filter@step_id
+  filter_id <- filter@id
 
   if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
     return(
@@ -99,17 +99,17 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
   parent_specs <- cohort$get_cache(step_id, filter_id, state = "pre")$specs
   setting_from_stat <- base::get("setting_from_stat", envir = asNamespace("shinyQueryBuilder"), inherits = FALSE)
 
-  filters <- filter$get_params("variables") %>%
+  filters <- get_filter_params(filter, "variables") |>
     purrr::map(
       ~ setting_from_stat(
         parent_specs[[.x]], .x, !!!gui_args$filters[[.x]],
         .queryBuilderConfig = queryBuilder::queryBuilderConfig
       )
-    ) %>%
+    ) |>
     purrr::map(~rlang::inject(shinyQueryBuilder::queryFilter(!!!.x)))
   gui_args$filters <- NULL
   selected_value <- adapt_rules_to_limits(
-    filter$get_params("value"),
+    get_filter_params(filter, "value"),
     filters,
     reset
   )
@@ -128,9 +128,7 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
   return(params)
 }
 
-#' @rdname gui-filter-layer
-#' @export
-.gui_filter.query <- function(filter, ...) {
+S7::method(.gui_filter, cohortBuilder::CbFilterQuery) <- function(filter, ...) {
   if (!requireNamespace("shinyQueryBuilder", quietly = TRUE)) {
     stop("In order to use 'query' filter, please install 'shinyQueryBuilder' package.")
   }
@@ -157,10 +155,10 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
                 `data-dismiss` = "modal", `data-bs-dismiss` = "modal",
                 onclick = move_dialog_back_js
               ),
-              filter$input_param,
+              filter@input_param,
               style = "display: inline-block;"
             ),
-            shiny::modalButton("Dismiss") %>%
+            shiny::modalButton("Dismiss") |>
               htmltools::tagAppendAttributes(
                 onclick = move_dialog_back_js
               )
@@ -190,7 +188,7 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
               return(NULL)
             }
             ns <- cohort$attributes$session$ns
-            filter_val <- queryBuilder::queryToExpr(filter$get_params("value"))
+            filter_val <- queryBuilder::queryToExpr(get_filter_params(filter, "value"))
             modal_dialog_id <- shiny::NS(ns(input_id), "query_modal")
             plot_id <- shiny::NS(ns(input_id), "feedback_plot")
             move_dialog_to_body_js <- move_modal_dialog_js(modal_dialog_id, ns(input_id), "body")
@@ -209,7 +207,7 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
                   `data-bs-toggle` = "modal", `data-bs-target` = paste0("#", modal_dialog_id),
                   onclick = move_dialog_to_body_js
                 ),
-                footer = shiny::modalButton("Dismiss") %>%
+                footer = shiny::modalButton("Dismiss") |>
                   htmltools::tagAppendAttributes(onclick = move_dialog_back_js)
               )
             )

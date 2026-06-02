@@ -2,14 +2,14 @@ extract_selected_datetime_range <- function(range, parent_range, reset) {
   if (identical(range, c(Inf, -Inf)) || length(range) == 0) {
     return(range)
   }
-  
+
   if (inherits(range, "character") || inherits(range, "POSIXct")) {
     if (length(range) == 1) range <- c(range, Inf)
-    
+
     range <- as.POSIXct(range, origin = "1970-01-01 UTC")
     parent_range <- as.POSIXct(parent_range, origin = "1970-01-01 UTC")
   }
-  
+
   if (reset || identical(range, NA) || !any(dplyr::between(range, parent_range[1], parent_range[2]))) {
     return(parent_range)
   }
@@ -19,13 +19,11 @@ extract_selected_datetime_range <- function(range, parent_range, reset) {
   if (anyNA(range[2]) || range[2] > parent_range[2]) {
     range[2] <- parent_range[2]
   }
-  
+
   return(range)
 }
 
-#' @rdname gui-filter-layer
-#' @export
-.gui_filter.datetime_range <- function(filter, ...) {
+S7::method(.gui_filter, cohortBuilder::CbFilterDatetimeRange) <- function(filter, ...) {
   list(
     input = function(input_id, cohort) {
       input_params <- range_input_params(filter, input_id, cohort, ...)
@@ -47,7 +45,7 @@ extract_selected_datetime_range <- function(range, parent_range, reset) {
                 suff_id(input_params, "datetimepicker")
               )
             ),
-            filter$input_param
+            filter@input_param
           )
         } else if (is_gui_type(filter, "slider")) {
           .cb_input(
@@ -58,7 +56,7 @@ extract_selected_datetime_range <- function(range, parent_range, reset) {
                 suff_id(input_params, "slider")
               )
             ),
-            filter$input_param
+            filter@input_param
           )
         },
         .cb_input(
@@ -67,39 +65,39 @@ extract_selected_datetime_range <- function(range, parent_range, reset) {
         )
       )
     },
-    
+
     feedback = function(input_id, cohort, empty = FALSE) {
       list(
         plot_id = shiny::NS(input_id, "feedback_plot") ,
         output_fun = shiny::plotOutput,
         render_fun = if (!is.null(empty)) {
           shiny::renderPlot(bg = "transparent", height = 60, {
-            if(empty || is.null(filter$get_params("range"))) { # when no data in parent step
+            if(empty || is.null(get_filter_params(filter, "range"))) { # when no data in parent step
               return(
                 ggplot2::ggplot()
               )
             }
-            step_id <- filter$step_id
-            filter_id <- filter$id
-            
+            step_id <- filter@step_id
+            filter_id <- filter@id
+
             filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
 
             filter_range <- extract_selected_datetime_range(
-              filter$get_params("range"),
+              get_filter_params(filter, "range"),
               freq_range(filter_cache$frequencies),
               FALSE
             )
-            
-            plot_data <- filter_cache$frequencies %>%
+
+            plot_data <- filter_cache$frequencies |>
               dplyr::mutate(# we take l_bound to limit upper cause last break have l_bound == u_bound
                 count = ifelse(l_bound >= filter_range[1] & l_bound <= filter_range[2], count, 0)
-              ) 
+              )
             n_missing <- filter_cache$n_missing
             n_total <- filter_cache$n_data
-            if (identical(filter$get_params("keep_na"), FALSE)) {
+            if (identical(get_filter_params(filter, "keep_na"), FALSE)) {
               n_missing <- 0
             }
-            
+
             plot_feedback_hist(plot_data, n_missing, n_total)
           })
         }
@@ -124,10 +122,10 @@ extract_selected_datetime_range <- function(range, parent_range, reset) {
           shiny::updateSliderInput,
           suff_id(input_params, "slider")
         )
-      }  
+      }
       .update_keep_na_input(session, input_id, filter, cohort)
     },
-    
+
     post_stats = FALSE,
     multi_input = FALSE
   )

@@ -36,9 +36,9 @@ filter_help_icon <- function(filter, ns, method, description, cohort) {
   shiny::a(
     href = "#",
     class = "filter_tooltip",
-    getOption("scb_icons", scb_icons)$filter_help %>%
+    getOption("scb_icons", scb_icons)$filter_help |>
       shiny::tagAppendAttributes(
-        onclick = .trigger_action_js("show_help", list(step_id = filter$step_id, filter_id = filter$id), ns = ns)
+        onclick = .trigger_action_js("show_help", list(step_id = filter@step_id, filter_id = filter@id), ns = ns)
       )
   )
 }

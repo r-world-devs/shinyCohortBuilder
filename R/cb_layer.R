@@ -1,14 +1,14 @@
 attach_filter_gui <- function(filter) {
-  if (!is.null(filter$gui)) {
+  if (!is.null(filter@extra$gui)) {
     return(filter)
   }
-  filter$gui <- rlang::exec(.gui_filter, filter, !!!filter$get_params("gui_args"))
+  filter@extra$gui <- rlang::exec(.gui_filter, filter, !!!get_filter_params(filter, "gui_args"))
   return(filter)
 }
 
 attach_filters_gui <- function(step) {
   filter_names <- names(step$filters)
-  step$filters <- step$filters %>%
+  step$filters <- step$filters |>
     purrr::modify(attach_filter_gui)
   return(step)
 }
@@ -171,7 +171,7 @@ post_update_filter_hook <- function(public, private, step_id, filter_id, ..., ac
 
   data_filter <- public$get_filter(step_id, filter_id)
   filter_stats <- if_null_default(
-    data_filter$get_params("stats"),
+    get_filter_params(data_filter, "stats"),
     public$attributes$stats
   )
   update <- hook_args$update
@@ -211,9 +211,9 @@ enable_panel <- function(cohort, session) {
 post_cohort_hook <- function(public, private, ...) {
   source <- public$get_source()
   if (!is.null(source)) {
-    available_filters <- source$get("available_filters")
+    available_filters <- source$available_filters
     if (!is.null(available_filters)) {
-      public$attributes$available_filters <- purrr::map(available_filters, ~ .x(source))
+      public$attributes$available_filters <- available_filters
     }
   }
 }

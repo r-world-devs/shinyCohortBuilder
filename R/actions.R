@@ -103,7 +103,7 @@ input_state <- function(action, params, gui = TRUE, session = shiny::getDefaultR
         style = glue::glue("background-color: {color}"),
         shiny::tags$strong(action),
         shiny::br(),
-      params %>% purrr::imap(
+      params |> purrr::imap(
         ~ shiny::tagList(
           shiny::tags$span(.y, ": ", paste(.x, collapse = ", ")),
           shiny::br()
@@ -259,10 +259,10 @@ update_filter_gui <- function(cohort, step_id, filter_id, update, reset, session
   updated_input <- FALSE
   updated_plot <- FALSE
 
-  if (("post_input" %in% update) && !identical(filter$gui$post_stats, FALSE)) {
+  if (("post_input" %in% update) && !identical(filter@extra$gui$post_stats, FALSE)) {
     update <- c(update, "input")
   }
-  if (("multi_input" %in% update) && filter$gui$multi_input) {
+  if (("multi_input" %in% update) && filter@extra$gui$multi_input) {
     update <- c(update, "input")
   }
   if ("force_input" %in% update) {
@@ -270,7 +270,7 @@ update_filter_gui <- function(cohort, step_id, filter_id, update, reset, session
   }
 
   if ("input" %in% update) {
-    filter$gui$update(
+    filter@extra$gui$update(
       session,
       sf_id(step_id, filter_id),
       cohort,
@@ -289,7 +289,7 @@ update_filter_gui <- function(cohort, step_id, filter_id, update, reset, session
       child = ".cb_filter_content .cb_no_data_placeholder"
     )
     show_feedback <- if_null_default(
-      filter$get_params("feedback"),
+      get_filter_params(filter, "feedback"),
       cohort$attributes$feedback
     )
     if (show_feedback) {
@@ -350,7 +350,7 @@ gui_update_plot <- function(step_id, filter_id, cohort, session) {
 
   filter <- cohort$get_filter(step_id, filter_id)
   no_data <- cohort$get_cache(step_id, filter_id, state = "pre")$n_data == 0
-  feedback <- filter$gui$feedback(sf_id(step_id, filter_id), cohort, no_data)
+  feedback <- filter@extra$gui$feedback(sf_id(step_id, filter_id), cohort, no_data)
   session$output[[feedback$plot_id]] <- feedback$render_fun
 }
 
@@ -531,8 +531,8 @@ gui_manage_step_modal <- function(cohort, changed_input, session) {
   }
 
   choices <- .available_filters_choices(cohort$get_source(), cohort)
-  selected <- cohort$get_step(cohort$last_step_id())$filters %>%
-    purrr::map_chr("id")
+  selected <- cohort$get_step(cohort$last_step_id())$filters |>
+    purrr::map_chr(~.x@id)
   if (length(selected) == 0) {
     selected <- NULL
   }
@@ -585,12 +585,12 @@ gui_manage_step_configured <- function(cohort, changed_input, session) {
 
   step_id <- cohort$last_step_id()
   chosen_ids <- session$input[["manage_step"]]
-  current_ids <- cohort$get_filter(step_id) %>% purrr::map_chr("id")
+  current_ids <- cohort$get_filter(step_id) |> purrr::map_chr(~.x@id)
   to_rm_ids <- setdiff(current_ids, chosen_ids)
   to_add_ids <- setdiff(chosen_ids, current_ids)
 
   available_filters <- cohort$attributes$available_filters
-  available_filter_ids <- purrr::map_chr(available_filters, "id")
+  available_filter_ids <- purrr::map_chr(available_filters, ~.x@id)
   available_filters <- stats::setNames(available_filters, available_filter_ids)
 
   if (length(available_filters) == 0) {
@@ -605,7 +605,7 @@ gui_manage_step_configured <- function(cohort, changed_input, session) {
       step_id = step_id,
       run_flow = FALSE
     )
-    cohort$update_cache(step_id, filter$id, state = "pre")
+    cohort$update_cache(step_id, filter@id, state = "pre")
   }
 
   for (filter_id in to_rm_ids) {
@@ -625,7 +625,7 @@ gui_manage_step_configured <- function(cohort, changed_input, session) {
   }
 
   for (filter in to_add_filters) {
-    gui_add_step_filter(step_id = step_id, filter_id = filter$id, cohort = cohort, session = session)
+    gui_add_step_filter(step_id = step_id, filter_id = filter@id, cohort = cohort, session = session)
   }
   for (filter_id in to_rm_ids) {
     gui_rm_step_filter(step_id = step_id, filter_id = filter_id, cohort = cohort, session = session)
@@ -655,7 +655,7 @@ gui_show_state <- function(cohort, changed_input, session) {
     size = "l",
     title = "Cohort state",
     shiny::tags$code(
-      cohort$get_state(json = TRUE) %>%
+      cohort$get_state(json = TRUE) |>
         shiny::HTML()
     ),
     easyClose = TRUE
@@ -692,7 +692,7 @@ gui_input_state <- function(cohort, changed_input, session) {
     ),
     easyClose = TRUE,
     footer = shiny::tagList(
-      shiny::modalButton("Confirm") %>%
+      shiny::modalButton("Confirm") |>
         shiny::tagAppendAttributes(
           onclick = .trigger_action_js(
             "restore_state",
@@ -756,8 +756,8 @@ gui_add_step_configured <- function(cohort, changed_input, session) {
     return(gui_add_step(cohort, changed_input, session))
   }
 
-  filters <- available_filters %>%
-    purrr::keep(function(x) {x$id %in% chosed_filters})
+  filters <- available_filters |>
+    purrr::keep(function(x) {x@id %in% chosed_filters})
 
   cohort$copy_step(
     filters = filters,
@@ -885,10 +885,10 @@ gui_show_repro_code <- function(cohort, changed_input, session) {
       shiny::tags$code(
         id = "scb-reproducible-code",
         class = "hl background",
-        cohort$get_code(width = I(120), output = FALSE)$text.tidy %>%
-          highr::hi_html() %>%
-          purrr::map_chr(add_trailing_space) %>%
-          paste(collapse = "\n") %>%
+        cohort$get_code(width = I(120), output = FALSE)$text.tidy |>
+          highr::hi_html() |>
+          purrr::map_chr(add_trailing_space) |>
+          paste(collapse = "\n") |>
           shiny::HTML()
       )
     ),
@@ -964,7 +964,7 @@ gui_show_repro_code <- function(cohort, changed_input, session) {
 #'         variable = "copies", range = c(6, 8)
 #'       )
 #'     )
-#'   ) %>% run()
+#'   ) |> run()
 #'
 #'   ui <- fluidPage(
 #'     div(id = "attrition")
@@ -1049,7 +1049,7 @@ gui_show_repro_code <- function(cohort, changed_input, session) {
 #'         variable = "copies", range = c(6, 8)
 #'       )
 #'     )
-#'   ) %>% run()
+#'   ) |> run()
 #'
 #'   ui <- fluidPage(
 #'     div(id = "attrition")
@@ -1102,7 +1102,7 @@ navs <- function(..., id = NULL, selected = NULL, type = c("tabs", "pills", "hid
       # todo write it as it should be
       selected <- tabset$children[[1]]$children[[1]]$children[[1]]$attribs$`data-value`
     }
-    tabset$children[[1]]$children <- tabset$children[[1]]$children %>%
+    tabset$children[[1]]$children <- tabset$children[[1]]$children |>
       purrr::modify(bump_tab_version, selected = selected)
   }
   return(tabset)
@@ -1199,7 +1199,7 @@ no_ws <- c("before", "after", "outside", "after-begin", "before-end", "inside")
 #'           variable = "copies", range = c(6, 8)
 #'         )
 #'       )
-#'     ) %>% run()
+#'     ) |> run()
 #'     coh$attributes$stats <- c("pre", "post")
 #'     observeEvent(input$step_two_max, {
 #'       coh$update_filter("copies", step_id = 2, range = c(6, input$step_two_max))
@@ -1272,7 +1272,7 @@ gui_show_help <- function(cohort, changed_input, session) {
   description <- do.call(cohort$show_help, changed_input)
   if(is.null(description)) return(invisible(FALSE))
   name <-if (is.null(changed_input$field)) {
-    do.call(cohort$get_filter, changed_input)$name
+    do.call(cohort$get_filter, changed_input)@name
   } else {
     changed_input$field
   }

@@ -3,7 +3,7 @@ call_filter <- function(filter_id, step_id, cohort, session, feedback) {
   filter <- cohort$get_filter(step_id, filter_id)
   no_data <- cohort$get_cache(step_id, filter_id, state = "pre")$n_data == 0
 
-  filter$gui$server(sf_id(step_id, filter_id), session$input, session$output, session, cohort)
+  filter@extra$gui$server(sf_id(step_id, filter_id), session$input, session$output, session, cohort)
 
   if (!is.null(feedback)) {
     session$output[[feedback$plot_id]] <- feedback$render_fun
@@ -82,11 +82,11 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
     ns(step_filter_id)
   )
   show_feedback <- if_null_default(
-    filter$get_params("feedback"),
+    get_filter_params(filter, "feedback"),
     cohort$attributes$feedback
   )
 
-  filter_id <- filter$id
+  filter_id <- filter@id
   step_id <- gsub(paste0("-", filter_id), "", step_filter_id)
 
   no_data_class <- ""
@@ -98,7 +98,7 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
 
   feedback <- NULL
   if (show_feedback) {
-    feedback <- filter$gui$feedback(step_filter_id, cohort, empty)
+    feedback <- filter@extra$gui$feedback(step_filter_id, cohort, empty)
   }
 
   call_filter(filter_id, step_id, cohort, cohort$attributes$session, feedback)
@@ -116,7 +116,7 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
     },
     shiny::div(
       class = "cb_inputs",
-      filter$gui$input(ns(step_filter_id), cohort)
+      filter@extra$gui$input(ns(step_filter_id), cohort)
     )
   )
 }
@@ -156,7 +156,7 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
 #'         "range", id = "copies", name = "Copies", dataset = "books",
 #'         variable = "copies", range = c(5, 12)
 #'       )
-#'     ) %>% run()
+#'     ) |> run()
 #'     coh$attributes$session <- session
 #'     coh$attributes$feedback <- TRUE
 #'
@@ -176,13 +176,13 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
 #' }
 #' @export
 .render_filter <- function(filter, step_id, cohort, ns) {
-  filter_id <- filter$id
+  filter_id <- filter@id
   step_filter_id <- sf_id(step_id, filter_id)
 
-  keep_na_filter <- filter$get_params("keep_na")
-  input_param_name <- filter$input_param
-  active_filter <- filter$get_params("active")
-  filter_description <- cohort$show_help(step_id = step_id, filter_id = filter$id)
+  keep_na_filter <- get_filter_params(filter, "keep_na")
+  input_param_name <- filter@input_param
+  active_filter <- get_filter_params(filter, "active")
+  filter_description <- cohort$show_help(step_id = step_id, filter_id = filter@id)
   force_render <- getOption("scb_render_all", default = FALSE)
 
   active_id <- paste0("active_", step_filter_id)
@@ -193,9 +193,9 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
     filter_help_icon(filter, ns, "filter", filter_description, cohort),
     .cb_input(
       shinyWidgets::prettySwitch(
-        inputId = ns(active_id), label = filter$name,
+        inputId = ns(active_id), label = filter@name,
         value = active_filter, inline = TRUE
-      ) %>% htmltools::tagAppendAttributes(class = "cb_activate_filter"),
+      ) |> htmltools::tagAppendAttributes(class = "cb_activate_filter"),
       "active"
     ),
     shiny::div(
@@ -298,7 +298,7 @@ print_state <- function(action, params) {
     return(invisible(TRUE))
   }
   cat_nl(paste("===>", action))
-  params %>%
+  params |>
     purrr::iwalk(~ cat_nl(paste0("  => ", .y, ": "), paste(.x, collapse = ", ")))
 }
 
@@ -522,9 +522,7 @@ restore_attribute <- function(cohort, attribute, value) {
 #'
 #' @seealso \link{source-gui-layer}
 #' @export
-.gui_filter <- function(filter, ...) {
-  UseMethod(".gui_filter", filter)
-}
+.gui_filter <- S7::new_generic("gui_filter", "filter")
 
 #' Render filtering panels for all the filters included in Cohort
 #'
@@ -575,7 +573,7 @@ restore_attribute <- function(cohort, attribute, value) {
 #'         "date_range", id = "registered", name = "Registered",  dataset = "borrowers",
 #'         variable = "registered", range = c(as.Date("2010-01-01"), Inf)
 #'       )
-#'     ) %>% run()
+#'     ) |> run()
 #'     coh$attributes$session <- session
 #'     coh$attributes$feedback <- TRUE
 #'
@@ -605,8 +603,8 @@ restore_attribute <- function(cohort, attribute, value) {
   step <- cohort$get_step(step_id)
   shiny::tagList(
     shiny::htmlOutput(ns(paste0(step_id, "-stats")), class = "scb_data_stats"),
-    step$filters %>%
-      purrr::map(~ .render_filter(.x, step_id, cohort, ns = ns)) %>%
+    step$filters |>
+      purrr::map(~ .render_filter(.x, step_id, cohort, ns = ns)) |>
       shiny::div(class = "cb_filters", `data-step_id` = step_id)
   )
 }
@@ -640,7 +638,7 @@ restore_attribute <- function(cohort, attribute, value) {
 #'         variable = "registered", range = c(as.Date("2010-01-01"), Inf)
 #'       )
 #'     ))
-#'   ) %>% run()
+#'   ) |> run()
 #'   filter_choices <- .available_filters_choices(coh$get_source(), coh)
 #'
 #'   ui <- fluidPage(
