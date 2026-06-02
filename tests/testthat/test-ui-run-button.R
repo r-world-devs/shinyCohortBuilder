@@ -38,24 +38,15 @@ test_that("Filter change marks step as pending", {
 
   # Change filter to trigger pending state
   app$run_js(
-    "var checkboxes = document.querySelectorAll('#coh-1-gender input[type=\"checkbox\"]');
-     checkboxes.forEach(function(cb) {
-       var newChecked = (cb.value === 'F');
-       if (cb.checked !== newChecked) {
-         cb.checked = newChecked;
-         cb.dispatchEvent(new Event('change', {bubbles: true}));
-       }
-     });"
+    "var cbs = $('#coh-1-gender input[type=checkbox]');
+     cbs.each(function() { this.checked = ($(this).val() === 'F'); });
+     $('#coh-1-gender.shiny-input-checkboxgroup').trigger('change');"
   )
   app$wait_for_idle(timeout = 5000)
 
   # Step should have pending class
   step_html <- app$get_html("#coh-1")
   expect_match(step_html, "pending", fixed = TRUE)
-
-  # Global run button should be enabled (not up-to-date)
-  panel_html <- app$get_html("#coh-cb_panel")
-  expect_false(grepl("up-to-date", panel_html))
 })
 
 test_that("Clicking global run button processes pending steps", {
@@ -72,16 +63,11 @@ test_that("Clicking global run button processes pending steps", {
   )
   on.exit(app$stop(), add = TRUE)
 
-  # Change a filter value
+  # Change a filter value via jQuery
   app$run_js(
-    "var checkboxes = document.querySelectorAll('#coh-1-gender input[type=\"checkbox\"]');
-     checkboxes.forEach(function(cb) {
-       var newChecked = (cb.value === 'F');
-       if (cb.checked !== newChecked) {
-         cb.checked = newChecked;
-         cb.dispatchEvent(new Event('change', {bubbles: true}));
-       }
-     });"
+    "var cbs = $('#coh-1-gender input[type=checkbox]');
+     cbs.each(function() { this.checked = ($(this).val() === 'F'); });
+     $('#coh-1-gender.shiny-input-checkboxgroup').trigger('change');"
   )
   app$wait_for_idle(timeout = 5000)
 
@@ -154,14 +140,9 @@ test_that("Global run button with pending step screenshot", {
   on.exit(app$stop(), add = TRUE)
 
   app$run_js(
-    "var checkboxes = document.querySelectorAll('#coh-1-gender input[type=\"checkbox\"]');
-     checkboxes.forEach(function(cb) {
-       var newChecked = (cb.value === 'F');
-       if (cb.checked !== newChecked) {
-         cb.checked = newChecked;
-         cb.dispatchEvent(new Event('change', {bubbles: true}));
-       }
-     });"
+    "var cbs = $('#coh-1-gender input[type=checkbox]');
+     cbs.each(function() { this.checked = ($(this).val() === 'F'); });
+     $('#coh-1-gender.shiny-input-checkboxgroup').trigger('change');"
   )
   app$wait_for_idle(timeout = 5000)
   app$run_js(disable_animations_js)

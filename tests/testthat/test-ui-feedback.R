@@ -17,7 +17,7 @@ test_that("Feedback app: filter-level feedback=TRUE shows plot", {
   on.exit(app$stop(), add = TRUE)
 
   # Gender filter has feedback=TRUE
-  gender_html <- app$get_html("#coh-1-gender")
+  gender_html <- app$get_html(".cb_filter[data-filter_id='gender']")
   expect_match(gender_html, "cb_feedback", fixed = TRUE)
 })
 
@@ -36,7 +36,7 @@ test_that("Feedback app: filter-level feedback=FALSE hides plot", {
   on.exit(app$stop(), add = TRUE)
 
   # Age filter has feedback=FALSE explicitly — no cb_feedback div
-  age_html <- app$get_html("#coh-1-age")
+  age_html <- app$get_html(".cb_filter[data-filter_id='age']")
   expect_false(grepl("cb_feedback", age_html))
 })
 
@@ -55,7 +55,7 @@ test_that("Feedback app: cohort-level feedback=TRUE inherits to filter without o
   on.exit(app$stop(), add = TRUE)
 
   # Group filter has no feedback param — inherits from cohort (TRUE)
-  group_html <- app$get_html("#coh-1-group")
+  group_html <- app$get_html(".cb_filter[data-filter_id='group']")
   expect_match(group_html, "cb_feedback", fixed = TRUE)
 })
 
@@ -75,16 +75,11 @@ test_that("Feedback app: changing filter value updates plots", {
 
   feedback_before <- app$get_html("#coh-1-gender .cb_feedback")
 
-  # Toggle gender selection
+  # Toggle gender selection via jQuery
   app$run_js(
-    "var checkboxes = document.querySelectorAll('#coh-1-gender input[type=\"checkbox\"]');
-     checkboxes.forEach(function(cb) {
-       var newChecked = (cb.value === 'F');
-       if (cb.checked !== newChecked) {
-         cb.checked = newChecked;
-         cb.dispatchEvent(new Event('change', {bubbles: true}));
-       }
-     });"
+    "var cbs = $('#coh-1-gender input[type=checkbox]');
+     cbs.each(function() { this.checked = ($(this).val() === 'F'); });
+     $('#coh-1-gender.shiny-input-checkboxgroup').trigger('change');"
   )
   app$wait_for_idle(timeout = 10000)
 
@@ -107,18 +102,16 @@ test_that("Feedback app: deactivating filter removes feedback content", {
   )
   on.exit(app$stop(), add = TRUE)
 
-  # Deactivate gender filter
+  # Deactivate gender filter via jQuery trigger
   app$run_js(
-    "var cb = document.querySelector('#coh-1-gender .cb_activate_filter input[type=\"checkbox\"]');
-     if (cb && cb.checked) {
-       cb.checked = false;
-       cb.dispatchEvent(new Event('change', {bubbles: true}));
-     }"
+    "var el = document.getElementById('coh-active_1-gender');
+     el.checked = false;
+     $(el).trigger('change');"
   )
   app$wait_for_idle(timeout = 5000)
 
   # Filter content should be hidden
-  gender_html <- app$get_html("#coh-1-gender")
+  gender_html <- app$get_html(".cb_filter[data-filter_id='gender']")
   expect_match(gender_html, "hidden-input", fixed = TRUE)
 })
 

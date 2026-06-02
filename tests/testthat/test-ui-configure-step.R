@@ -48,9 +48,10 @@ test_that("Configure step: selecting filters and accepting creates step", {
 
   # Select age and group filters in virtualSelect
   app$run_js(
-    "var el = document.querySelector('[data-id=\"coh-configure_step\"]');
+    "var el = document.getElementById('coh-configure_step');
      if (el && el.virtualSelect) {
        el.virtualSelect.setValue(['age', 'group']);
+       $(el).trigger('change');
      }"
   )
   app$wait_for_idle(timeout = 3000)
@@ -118,9 +119,10 @@ test_that("Manage step: adding filter via manage modal", {
 
   # Add age filter to selection
   app$run_js(
-    "var el = document.querySelector('[data-id=\"coh-manage_step\"]');
+    "var el = document.getElementById('coh-manage_step');
      if (el && el.virtualSelect) {
        el.virtualSelect.setValue(['gender', 'age']);
+       $(el).trigger('change');
      }"
   )
   app$wait_for_idle(timeout = 3000)
@@ -155,9 +157,10 @@ test_that("Manage step: removing filter via manage modal", {
   Sys.sleep(0.5)
 
   app$run_js(
-    "var el = document.querySelector('[data-id=\"coh-manage_step\"]');
+    "var el = document.getElementById('coh-manage_step');
      if (el && el.virtualSelect) {
        el.virtualSelect.setValue(['age']);
+       $(el).trigger('change');
      }"
   )
   app$wait_for_idle(timeout = 3000)

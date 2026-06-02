@@ -31,7 +31,7 @@ test_that("Basic app renders panel, steps, and filters", {
 
   # Activation switches present
   switches <- app$get_html(".cb_activate_filter")
-  expect_true(nchar(switches) > 0)
+  expect_true(all(nchar(switches) > 0))
 
   # Data output rendered
   output <- app$get_html("#datasets")
@@ -57,16 +57,11 @@ test_that("Discrete filter: toggling checkbox updates data", {
   # Initial state: gender = "M" selected
   output_before <- app$get_html("#datasets")
 
-  # Uncheck "M" and check "F" via JS
+  # Uncheck "M" and check "F" via jQuery
   app$run_js(
-    "var checkboxes = document.querySelectorAll('#coh-1-gender input[type=\"checkbox\"]');
-     checkboxes.forEach(function(cb) {
-       var newChecked = (cb.value === 'F');
-       if (cb.checked !== newChecked) {
-         cb.checked = newChecked;
-         cb.dispatchEvent(new Event('change', {bubbles: true}));
-       }
-     });"
+    "var cbs = $('#coh-1-gender input[type=checkbox]');
+     cbs.each(function() { this.checked = ($(this).val() === 'F'); });
+     $('#coh-1-gender.shiny-input-checkboxgroup').trigger('change');"
   )
   app$wait_for_idle(timeout = 5000)
 
@@ -91,18 +86,16 @@ test_that("Toggling filter active switch hides content", {
   )
   on.exit(app$stop(), add = TRUE)
 
-  # Deactivate gender filter by clicking the prettySwitch
+  # Deactivate gender filter by toggling the prettySwitch via jQuery
   app$run_js(
-    "var cb = document.querySelector('#coh-1-gender .cb_activate_filter input[type=\"checkbox\"]');
-     if (cb && cb.checked) {
-       cb.checked = false;
-       cb.dispatchEvent(new Event('change', {bubbles: true}));
-     }"
+    "var el = document.getElementById('coh-active_1-gender');
+     el.checked = false;
+     $(el).trigger('change');"
   )
   app$wait_for_idle(timeout = 5000)
 
   # The filter content should be hidden
-  filter_html <- app$get_html("#coh-1-gender")
+  filter_html <- app$get_html(".cb_filter[data-filter_id='gender']")
   expect_match(filter_html, "hidden-input", fixed = TRUE)
 })
 
@@ -218,8 +211,8 @@ test_that("Get State modal shows JSON state", {
   )
   on.exit(app$stop(), add = TRUE)
 
-  # Click Get State button
-  app$click(selector = "#coh-cb_panel button:has(> .fa-stream)")
+  # Click Get State button (icon: fa-bars-staggered in FA6)
+  app$click(selector = "#coh-cb_panel button:has(> .fa-bars-staggered)")
   app$wait_for_idle(timeout = 5000)
   Sys.sleep(0.5)
 
@@ -253,6 +246,155 @@ test_that("Show Reproducible Code modal displays code", {
   modal_html <- app$get_html(".modal-dialog")
   expect_match(modal_html, "Reproducible code", fixed = TRUE)
   expect_match(modal_html, "scb-reproducible-code", fixed = TRUE)
+})
+
+# ── Get State modal (deeper) ────────────────────────────────────────────────
+
+test_that("Get State modal contains JSON with filter info", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_screenshot_only()
+
+  app_dir <- test_path("apps", "basic")
+  app <- AppDriver$new(
+    app_dir, name = "basic-get-state-json",
+    height = 900, width = 1200,
+    variant = platform_variant(),
+    load_timeout = 60000
+  )
+  on.exit(app$stop(), add = TRUE)
+
+  # Click Get State button (icon: fa-bars-staggered, swapped with set_state)
+  app$click(selector = "#coh-cb_panel button:has(> .fa-bars-staggered)")
+  app$wait_for_idle(timeout = 5000)
+  Sys.sleep(0.5)
+
+  modal_html <- app$get_html(".modal-dialog")
+  expect_match(modal_html, "Cohort state", fixed = TRUE)
+  # JSON state should reference the filter IDs
+  expect_match(modal_html, "gender", fixed = TRUE)
+  expect_match(modal_html, "age", fixed = TRUE)
+})
+
+# ── Set State modal ────────────────────────────────────────────────────────
+
+test_that("Set State modal shows file input and textarea", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_screenshot_only()
+
+  app_dir <- test_path("apps", "basic")
+  app <- AppDriver$new(
+    app_dir, name = "basic-set-state-modal",
+    height = 900, width = 1200,
+    variant = platform_variant(),
+    load_timeout = 60000
+  )
+  on.exit(app$stop(), add = TRUE)
+
+  # Click Set State button (icon: fa-sliders, swapped with get_state)
+  app$click(selector = "#coh-cb_panel button:has(> .fa-sliders)")
+  app$wait_for_idle(timeout = 5000)
+  Sys.sleep(0.5)
+
+  modal_html <- app$get_html(".modal-dialog")
+  expect_match(modal_html, "Cohort state", fixed = TRUE)
+  expect_match(modal_html, "Choose json file", fixed = TRUE)
+  expect_match(modal_html, "Paste json state", fixed = TRUE)
+  expect_match(modal_html, "Confirm", fixed = TRUE)
+})
+
+test_that("Set State via textarea restores cohort state", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_screenshot_only()
+
+  app_dir <- test_path("apps", "basic")
+  app <- AppDriver$new(
+    app_dir, name = "basic-set-state-restore",
+    height = 900, width = 1200,
+    variant = platform_variant(),
+    load_timeout = 60000
+  )
+  on.exit(app$stop(), add = TRUE)
+
+  output_before <- app$get_html("#datasets")
+
+  # Open Set State modal
+  app$click(selector = "#coh-cb_panel button:has(> .fa-sliders)")
+  app$wait_for_idle(timeout = 5000)
+  Sys.sleep(0.5)
+
+  # Paste JSON state to select only "F" for gender
+  app$run_js(
+    "var el = document.getElementById('coh-coh_string_state');
+     if (el) {
+       $(el).val('[{\"step\":\"1\",\"filters\":[{\"type\":\"discrete\",\"id\":\"gender\",\"name\":\"Gender\",\"variable\":\"gender\",\"value\":\"F\",\"dataset\":\"patients\",\"keep_na\":true,\"description\":null,\"active\":true},{\"type\":\"range\",\"id\":\"age\",\"name\":\"Age\",\"variable\":\"age\",\"range\":[30,50],\"dataset\":\"patients\",\"keep_na\":true,\"description\":null,\"active\":true}]}]');
+       $(el).trigger('change');
+     }"
+  )
+  app$wait_for_idle(timeout = 3000)
+
+  # Click Confirm to restore state
+  app$click(selector = ".modal-footer button.btn:first-child")
+  app$wait_for_idle(timeout = 10000)
+
+  # Data should have changed
+  output_after <- app$get_html("#datasets")
+  expect_false(identical(output_before, output_after))
+})
+
+# ── Reproducible code modal (deeper) ──────────────────────────────────────
+
+test_that("Repro code modal contains R code and copy button", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_screenshot_only()
+
+  app_dir <- test_path("apps", "basic")
+  app <- AppDriver$new(
+    app_dir, name = "basic-repro-code-deep",
+    height = 900, width = 1200,
+    variant = platform_variant(),
+    load_timeout = 60000
+  )
+  on.exit(app$stop(), add = TRUE)
+
+  app$click(selector = "#coh-cb_panel button:has(> .fa-code)")
+  app$wait_for_idle(timeout = 5000)
+  Sys.sleep(0.5)
+
+  modal_html <- app$get_html(".modal-dialog")
+  # Code should contain R filtering code
+  expect_match(modal_html, "scb-reproducible-code", fixed = TRUE)
+  expect_match(modal_html, "filter", fixed = TRUE)
+  # Copy button should be present
+  expect_match(modal_html, "scb-copy-to-clipboard", fixed = TRUE)
+})
+
+# ── Attrition modal ───────────────────────────────────────────────────────
+
+test_that("Attrition modal shows cohort attrition", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_if_screenshot_only()
+
+  app_dir <- test_path("apps", "basic")
+  app <- AppDriver$new(
+    app_dir, name = "basic-attrition",
+    height = 900, width = 1200,
+    variant = platform_variant(),
+    load_timeout = 60000
+  )
+  on.exit(app$stop(), add = TRUE)
+
+  # Click Show Attrition button (icon: fa-diagram-project)
+  app$click(selector = "#coh-cb_panel button:has(> .fa-diagram-project)")
+  app$wait_for_idle(timeout = 5000)
+  Sys.sleep(0.5)
+
+  modal_html <- app$get_html(".modal-dialog")
+  expect_match(modal_html, "Cohort attrition", fixed = TRUE)
 })
 
 # ── Screenshots ─────────────────────────────────────────────────────────────
@@ -294,5 +436,109 @@ test_that("Basic app with two steps screenshot", {
   app$wait_for_idle(timeout = 10000)
   app$run_js(disable_animations_js)
   Sys.sleep(0.5)
+  app$expect_screenshot(threshold = 3)
+})
+
+test_that("Get State modal screenshot", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_without_screenshot_tests()
+
+  app_dir <- test_path("apps", "basic")
+  app <- AppDriver$new(
+    app_dir, name = "basic-get-state-screenshot",
+    height = 900, width = 1200,
+    variant = platform_variant(),
+    load_timeout = 60000
+  )
+  on.exit(app$stop(), add = TRUE)
+
+  app$click(selector = "#coh-cb_panel button:has(> .fa-bars-staggered)")
+  app$wait_for_idle(timeout = 5000)
+  Sys.sleep(0.5)
+  app$run_js(disable_animations_js)
+  Sys.sleep(0.3)
+  app$expect_screenshot(threshold = 3)
+})
+
+test_that("Set State restored screenshot", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_without_screenshot_tests()
+
+  app_dir <- test_path("apps", "basic")
+  app <- AppDriver$new(
+    app_dir, name = "basic-set-state-screenshot",
+    height = 900, width = 1200,
+    variant = platform_variant(),
+    load_timeout = 60000
+  )
+  on.exit(app$stop(), add = TRUE)
+
+  # Open Set State modal
+  app$click(selector = "#coh-cb_panel button:has(> .fa-sliders)")
+  app$wait_for_idle(timeout = 5000)
+  Sys.sleep(0.5)
+
+  # Paste JSON state selecting only "F" for gender
+  app$run_js(
+    "var el = document.getElementById('coh-coh_string_state');
+     if (el) {
+       $(el).val('[{\"step\":\"1\",\"filters\":[{\"type\":\"discrete\",\"id\":\"gender\",\"name\":\"Gender\",\"variable\":\"gender\",\"value\":\"F\",\"dataset\":\"patients\",\"keep_na\":true,\"description\":null,\"active\":true},{\"type\":\"range\",\"id\":\"age\",\"name\":\"Age\",\"variable\":\"age\",\"range\":[30,50],\"dataset\":\"patients\",\"keep_na\":true,\"description\":null,\"active\":true}]}]');
+       $(el).trigger('change');
+     }"
+  )
+  app$wait_for_idle(timeout = 3000)
+
+  # Click Confirm to restore state
+  app$click(selector = ".modal-footer button.btn:first-child")
+  app$wait_for_idle(timeout = 10000)
+
+  app$run_js(disable_animations_js)
+  Sys.sleep(0.5)
+  app$expect_screenshot(threshold = 3)
+})
+
+test_that("Reproducible code modal screenshot", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_without_screenshot_tests()
+
+  app_dir <- test_path("apps", "basic")
+  app <- AppDriver$new(
+    app_dir, name = "basic-repro-code-screenshot",
+    height = 900, width = 1200,
+    variant = platform_variant(),
+    load_timeout = 60000
+  )
+  on.exit(app$stop(), add = TRUE)
+
+  app$click(selector = "#coh-cb_panel button:has(> .fa-code)")
+  app$wait_for_idle(timeout = 5000)
+  Sys.sleep(0.5)
+  app$run_js(disable_animations_js)
+  Sys.sleep(0.3)
+  app$expect_screenshot(threshold = 3)
+})
+
+test_that("Attrition modal screenshot", {
+  skip_on_cran()
+  skip_on_ci()
+  skip_without_screenshot_tests()
+
+  app_dir <- test_path("apps", "basic")
+  app <- AppDriver$new(
+    app_dir, name = "basic-attrition-screenshot",
+    height = 900, width = 1200,
+    variant = platform_variant(),
+    load_timeout = 60000
+  )
+  on.exit(app$stop(), add = TRUE)
+
+  app$click(selector = "#coh-cb_panel button:has(> .fa-diagram-project)")
+  app$wait_for_idle(timeout = 5000)
+  Sys.sleep(0.5)
+  app$run_js(disable_animations_js)
+  Sys.sleep(0.3)
   app$expect_screenshot(threshold = 3)
 })

@@ -27,7 +27,7 @@ coh <- cohort(
 
 ui <- bslib::page_fluid(
   theme = bslib::bs_theme(version = 5),
-  cb_ui("coh", style = "width: 350px; float: left;", state = TRUE, code = TRUE, attrition = TRUE),
+  cb_ui("coh", style = "width: 350px; float: left;"),
   div(
     style = "float: right; width: calc(100% - 360px);",
     verbatimTextOutput("datasets")
