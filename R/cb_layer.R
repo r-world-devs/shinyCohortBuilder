@@ -190,7 +190,7 @@ post_update_filter_hook <- function(public, private, step_id, filter_id, ..., ac
     gui_update_filters_loop(public, step_id, FALSE, update, exclude = filter_id, session)
   }
   print("b2")
-  if (hook_args$update_active) {
+  if (isTRUE(hook_args$update_active)) {
     gui_update_filter_class(step_id, filter_id, active, "hidden-input", session)
   }
   print("b3")

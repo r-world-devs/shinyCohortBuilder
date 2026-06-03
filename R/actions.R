@@ -434,13 +434,13 @@ gui_update_filter <- function(cohort, changed_input, session) {
   }
 
   changed_input <- convert_input_value(changed_input, step_id, filter_id, cohort, update_active)
+  changed_input$hook_args <- list(
+    pre = list(),
+    post = list(update_active = update_active, update = update)
+  )
   do.call(
     cohort$update_filter,
-    changed_input,
-    hook_args = list(
-      pre = list(),
-      post = list(update_active = update_active, update = update)
-    )
+    changed_input
   )
 }
 
