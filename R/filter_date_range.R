@@ -1,6 +1,7 @@
 S7::method(.gui_filter, cohortBuilder::CbFilterDateRange) <- function(filter, ...) {
   list(
     input = function(input_id, cohort) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       shiny::tagList(
         .cb_input(
           do.call(
@@ -10,7 +11,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDateRange) <- function(filter, ..
               range_input_params(filter, input_id, cohort, ...)
             )
           ),
-          filter@input_param
+          filter@private$input_param
         ),
         .cb_input(
           .keep_na_input(input_id, filter, cohort),
@@ -19,6 +20,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDateRange) <- function(filter, ..
       )
     },
     feedback = function(input_id, cohort, empty = FALSE) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       list(
         plot_id = shiny::NS(input_id, "feedback_plot") ,
         output_fun = shiny::plotOutput,
@@ -34,7 +36,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDateRange) <- function(filter, ..
 
             filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
             filter_range <- extract_selected_range(
-              get_filter_params(filter, "range"),
+              filter@range,
               freq_range(filter_cache$frequencies),
               FALSE
             )
@@ -44,8 +46,8 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDateRange) <- function(filter, ..
                 count = ifelse(l_bound >= filter_range[1] & l_bound <= filter_range[2], count, 0)
               )
 
-            if (!is.null(get_filter_params(filter, "n_bins"))) {
-              intervals <- seq.Date(plot_data$l_bound[1], rev(plot_data$u_bound)[1], length.out = get_filter_params(filter, "n_bins"))
+            if (!is.null(filter@extra$n_bins)) {
+              intervals <- seq.Date(plot_data$l_bound[1], rev(plot_data$u_bound)[1], length.out = filter@extra$n_bins)
               plot_data <- plot_data |>
                 dplyr::mutate(level = findInterval(l_bound, intervals)) |>
                 dplyr::group_by(level) |>
@@ -55,7 +57,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDateRange) <- function(filter, ..
             # todo possibly add modifier to lower number of bars
             n_missing <- filter_cache$n_missing
             n_total <- filter_cache$n_data
-            if (identical(get_filter_params(filter, "keep_na"), FALSE)) {
+            if (identical(filter@keep_na, FALSE)) {
               n_missing <- 0
             }
 
@@ -66,6 +68,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDateRange) <- function(filter, ..
     },
     server = function(input_id, input, output, session, cohort) {},
     update = function(session, input_id, cohort, reset = FALSE, ...) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       do.call(
         shiny::updateDateRangeInput,
         append(

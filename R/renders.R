@@ -3,7 +3,7 @@ call_filter <- function(filter_id, step_id, cohort, session, feedback) {
   filter <- cohort$get_filter(step_id, filter_id)
   no_data <- cohort$get_cache(step_id, filter_id, state = "pre")$n_data == 0
 
-  filter@extra$gui$server(sf_id(step_id, filter_id), session$input, session$output, session, cohort)
+  filter@private$gui$server(sf_id(step_id, filter_id), session$input, session$output, session, cohort)
 
   if (!is.null(feedback)) {
     session$output[[feedback$plot_id]] <- feedback$render_fun
@@ -82,7 +82,7 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
     ns(step_filter_id)
   )
   show_feedback <- if_null_default(
-    get_filter_params(filter, "feedback"),
+    filter@extra$feedback,
     cohort$attributes$feedback
   )
 
@@ -98,7 +98,7 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
 
   feedback <- NULL
   if (show_feedback) {
-    feedback <- filter@extra$gui$feedback(step_filter_id, cohort, empty)
+    feedback <- filter@private$gui$feedback(step_filter_id, cohort, empty)
   }
 
   call_filter(filter_id, step_id, cohort, cohort$attributes$session, feedback)
@@ -116,7 +116,7 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
     },
     shiny::div(
       class = "cb_inputs",
-      filter@extra$gui$input(ns(step_filter_id), cohort)
+      filter@private$gui$input(ns(step_filter_id), cohort)
     )
   )
 }
@@ -179,9 +179,9 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
   filter_id <- filter@id
   step_filter_id <- sf_id(step_id, filter_id)
 
-  keep_na_filter <- get_filter_params(filter, "keep_na")
-  input_param_name <- filter@input_param
-  active_filter <- get_filter_params(filter, "active")
+  keep_na_filter <- filter@keep_na
+  input_param_name <- filter@private$input_param
+  active_filter <- filter@active
   filter_description <- cohort$show_help(step_id = step_id, filter_id = filter@id)
   force_render <- getOption("scb_render_all", default = FALSE)
 

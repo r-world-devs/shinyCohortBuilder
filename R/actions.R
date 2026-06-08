@@ -259,10 +259,10 @@ update_filter_gui <- function(cohort, step_id, filter_id, update, reset, session
   updated_input <- FALSE
   updated_plot <- FALSE
 
-  if (("post_input" %in% update) && !identical(filter@extra$gui$post_stats, FALSE)) {
+  if (("post_input" %in% update) && !identical(filter@private$gui$post_stats, FALSE)) {
     update <- c(update, "input")
   }
-  if (("multi_input" %in% update) && filter@extra$gui$multi_input) {
+  if (("multi_input" %in% update) && filter@private$gui$multi_input) {
     update <- c(update, "input")
   }
   if ("force_input" %in% update) {
@@ -270,7 +270,7 @@ update_filter_gui <- function(cohort, step_id, filter_id, update, reset, session
   }
 
   if ("input" %in% update) {
-    filter@extra$gui$update(
+    filter@private$gui$update(
       session,
       sf_id(step_id, filter_id),
       cohort,
@@ -289,7 +289,7 @@ update_filter_gui <- function(cohort, step_id, filter_id, update, reset, session
       child = ".cb_filter_content .cb_no_data_placeholder"
     )
     show_feedback <- if_null_default(
-      get_filter_params(filter, "feedback"),
+      filter@extra$feedback,
       cohort$attributes$feedback
     )
     if (show_feedback) {
@@ -350,7 +350,7 @@ gui_update_plot <- function(step_id, filter_id, cohort, session) {
 
   filter <- cohort$get_filter(step_id, filter_id)
   no_data <- cohort$get_cache(step_id, filter_id, state = "pre")$n_data == 0
-  feedback <- filter@extra$gui$feedback(sf_id(step_id, filter_id), cohort, no_data)
+  feedback <- filter@private$gui$feedback(sf_id(step_id, filter_id), cohort, no_data)
   session$output[[feedback$plot_id]] <- feedback$render_fun
 }
 
@@ -599,7 +599,7 @@ gui_manage_step_configured <- function(cohort, changed_input, session) {
 
   to_add_filters <- available_filters[to_add_ids]
   for (filter in to_add_filters) {
-    filter_state <- cohortBuilder:::get_filter_state(filter, extra_fields = NULL)
+    filter_state <- get_filter_params(filter)
     cohort$add_filter(
       filter = do.call(cohortBuilder::filter, filter_state),
       step_id = step_id,

@@ -26,6 +26,7 @@ extract_selected_datetime_range <- function(range, parent_range, reset) {
 S7::method(.gui_filter, cohortBuilder::CbFilterDatetimeRange) <- function(filter, ...) {
   list(
     input = function(input_id, cohort) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       input_params <- range_input_params(filter, input_id, cohort, ...)
       shiny::tagList(
         if (is_gui_type(filter, "datetimepicker")) {
@@ -45,7 +46,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDatetimeRange) <- function(filter
                 suff_id(input_params, "datetimepicker")
               )
             ),
-            filter@input_param
+            filter@private$input_param
           )
         } else if (is_gui_type(filter, "slider")) {
           .cb_input(
@@ -56,7 +57,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDatetimeRange) <- function(filter
                 suff_id(input_params, "slider")
               )
             ),
-            filter@input_param
+            filter@private$input_param
           )
         },
         .cb_input(
@@ -67,12 +68,13 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDatetimeRange) <- function(filter
     },
 
     feedback = function(input_id, cohort, empty = FALSE) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       list(
         plot_id = shiny::NS(input_id, "feedback_plot") ,
         output_fun = shiny::plotOutput,
         render_fun = if (!is.null(empty)) {
           shiny::renderPlot(bg = "transparent", height = 60, {
-            if(empty || is.null(get_filter_params(filter, "range"))) { # when no data in parent step
+            if(empty || is.null(filter@range)) { # when no data in parent step
               return(
                 ggplot2::ggplot()
               )
@@ -83,7 +85,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDatetimeRange) <- function(filter
             filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
 
             filter_range <- extract_selected_datetime_range(
-              get_filter_params(filter, "range"),
+              filter@range,
               freq_range(filter_cache$frequencies),
               FALSE
             )
@@ -94,7 +96,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDatetimeRange) <- function(filter
               )
             n_missing <- filter_cache$n_missing
             n_total <- filter_cache$n_data
-            if (identical(get_filter_params(filter, "keep_na"), FALSE)) {
+            if (identical(filter@keep_na, FALSE)) {
               n_missing <- 0
             }
 
@@ -105,6 +107,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDatetimeRange) <- function(filter
     },
     server = function(input_id, input, output, session, cohort) {},
     update = function(session, input_id, cohort, reset = FALSE, ...) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       input_params <- append(
         list(session = session),
         range_input_params(filter, input_id, cohort, reset, TRUE, ...)

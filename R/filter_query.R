@@ -99,7 +99,7 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
   parent_specs <- cohort$get_cache(step_id, filter_id, state = "pre")$specs
   setting_from_stat <- base::get("setting_from_stat", envir = asNamespace("shinyQueryBuilder"), inherits = FALSE)
 
-  filters <- get_filter_params(filter, "variables") |>
+  filters <- filter@variables |>
     purrr::map(
       ~ setting_from_stat(
         parent_specs[[.x]], .x, !!!gui_args$filters[[.x]],
@@ -109,7 +109,7 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
     purrr::map(~rlang::inject(shinyQueryBuilder::queryFilter(!!!.x)))
   gui_args$filters <- NULL
   selected_value <- adapt_rules_to_limits(
-    get_filter_params(filter, "value"),
+    filter@value,
     filters,
     reset
   )
@@ -134,6 +134,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterQuery) <- function(filter, ...) {
   }
   list(
     input = function(input_id, cohort) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       input_params <- query_input_params(filter, input_id, cohort, ...)
       input_params$inputId <- paste0(input_id, "_selected")
       modal_dialog_id <- paste0(input_id, "modal_in")
@@ -155,7 +156,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterQuery) <- function(filter, ...) {
                 `data-dismiss` = "modal", `data-bs-dismiss` = "modal",
                 onclick = move_dialog_back_js
               ),
-              filter@input_param,
+              filter@private$input_param,
               style = "display: inline-block;"
             ),
             shiny::modalButton("Dismiss") |>
@@ -179,6 +180,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterQuery) <- function(filter, ...) {
       )
     },
     feedback = function(input_id, cohort, empty = FALSE) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       list(
         plot_id = shiny::NS(input_id, "feedback_plot") ,
         output_fun = shiny::htmlOutput,
@@ -188,7 +190,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterQuery) <- function(filter, ...) {
               return(NULL)
             }
             ns <- cohort$attributes$session$ns
-            filter_val <- queryBuilder::queryToExpr(get_filter_params(filter, "value"))
+            filter_val <- queryBuilder::queryToExpr(filter@value)
             modal_dialog_id <- shiny::NS(ns(input_id), "query_modal")
             plot_id <- shiny::NS(ns(input_id), "feedback_plot")
             move_dialog_to_body_js <- move_modal_dialog_js(modal_dialog_id, ns(input_id), "body")
@@ -217,6 +219,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterQuery) <- function(filter, ...) {
     },
     server = function(input_id, input, output, session, cohort) {},
     update = function(session, input_id, cohort, reset = FALSE, ...) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       update_params <- query_input_params(filter, input_id, cohort, reset, TRUE, ...)
       update_params$inputId <- paste0(input_id, "_selected")
 

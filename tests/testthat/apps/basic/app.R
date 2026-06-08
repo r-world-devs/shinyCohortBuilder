@@ -1,13 +1,14 @@
 library(shiny)
 library(cohortBuilder)
 library(shinyCohortBuilder)
+options("scb_minified" = FALSE)
 
 source <- set_source(
   tblist(
     patients = data.frame(
       id = 1:10,
-      group = factor(c("A", "B", "C", "B", "B", "C", "A", "B", "C", "B")),
-      gender = factor(c("F", "M", "F", "F", "F", "M", "M", "F", "F", "M")),
+      group = c("A", "B", "C", "B", "B", "C", "A", "B", "C", "B"),
+      gender = c("F", "M", "F", "F", "F", "M", "M", "F", "F", "M"),
       age = c(50L, 44L, 38L, 49L, 45L, 33L, 43L, 35L, 40L, NA)
     )
   )
@@ -27,7 +28,11 @@ coh <- cohort(
 
 ui <- bslib::page_fluid(
   theme = bslib::bs_theme(version = 5),
-  cb_ui("coh", style = "width: 350px; float: left;", state = TRUE, code = TRUE, attrition = TRUE),
+  cb_ui(
+    "coh", style = "width: 350px; float: left;",
+    state = TRUE, code = TRUE, attrition = TRUE,
+    assistant = FALSE
+  ),
   div(
     style = "float: right; width: calc(100% - 360px);",
     verbatimTextOutput("datasets")

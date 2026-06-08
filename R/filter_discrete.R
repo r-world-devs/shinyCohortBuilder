@@ -57,7 +57,7 @@ choice_name <- function(name, parent_stat, current_stat, stats) {
 }
 
 is_vs <- function(filter) {
-  !is.null(get_filter_params(filter, "gui_input")) && get_filter_params(filter, "gui_input") == "vs"
+  !is.null(filter@extra$gui_input) && filter@extra$gui_input == "vs"
 }
 
 #' Generate NA's filter selection GUI input
@@ -105,7 +105,7 @@ is_vs <- function(filter) {
     shiny::checkboxInput(
       paste0(input_id, "-keep_na"),
       label = na_message,
-      get_filter_params(filter, "keep_na")
+      filter@keep_na
     ) |>
       shiny::tagAppendAttributes(class = "cb_na_input")
   )
@@ -123,7 +123,7 @@ is_vs <- function(filter) {
   shiny::updateCheckboxInput(
     session,
     inputId = paste0(input_id, "-keep_na"),
-    value = get_filter_params(filter, "keep_na"),
+    value = filter@keep_na,
     label = na_message
   )
 }
@@ -161,7 +161,7 @@ discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, updat
     )
   )
   selected_value <- extract_selected_value(
-    get_filter_params(filter, "value"),
+    filter@value,
     parent_filter_stats, reset
   )
   value_mapping <- function(x, cohort) x
@@ -177,7 +177,7 @@ discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, updat
       current = filter_stats,
       previous = parent_filter_stats,
       stats = if_null_default(
-        get_filter_params(filter, "stats"),
+        filter_params$stats,
         cohort$attributes$stats
       )
 
@@ -282,6 +282,7 @@ plot_feedback_bar <- function(plot_data, n_missing) {
 S7::method(.gui_filter, cohortBuilder::CbFilterDiscrete) <- function(filter, ...) {
   list(
     input = function(input_id, cohort) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       input_fun <- shiny::checkboxGroupInput
       extra_params <- NULL
       if (is_vs(filter)) {
@@ -303,7 +304,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscrete) <- function(filter, ...
               discrete_input_params(filter, input_id, cohort, ...)
             )
           ),
-          filter@input_param
+          filter@private$input_param
         ),
         .cb_input(
           .keep_na_input(input_id, filter, cohort),
@@ -312,6 +313,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscrete) <- function(filter, ...
       )
     },
     feedback = function(input_id, cohort, empty = FALSE) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       list(
         plot_id = shiny::NS(input_id, "feedback_plot") ,
         output_fun = ggiraph::girafeOutput,
@@ -330,10 +332,10 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscrete) <- function(filter, ...
             filter_id <- filter@id
 
             filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
-            filter_value <- extract_selected_value(get_filter_params(filter, "value"), filter_cache$choices, FALSE)
+            filter_value <- extract_selected_value(filter@value, filter_cache$choices, FALSE)
             plot_data <- filter_cache$choices[filter_value]
             n_missing <- filter_cache$n_missing
-            if (identical(get_filter_params(filter, "keep_na"), FALSE)) {
+            if (identical(filter@keep_na, FALSE)) {
               n_missing <- 0
             }
 
@@ -349,13 +351,14 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscrete) <- function(filter, ...
         if (!is.na(value)) {
           .trigger_action(session, "update_filter", params = list(
             step_id = filter@step_id, filter_id = filter@id,
-            input_name = filter@input_param, input_value = value,
+            input_name = filter@private$input_param, input_value = value,
             update = "force_input", run_flow = FALSE
           ))
         }
       }, ignoreInit = TRUE) |> .save_observer(input_id, session)
     },
     update = function(session, input_id, cohort, reset = FALSE, ...) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       input_fun <- shiny::updateCheckboxGroupInput
       update_params <- discrete_input_params(filter, input_id, cohort, reset, TRUE, ...)
       if (is_vs(filter)) {
@@ -371,7 +374,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscrete) <- function(filter, ...
       )
       .update_keep_na_input(session, input_id, filter, cohort)
     },
-    post_stats = if (is.null(get_filter_params(filter, "stats"))) NULL else "post" %in% get_filter_params(filter, "stats"),
+    post_stats = if (is.null(filter@extra$stats)) NULL else "post" %in% filter@extra$stats,
     multi_input = FALSE
   )
 }

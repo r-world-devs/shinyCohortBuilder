@@ -72,12 +72,12 @@ range_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
 
   if (filter@type == "datetime_range") {
     selected_range <- extract_selected_datetime_range(
-      get_filter_params(filter, "range"),
+      filter@range,
       parent_range, reset
     )
   } else {
     selected_range <- extract_selected_range(
-      get_filter_params(filter, "range"),
+      filter@range,
       parent_range, reset
     )
   }
@@ -95,8 +95,8 @@ range_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
 
   # Below should be deprecated now soon
   if (filter@type == "range") {
-    if (!is.null(get_filter_params(filter, "step"))) {
-      params$step <- get_filter_params(filter, "step")
+    if (!is.null(filter@extra$step)) {
+      params$step <- filter@extra$step
     } else {
       params$step <- freq_step(parent_filter_stats)
     }
@@ -108,8 +108,8 @@ range_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
   }
 
   if (filter@type == "datetime_range") {
-    if (!is.null(get_filter_params(filter, "step"))) {
-      params$step <- get_filter_params(filter, "step")
+    if (!is.null(filter@extra$step)) {
+      params$step <- filter@extra$step
     } else {
       params$step <- freq_step(parent_filter_stats)
     }
@@ -169,16 +169,17 @@ suff_id <- function(params_list, suffix) {
 }
 
 is_gui_type <- function(filter, type) {
-  gui_input <- get_filter_params(filter, "gui_input")
+  gui_input <- filter@extra$gui_input
   if (is.null(gui_input)) {
     return(TRUE)
   }
-  type %in% get_filter_params(filter, "gui_input")
+  type %in% filter@extra$gui_input
 }
 
 S7::method(.gui_filter, cohortBuilder::CbFilterRange) <- function(filter, ...) {
   list(
     input = function(input_id, cohort) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       input_params <- range_input_params(filter, input_id, cohort, ...)
 
       shiny::tagList(
@@ -191,7 +192,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterRange) <- function(filter, ...) {
                 suff_id(input_params, "slider")
               )
             ),
-            filter@input_param
+            filter@private$input_param
           )
         },
         if (is_gui_type(filter, "numeric")) {
@@ -200,7 +201,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterRange) <- function(filter, ...) {
               shinyWidgets::numericRangeInput,
               suff_id(input_params, "numrange")
             ),
-            filter@input_param
+            filter@private$input_param
           )
         },
         .cb_input(
@@ -210,6 +211,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterRange) <- function(filter, ...) {
       )
     },
     feedback = function(input_id, cohort, empty = FALSE) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       list(
         plot_id = shiny::NS(input_id, "feedback_plot") ,
         output_fun = shiny::plotOutput,
@@ -225,7 +227,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterRange) <- function(filter, ...) {
 
             filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
             filter_range <- extract_selected_range(
-              get_filter_params(filter, "range"),
+              filter@range,
               freq_range(filter_cache$frequencies),
               FALSE
             )
@@ -236,7 +238,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterRange) <- function(filter, ...) {
               )
             n_missing <- filter_cache$n_missing
             n_total <- filter_cache$n_data
-            if (identical(get_filter_params(filter, "keep_na"), FALSE)) {
+            if (identical(filter@keep_na, FALSE)) {
               n_missing <- 0
             }
 
@@ -247,6 +249,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterRange) <- function(filter, ...) {
     },
     server = function(input_id, input, output, session, cohort) {},
     update = function(session, input_id, cohort, reset = FALSE, ...) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       input_params <- append(
         list(session = session),
         range_input_params(filter, input_id, cohort, reset, TRUE, ...)
@@ -266,6 +269,6 @@ S7::method(.gui_filter, cohortBuilder::CbFilterRange) <- function(filter, ...) {
       .update_keep_na_input(session, input_id, filter, cohort)
     },
     post_stats = FALSE,
-    multi_input = length(get_filter_params(filter, "gui_input")) != 1
+    multi_input = length(filter@extra$gui_input) != 1
   )
 }

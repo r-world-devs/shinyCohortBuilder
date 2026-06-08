@@ -91,7 +91,7 @@ discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, 
 
   parent_choices <- cohort$get_cache(step_id, filter_id, state = "pre")$choices
   selected_value <- get_matching_vals(
-    get_filter_params(filter, "value"),
+    filter@value,
     parent_choices,
     reset
   )
@@ -115,6 +115,7 @@ discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, 
 S7::method(.gui_filter, cohortBuilder::CbFilterDiscreteText) <- function(filter, ...) {
   list(
     input = function(input_id, cohort) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       input_params <- modify_list(
         list(
           all = NULL, readonly = FALSE, width = "100%",
@@ -144,7 +145,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscreteText) <- function(filter,
                 `data-dismiss` = "modal", `data-bs-dismiss` = "modal",
                 onclick = move_dialog_back_js, try_binding = FALSE
               ),
-              filter@input_param,
+              filter@private$input_param,
               style = "display: inline-block;"
             ),
             shiny::modalButton("Dismiss") |>
@@ -164,6 +165,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscreteText) <- function(filter,
       )
     },
     feedback = function(input_id, cohort, empty = FALSE) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       list(
         plot_id = shiny::NS(input_id, "feedback_plot") ,
         output_fun = shiny::plotOutput,
@@ -178,7 +180,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscreteText) <- function(filter,
             filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
             n_total <- filter_cache$n_data
 
-            n_selected <- get_n_matching_vals(get_filter_params(filter, "value"), filter_cache$choices)
+            n_selected <- get_n_matching_vals(filter@value, filter_cache$choices)
             plot_data <- c("selected" = n_selected, "not_seleced" = n_total - n_selected)
 
             plot_feedback_text_bar(plot_data)
@@ -188,6 +190,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscreteText) <- function(filter,
     },
     server = function(input_id, input, output, session, cohort) {},
     update = function(session, input_id, cohort, reset = FALSE, ...) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       input_fun <- shinyGizmo::updateTextArea
       update_params <- discrete_text_input_params(filter, input_id, cohort, reset, TRUE, ...)
       parent <- update_params$all

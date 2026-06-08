@@ -1,8 +1,8 @@
 attach_filter_gui <- function(filter) {
-  if (!is.null(filter@extra$gui)) {
+  if (!is.null(filter@private$gui)) {
     return(filter)
   }
-  filter@extra$gui <- rlang::exec(.gui_filter, filter, !!!get_filter_params(filter, "gui_args"))
+  filter@private$gui <- rlang::exec(.gui_filter, filter, !!!filter@extra$gui_args)
   return(filter)
 }
 
@@ -151,9 +151,6 @@ post_update_filter_hook <- function(public, private, step_id, filter_id, ..., ac
   if (is.null(session)) {
     return(invisible(FALSE))
   }
-  print("post_update_filter_hook")
-  print(step_id)
-  print(filter_id)
   if (missing(active)) {
     active <- NULL
   }
@@ -171,7 +168,7 @@ post_update_filter_hook <- function(public, private, step_id, filter_id, ..., ac
 
   data_filter <- public$get_filter(step_id, filter_id)
   filter_stats <- if_null_default(
-    get_filter_params(data_filter, "stats"),
+    data_filter@extra$stats,
     public$attributes$stats
   )
   update <- hook_args$update
@@ -184,22 +181,19 @@ post_update_filter_hook <- function(public, private, step_id, filter_id, ..., ac
     update_filter_gui(public, step_id, filter_id, update, FALSE, session)
   }
 
-  print("b1")
   if (!run_on_request && ("post" %in% public$attributes$stats)) {
     update <- "post_input"
     gui_update_filters_loop(public, step_id, FALSE, update, exclude = filter_id, session)
   }
-  print("b2")
+
   if (isTRUE(hook_args$update_active)) {
     gui_update_filter_class(step_id, filter_id, active, "hidden-input", session)
   }
-  print("b3")
+
   if (is_none(public$attributes$run_button)) {
     gui_update_data_stats(public, list(step_id = step_id), session)
-    print("b4")
     update_next_step(public, step_id, FALSE, session)
   }
-  print("done")
 }
 
 enable_panel <- function(cohort, session) {

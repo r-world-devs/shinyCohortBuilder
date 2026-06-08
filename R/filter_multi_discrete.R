@@ -64,7 +64,7 @@ multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE,
     purrr::map2(parent_filter_stats, extend_stats)
 
   selected_value <- extract_selected_values(
-    get_filter_params(filter, "values"),
+    filter@values,
     parent_filter_stats, reset
   )
   choices <- parent_filter_stats |> purrr::map(names)
@@ -88,7 +88,7 @@ multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE,
     ),
     choice_names,
     stats = if_null_default(
-      get_filter_params(filter, "stats"),
+      filter@extra$stats,
       cohort$attributes$stats
     )
   )
@@ -191,6 +191,7 @@ grouped_list_to_df <- function(grouped_list) {
 S7::method(.gui_filter, cohortBuilder::CbFilterMultiDiscrete) <- function(filter, ...) {
   list(
     input = function(input_id, cohort) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       shiny::tagList(
         .cb_input(
           do.call(
@@ -208,7 +209,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterMultiDiscrete) <- function(filter
               multi_discrete_input_params(filter, input_id, cohort, ...)
             )
           ),
-          filter@input_param
+          filter@private$input_param
         ),
         .cb_input(
           .keep_na_input(
@@ -220,6 +221,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterMultiDiscrete) <- function(filter
       )
     },
     feedback = function(input_id, cohort, empty = FALSE) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       list(
         plot_id = shiny::NS(input_id, "feedback_plot") ,
         output_fun = ggiraph::girafeOutput,
@@ -237,7 +239,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterMultiDiscrete) <- function(filter
             step_id <- filter@step_id
             filter_id <- filter@id
             filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
-            orig_values <- get_filter_params(filter, "values")
+            orig_values <- filter@values
             if (is.null(orig_values)) {
               orig_values <- filter_cache$choices |>
                 purrr::map(names)
@@ -260,7 +262,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterMultiDiscrete) <- function(filter
               value = unlist(filter_cache$n_missing)
             ) |>
               dplyr::filter(variable %in% plot_data$variable)
-            if (identical(get_filter_params(filter, "keep_na"), FALSE)) {
+            if (identical(filter@keep_na, FALSE)) {
               n_missing$value <- 0
             }
 
@@ -271,6 +273,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterMultiDiscrete) <- function(filter
     },
     server = function(input_id, input, output, session, cohort) {},
     update = function(session, input_id, cohort, reset = FALSE, ...) {
+      filter <- cohort$get_filter(filter@step_id, filter@id)
       update_params <- multi_discrete_input_params(filter, input_id, cohort, reset, TRUE, ...)
       update_params$max_groups <- NULL
       update_params$label <- NULL

@@ -112,14 +112,14 @@ dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
       name = as.character(
         shiny::div(
           `data-tooltip-z-index` = 9999,
-          `data-tooltip` = get_filter_params(x, "description"),
+          `data-tooltip` = x@description,
           `data-tooltip-position` = "top right",
           `data-tooltip-allow-html` = "true",
           x@name
         )
       ),
       id = x@id,
-      dataset = get_filter_params(x, "dataset")
+      dataset = x@dataset
     )
   }) |> dplyr::bind_rows()
   choices$name <- gsub("\"", "'", choices$name) # prevents invalid interpolation for setting labels
@@ -130,5 +130,5 @@ dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
 #' @rdname filter-position
 #' @export
 .filter_position.tblist <- function(source, step_id, filter, ns, ...) {
-  return(glue::glue('#{ns(step_id)} .{get_filter_params(filter, "dataset")}'))
+  return(glue::glue('#{ns(step_id)} .{filter@dataset}'))
 }
