@@ -279,10 +279,9 @@ plot_feedback_bar <- function(plot_data, n_missing) {
   )
 }
 
-S7::method(.gui_filter, cohortBuilder::CbFilterDiscrete) <- function(filter, ...) {
+S7::method(.gui_filter, cohortBuilder::CbFilterDiscrete) <- function(object, ...) {
   list(
-    input = function(input_id, cohort) {
-      filter <- cohort$get_filter(filter@step_id, filter@id)
+    input = function(filter, input_id, cohort) {
       input_fun <- shiny::checkboxGroupInput
       extra_params <- NULL
       if (is_vs(filter)) {
@@ -312,8 +311,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscrete) <- function(filter, ...
         )
       )
     },
-    feedback = function(input_id, cohort, empty = FALSE) {
-      filter <- cohort$get_filter(filter@step_id, filter@id)
+    feedback = function(filter, input_id, cohort, empty = FALSE) {
       list(
         plot_id = shiny::NS(input_id, "feedback_plot") ,
         output_fun = ggiraph::girafeOutput,
@@ -344,7 +342,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscrete) <- function(filter, ...
         }
       )
     },
-    server = function(input_id, input, output, session, cohort) {
+    server = function(filter, input_id, input, output, session, cohort) {
       shiny::observeEvent(input[[shiny::NS(input_id, "feedback_plot_selected")]], {
         value <- input[[shiny::NS(input_id, "feedback_plot_selected")]]
 
@@ -357,8 +355,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscrete) <- function(filter, ...
         }
       }, ignoreInit = TRUE) |> .save_observer(input_id, session)
     },
-    update = function(session, input_id, cohort, reset = FALSE, ...) {
-      filter <- cohort$get_filter(filter@step_id, filter@id)
+    update = function(filter, session, input_id, cohort, reset = FALSE, ...) {
       input_fun <- shiny::updateCheckboxGroupInput
       update_params <- discrete_input_params(filter, input_id, cohort, reset, TRUE, ...)
       if (is_vs(filter)) {
@@ -374,7 +371,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscrete) <- function(filter, ...
       )
       .update_keep_na_input(session, input_id, filter, cohort)
     },
-    post_stats = if (is.null(filter@extra$stats)) NULL else "post" %in% filter@extra$stats,
+    post_stats = if (is.null(object@extra$stats)) NULL else "post" %in% object@extra$stats,
     multi_input = FALSE
   )
 }

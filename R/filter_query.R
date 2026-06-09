@@ -128,13 +128,12 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
   return(params)
 }
 
-S7::method(.gui_filter, cohortBuilder::CbFilterQuery) <- function(filter, ...) {
+S7::method(.gui_filter, cohortBuilder::CbFilterQuery) <- function(object, ...) {
   if (!requireNamespace("shinyQueryBuilder", quietly = TRUE)) {
     stop("In order to use 'query' filter, please install 'shinyQueryBuilder' package.")
   }
   list(
-    input = function(input_id, cohort) {
-      filter <- cohort$get_filter(filter@step_id, filter@id)
+    input = function(filter, input_id, cohort) {
       input_params <- query_input_params(filter, input_id, cohort, ...)
       input_params$inputId <- paste0(input_id, "_selected")
       modal_dialog_id <- paste0(input_id, "modal_in")
@@ -179,8 +178,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterQuery) <- function(filter, ...) {
         )
       )
     },
-    feedback = function(input_id, cohort, empty = FALSE) {
-      filter <- cohort$get_filter(filter@step_id, filter@id)
+    feedback = function(filter, input_id, cohort, empty = FALSE) {
       list(
         plot_id = shiny::NS(input_id, "feedback_plot") ,
         output_fun = shiny::htmlOutput,
@@ -217,9 +215,8 @@ S7::method(.gui_filter, cohortBuilder::CbFilterQuery) <- function(filter, ...) {
         }
       )
     },
-    server = function(input_id, input, output, session, cohort) {},
-    update = function(session, input_id, cohort, reset = FALSE, ...) {
-      filter <- cohort$get_filter(filter@step_id, filter@id)
+    server = function(filter, input_id, input, output, session, cohort) {},
+    update = function(filter, session, input_id, cohort, reset = FALSE, ...) {
       update_params <- query_input_params(filter, input_id, cohort, reset, TRUE, ...)
       update_params$inputId <- paste0(input_id, "_selected")
 

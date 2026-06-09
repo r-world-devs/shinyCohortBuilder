@@ -3,7 +3,7 @@ call_filter <- function(filter_id, step_id, cohort, session, feedback) {
   filter <- cohort$get_filter(step_id, filter_id)
   no_data <- cohort$get_cache(step_id, filter_id, state = "pre")$n_data == 0
 
-  filter@private$gui$server(sf_id(step_id, filter_id), session$input, session$output, session, cohort)
+  filter@private$gui$server(filter, sf_id(step_id, filter_id), session$input, session$output, session, cohort)
 
   if (!is.null(feedback)) {
     session$output[[feedback$plot_id]] <- feedback$render_fun
@@ -98,7 +98,7 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
 
   feedback <- NULL
   if (show_feedback) {
-    feedback <- filter@private$gui$feedback(step_filter_id, cohort, empty)
+    feedback <- filter@private$gui$feedback(filter, step_filter_id, cohort, empty)
   }
 
   call_filter(filter_id, step_id, cohort, cohort$attributes$session, feedback)
@@ -116,7 +116,7 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
     },
     shiny::div(
       class = "cb_inputs",
-      filter@private$gui$input(ns(step_filter_id), cohort)
+      filter@private$gui$input(filter, ns(step_filter_id), cohort)
     )
   )
 }
@@ -502,7 +502,7 @@ restore_attribute <- function(cohort, attribute, value) {
 #'
 #' If you want to learn more about creating filter layers see `vignette("gui-filter-layer")`.
 #'
-#' @param filter Filter object.
+#' @param object Filter object (used for S7 method dispatch).
 #' @param ... Extra arguments passed to a specific method.
 #' @return List consisting filter metadata and methods that allow to perform filter based operations.
 #'     See `vignette("custom-filters")`.
@@ -522,7 +522,7 @@ restore_attribute <- function(cohort, attribute, value) {
 #'
 #' @seealso \link{source-gui-layer}
 #' @export
-.gui_filter <- S7::new_generic("gui_filter", "filter")
+.gui_filter <- S7::new_generic("gui_filter", "object")
 
 #' Render filtering panels for all the filters included in Cohort
 #'

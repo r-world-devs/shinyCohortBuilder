@@ -271,6 +271,7 @@ update_filter_gui <- function(cohort, step_id, filter_id, update, reset, session
 
   if ("input" %in% update) {
     filter@private$gui$update(
+      filter,
       session,
       sf_id(step_id, filter_id),
       cohort,
@@ -350,7 +351,7 @@ gui_update_plot <- function(step_id, filter_id, cohort, session) {
 
   filter <- cohort$get_filter(step_id, filter_id)
   no_data <- cohort$get_cache(step_id, filter_id, state = "pre")$n_data == 0
-  feedback <- filter@private$gui$feedback(sf_id(step_id, filter_id), cohort, no_data)
+  feedback <- filter@private$gui$feedback(filter, sf_id(step_id, filter_id), cohort, no_data)
   session$output[[feedback$plot_id]] <- feedback$render_fun
 }
 

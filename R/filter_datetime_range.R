@@ -23,10 +23,9 @@ extract_selected_datetime_range <- function(range, parent_range, reset) {
   return(range)
 }
 
-S7::method(.gui_filter, cohortBuilder::CbFilterDatetimeRange) <- function(filter, ...) {
+S7::method(.gui_filter, cohortBuilder::CbFilterDatetimeRange) <- function(object, ...) {
   list(
-    input = function(input_id, cohort) {
-      filter <- cohort$get_filter(filter@step_id, filter@id)
+    input = function(filter, input_id, cohort) {
       input_params <- range_input_params(filter, input_id, cohort, ...)
       shiny::tagList(
         if (is_gui_type(filter, "datetimepicker")) {
@@ -67,8 +66,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDatetimeRange) <- function(filter
       )
     },
 
-    feedback = function(input_id, cohort, empty = FALSE) {
-      filter <- cohort$get_filter(filter@step_id, filter@id)
+    feedback = function(filter, input_id, cohort, empty = FALSE) {
       list(
         plot_id = shiny::NS(input_id, "feedback_plot") ,
         output_fun = shiny::plotOutput,
@@ -105,9 +103,8 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDatetimeRange) <- function(filter
         }
       )
     },
-    server = function(input_id, input, output, session, cohort) {},
-    update = function(session, input_id, cohort, reset = FALSE, ...) {
-      filter <- cohort$get_filter(filter@step_id, filter@id)
+    server = function(filter, input_id, input, output, session, cohort) {},
+    update = function(filter, session, input_id, cohort, reset = FALSE, ...) {
       input_params <- append(
         list(session = session),
         range_input_params(filter, input_id, cohort, reset, TRUE, ...)

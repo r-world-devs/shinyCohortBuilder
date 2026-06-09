@@ -188,10 +188,9 @@ grouped_list_to_df <- function(grouped_list) {
     )
 }
 
-S7::method(.gui_filter, cohortBuilder::CbFilterMultiDiscrete) <- function(filter, ...) {
+S7::method(.gui_filter, cohortBuilder::CbFilterMultiDiscrete) <- function(object, ...) {
   list(
-    input = function(input_id, cohort) {
-      filter <- cohort$get_filter(filter@step_id, filter@id)
+    input = function(filter, input_id, cohort) {
       shiny::tagList(
         .cb_input(
           do.call(
@@ -220,8 +219,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterMultiDiscrete) <- function(filter
         )
       )
     },
-    feedback = function(input_id, cohort, empty = FALSE) {
-      filter <- cohort$get_filter(filter@step_id, filter@id)
+    feedback = function(filter, input_id, cohort, empty = FALSE) {
       list(
         plot_id = shiny::NS(input_id, "feedback_plot") ,
         output_fun = ggiraph::girafeOutput,
@@ -271,9 +269,8 @@ S7::method(.gui_filter, cohortBuilder::CbFilterMultiDiscrete) <- function(filter
         }
       )
     },
-    server = function(input_id, input, output, session, cohort) {},
-    update = function(session, input_id, cohort, reset = FALSE, ...) {
-      filter <- cohort$get_filter(filter@step_id, filter@id)
+    server = function(filter, input_id, input, output, session, cohort) {},
+    update = function(filter, session, input_id, cohort, reset = FALSE, ...) {
       update_params <- multi_discrete_input_params(filter, input_id, cohort, reset, TRUE, ...)
       update_params$max_groups <- NULL
       update_params$label <- NULL

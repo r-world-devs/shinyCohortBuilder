@@ -45,9 +45,9 @@ test_that(".gui_filter.discrete input renders checkbox group by default", {
   coh$attributes$stats <- c("pre", "post")
   coh$attributes$feedback <- TRUE
   filter <- coh$get_filter("1", "x_filter")
-  filter@extra$gui <- .gui_filter(filter)
+  filter@private$gui <- .gui_filter(filter)
 
-  ui <- filter@extra$gui$input("1-x_filter", coh)
+  ui <- filter@private$gui$input(filter,"1-x_filter", coh)
   rendered <- as.character(ui)
 
   # Should contain checkbox group with the values
@@ -74,9 +74,9 @@ test_that(".gui_filter.discrete with gui_input='vs' uses virtualSelect", {
 
   coh$attributes$stats <- c("pre", "post")
   filter <- coh$get_filter("1", "x_vs")
-  filter@extra$gui <- .gui_filter(filter)
+  filter@private$gui <- .gui_filter(filter)
 
-  ui <- filter@extra$gui$input("1-x_vs", coh)
+  ui <- filter@private$gui$input(filter,"1-x_vs", coh)
   rendered <- as.character(ui)
 
   # virtualSelect adds specific class
@@ -100,7 +100,7 @@ test_that(".gui_filter.discrete feedback returns girafe output", {
   filter <- coh$get_filter("1", "x_fb")
   gui <- .gui_filter(filter)
 
-  fb <- gui$feedback("1-x_fb", coh, empty = FALSE)
+  fb <- gui$feedback(filter, "1-x_fb", coh, empty = FALSE)
   expect_true("plot_id" %in% names(fb))
   expect_true("output_fun" %in% names(fb))
   expect_true("render_fun" %in% names(fb))
