@@ -59,9 +59,9 @@ test_that("Discrete filter: toggling checkbox updates data", {
 
   # Uncheck "M" and check "F" via jQuery
   app$run_js(
-    "var cbs = $('#coh-1-gender input[type=checkbox]');
+    "var cbs = $('#coh-1-gender-val input[type=checkbox]');
      cbs.each(function() { this.checked = ($(this).val() === 'F'); });
-     $('#coh-1-gender.shiny-input-checkboxgroup').trigger('change');"
+     $('#coh-1-gender-val.shiny-input-checkboxgroup').trigger('change');"
   )
   app$wait_for_idle(timeout = 5000)
 

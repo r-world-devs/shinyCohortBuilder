@@ -44,6 +44,7 @@ attach_list_names <- function(list_vals, list_names) {
 }
 
 multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
+  input_id <- suff(input_id, "val")
   step_id <- filter@step_id
   filter_id <- filter@id
   filter_params <- get_filter_params(filter)

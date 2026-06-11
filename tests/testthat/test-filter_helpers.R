@@ -148,7 +148,7 @@ test_that("get_n_matching_vals returns total when NA", {
   expect_equal(result, 3)
 })
 
-test_that("extend_stats fills missing entries with 0", {
+test_that("extend_stats fills missing entries with NA", {
   result <- shinyCohortBuilder:::extend_stats(
     list("A" = 5),
     list("A" = 10, "B" = 20)

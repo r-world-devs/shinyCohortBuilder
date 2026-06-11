@@ -21,3 +21,7 @@ modify_list <- function(x, y) {
     utils::modifyList(x, y, keep.null = TRUE)
   )
 }
+
+suff <- function(x, suffix) {
+  paste0(x, "-", suffix)
+} 

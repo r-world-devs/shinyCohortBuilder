@@ -38,9 +38,9 @@ test_that("Filter change marks step as pending", {
 
   # Change filter to trigger pending state
   app$run_js(
-    "var cbs = $('#coh-1-gender input[type=checkbox]');
+    "var cbs = $('#coh-1-gender-val input[type=checkbox]');
      cbs.each(function() { this.checked = ($(this).val() === 'F'); });
-     $('#coh-1-gender.shiny-input-checkboxgroup').trigger('change');"
+     $('#coh-1-gender-val.shiny-input-checkboxgroup').trigger('change');"
   )
   app$wait_for_idle(timeout = 5000)
 
@@ -65,9 +65,9 @@ test_that("Clicking global run button processes pending steps", {
 
   # Change a filter value via jQuery
   app$run_js(
-    "var cbs = $('#coh-1-gender input[type=checkbox]');
+    "var cbs = $('#coh-1-gender-val input[type=checkbox]');
      cbs.each(function() { this.checked = ($(this).val() === 'F'); });
-     $('#coh-1-gender.shiny-input-checkboxgroup').trigger('change');"
+     $('#coh-1-gender-val.shiny-input-checkboxgroup').trigger('change');"
   )
   app$wait_for_idle(timeout = 5000)
 
@@ -140,9 +140,9 @@ test_that("Global run button with pending step screenshot", {
   on.exit(app$stop(), add = TRUE)
 
   app$run_js(
-    "var cbs = $('#coh-1-gender input[type=checkbox]');
+    "var cbs = $('#coh-1-gender-val input[type=checkbox]');
      cbs.each(function() { this.checked = ($(this).val() === 'F'); });
-     $('#coh-1-gender.shiny-input-checkboxgroup').trigger('change');"
+     $('#coh-1-gender-val.shiny-input-checkboxgroup').trigger('change');"
   )
   app$wait_for_idle(timeout = 5000)
   app$run_js(disable_animations_js)

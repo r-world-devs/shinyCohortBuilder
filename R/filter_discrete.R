@@ -1,7 +1,7 @@
 extend_stats <- function(current, parent, inherit_parent = character(0)) {
   missing_stats <- setdiff(names(parent), names(current))
   for (missing_stat in missing_stats) {
-    current[[missing_stat]] <- NA
+    current[[missing_stat]] <- 0
     if (missing_stat %in% inherit_parent) {
       current[[missing_stat]] <- parent[[missing_stat]]
     }
@@ -140,6 +140,7 @@ inherit_parent_stats <- function(filter_values, parent_options, is_cached) {
 }
 
 discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
+  input_id <- suff(input_id, "val")
   step_id <- filter@step_id
   filter_id <- filter@id
   filter_params <- get_filter_params(filter)

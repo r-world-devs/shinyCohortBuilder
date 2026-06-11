@@ -229,6 +229,22 @@ post_set_pending_hook <- function(public, private, step_id, ...) {
   gui_update_pending_state(session, public, step_id)
 }
 
+post_add_filter_hook <- function(public, private, step_id, filter) {
+  session <- public$attributes$session
+  if (is.null(session)) {
+    return(invisible(FALSE))
+  }
+  gui_add_step_filter(step_id = step_id, filter_id = filter@id, cohort = public, session = session)
+}
+
+post_rm_filter_hook <- function(public, private, step_id, filter_id) {
+  session <- public$attributes$session
+  if (is.null(session)) {
+    return(invisible(FALSE))
+  }
+  gui_rm_step_filter(step_id = step_id, filter_id = filter_id, cohort = public, session = session)
+}
+
 .onLoad <- function(libname, pkgname){
   cohortBuilder::add_hook("pre_update_source_hook", pre_update_source_hook)
   cohortBuilder::add_hook("post_update_source_hook", post_update_source_hook)
@@ -242,6 +258,8 @@ post_set_pending_hook <- function(public, private, step_id, ...) {
   cohortBuilder::add_hook("post_update_source_hook", post_cohort_hook)
   cohortBuilder::add_hook("post_init_source_hook", post_init_source_hook)
   cohortBuilder::add_hook("post_set_pending_hook", post_set_pending_hook)
+  cohortBuilder::add_hook("post_add_filter_hook", post_add_filter_hook)
+  cohortBuilder::add_hook("post_rm_filter_hook", post_rm_filter_hook)
 }
 
 .onUnload <- function(libpath) {
@@ -257,4 +275,6 @@ post_set_pending_hook <- function(public, private, step_id, ...) {
   options("post_update_source_hook" = NULL)
   options("post_init_source_hook" = NULL)
   options("post_set_pending_hook" = NULL)
+  options("post_add_filter_hook" = NULL)
+  options("post_rm_filter_hook" = NULL)
 }

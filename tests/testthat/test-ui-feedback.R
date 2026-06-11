@@ -77,9 +77,9 @@ test_that("Feedback app: changing filter value updates plots", {
 
   # Toggle gender selection via jQuery
   app$run_js(
-    "var cbs = $('#coh-1-gender input[type=checkbox]');
+    "var cbs = $('#coh-1-gender-val input[type=checkbox]');
      cbs.each(function() { this.checked = ($(this).val() === 'F'); });
-     $('#coh-1-gender.shiny-input-checkboxgroup').trigger('change');"
+     $('#coh-1-gender-val.shiny-input-checkboxgroup').trigger('change');"
   )
   app$wait_for_idle(timeout = 10000)
 

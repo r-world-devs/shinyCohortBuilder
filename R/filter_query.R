@@ -81,7 +81,7 @@ adapt_rules_to_limits <- function(rules, filters, reset = FALSE) {
 }
 
 query_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
-
+  input_id <- suff(input_id, "val")
   step_id <- filter@step_id
   filter_id <- filter@id
 

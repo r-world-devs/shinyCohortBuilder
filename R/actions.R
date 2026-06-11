@@ -617,12 +617,6 @@ gui_manage_step_configured <- function(cohort, changed_input, session) {
     cohort$run_step(step_id)
   }
 
-  for (filter in to_add_filters) {
-    gui_add_step_filter(step_id = step_id, filter_id = filter@id, cohort = cohort, session = session)
-  }
-  for (filter_id in to_rm_ids) {
-    gui_rm_step_filter(step_id = step_id, filter_id = filter_id, cohort = cohort, session = session)
-  }
   session$sendCustomMessage(
     "validate_filter_groups",
     list(step_id = step_id, ns_prefix = session$ns(""))
