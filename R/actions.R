@@ -430,10 +430,6 @@ gui_update_filter <- function(cohort, changed_input, session) {
   print_state("update_filter", changed_input)
   input_state("update_filter", changed_input)
 
-  if (run_on_request) {
-    trigger_pending_state(step_id, "add", session)
-  }
-
   changed_input <- convert_input_value(changed_input, step_id, filter_id, cohort, update_active)
   changed_input$hook_args <- list(
     pre = list(),
@@ -615,10 +611,6 @@ gui_manage_step_configured <- function(cohort, changed_input, session) {
       step_id = step_id,
       run_flow = FALSE
     )
-  }
-
-  if (run_on_request) {
-    trigger_pending_state(step_id, "add", session)
   }
 
   if (!run_on_request) {
@@ -856,8 +848,6 @@ gui_update_step <- function(cohort, changed_input, session) {
     changed_input$update, session = session
   )
   gui_update_data_stats(cohort, list(step_id = changed_input$step_id), session)
-
-  trigger_pending_state(changed_input$step_id, "remove", session)
 
   if (changed_input$run_flow) {
     update_next_step(cohort, changed_input$step_id, FALSE, session)
@@ -1224,15 +1214,17 @@ no_ws <- c("before", "after", "outside", "after-begin", "before-end", "inside")
 .update_data_stats.default <- function(source, step_id, cohort, session, ...) {
   ns <- session$ns
   stats <- cohort$attributes$stats
+  selector <- paste0("#", ns(paste0(step_id, "-stats")))
 
-  session$output[[paste0(step_id, "-stats")]] <- shiny::renderUI({
-    previous <- cohort$get_cache(step_id, state = "pre")$n_rows
-    if (!previous > 0) {
-      return("No data selected in previous step.")
-    }
+  previous <- cohort$get_cache(step_id, state = "pre")$n_rows
+  if (!previous > 0) {
+    ui <- "No data selected in previous step."
+  } else {
     current <- cohort$get_cache(step_id, state = "post")$n_rows
-    .pre_post_stats(current, previous, percent = TRUE, stats = stats)
-  })
+    ui <- .pre_post_stats(current, previous, percent = TRUE, stats = stats)
+  }
+  shiny::removeUI(selector = paste0(selector, " > *"), multiple = TRUE, immediate = TRUE)
+  shiny::insertUI(selector = selector, ui = ui, immediate = TRUE)
 }
 
 gui_update_data_stats <- function(cohort, changed_input, session) {
@@ -1262,7 +1254,6 @@ gui_clear_step <- function(cohort, changed_input, session) {
   }
 
   if (!is_none(cohort$attributes$run_button)) {
-    trigger_pending_state(changed_input$step_id, "add", session)
     changed_input$run_flow <- FALSE
   }
   changed_input$update <- c("input", "plot")

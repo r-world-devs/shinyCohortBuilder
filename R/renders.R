@@ -277,7 +277,15 @@ render_step <- function(cohort, step_id, active, allow_rm, input, output, sessio
     )
   )
 
+  gui_update_pending_state(session, cohort, step_id)
   .update_data_stats(cohort$get_source(), step_id, cohort, session)
+}
+
+gui_update_pending_state <- function(session, cohort, step_id) {
+  if (!is_none(cohort$attributes$run_button)) {
+    action <- if (cohort$is_pending(step_id)) "add" else "remove"
+    trigger_pending_state(step_id, action, session)
+  }
 }
 
 cat_nl <- function(...) {
@@ -458,22 +466,36 @@ empty_if_false <- function(condition, value, span = TRUE, empty = NULL) {
 #'
 #' @export
 .pre_post_stats <- function(current, previous, name, brackets = FALSE, percent = FALSE, stats = c("pre", "post")) {
+  if (is.null(current)) {
+    current <- NA
+  }
   shiny::tags$span(
     empty_if_false(!missing(name), paste0(name, " ")),
     empty_if_false(brackets && length(stats), "("),
-    empty_if_false("post" %in% stats, shiny::tags$span(class = "cb_delayed", current, .noWS = no_ws), span = FALSE),
+    empty_if_false(
+      "post" %in% stats, 
+      shiny::tags$span(class = "cb_delayed", if_na_default(current, "??"), .noWS = no_ws), 
+      span = FALSE
+    ),
     empty_if_false(length(stats) == 2, " / "),
     empty_if_false("pre" %in% stats, previous),
     empty_if_false(brackets && length(stats), ")"),
     empty_if_false(percent && length(stats) == 2, " ("),
     empty_if_false(
       percent && length(stats) == 2,
-      shiny::tags$span(class = "cb_delayed", glue::glue("{round(100 * current / previous, 0)}%"), .noWS = no_ws),
+      shiny::tags$span(class = "cb_delayed", glue::glue("{calc_percent(current, previous)}%"), .noWS = no_ws),
       span = FALSE
     ),
     empty_if_false(percent && length(stats) == 2, ")"),
     .noWS = no_ws
   )
+}
+
+calc_percent <- function(current, previous) {
+  if (is.null(current) || is.na(current)) {
+    return("??")
+  }
+  round(100 * current / previous, 0)
 }
 
 restore_attribute <- function(cohort, attribute, value) {
@@ -602,7 +624,7 @@ restore_attribute <- function(cohort, attribute, value) {
 .render_filters.default <- function(source, cohort, step_id, ns, ...) {
   step <- cohort$get_step(step_id)
   shiny::tagList(
-    shiny::htmlOutput(ns(paste0(step_id, "-stats")), class = "scb_data_stats"),
+    shiny::div(id = ns(paste0(step_id, "-stats")), class = "scb_data_stats"),
     step$filters |>
       purrr::map(~ .render_filter(.x, step_id, cohort, ns = ns)) |>
       shiny::div(class = "cb_filters", `data-step_id` = step_id)
@@ -931,7 +953,7 @@ bookmark_restore <- function(cohort, enable_bookmarking) {
 #' @export
 cb_server <- function(id, cohort, run_button = "none", stats = c("pre", "post"), feedback = FALSE,
                       enable_bookmarking = shiny::getShinyOption("bookmarkStore", default = "disable"),
-                      show_help = TRUE, ...) {
+                      show_help = TRUE, chat = NULL, ...) {
 
   if (is.logical(run_button)) {
     lifecycle::deprecate_stop("0.2.0", "shinyCohorBuilder::cb_server(arg = 'must be a scalar character')")
@@ -968,6 +990,10 @@ cb_server <- function(id, cohort, run_button = "none", stats = c("pre", "post"),
       bookmark_restore(cohort, enable_bookmarking)
 
       render_steps(cohort, cohort$attributes$session, init = TRUE)
+
+      if (!is.null(chat)) {
+        cb_chat_server("chat", chat, input, output, session)
+      }
     }
   )
 }

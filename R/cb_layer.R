@@ -100,6 +100,8 @@ post_run_step_hook <- function(public, private, step_id) {
     return(invisible(FALSE))
   }
 
+  .update_data_stats(public$get_source(), step_id, public, session)
+
   session$sendCustomMessage(
     "inform_data_updated",
     list(step_id = step_id, ns_prefix = session$ns(""))
@@ -132,9 +134,6 @@ post_add_step_hook <- function(public, private, step_id) {
   }
 
   session$sendCustomMessage("pre_add_step_action", list(id = step_id, ns_prefix = session$ns("")))
-  print("post_add_step_hook")
-  print(step_id)
-  #print(sum_up(public))
   render_step(
     public,
     step_id,
@@ -221,6 +220,14 @@ post_init_source_hook <- function(public, private, ...) {
   }
 }
 
+post_set_pending_hook <- function(public, private, step_id, ...) {
+  session <- public$attributes$session
+  if (is.null(session)) {
+    return(invisible(FALSE))
+  }
+
+  gui_update_pending_state(session, public, step_id)
+}
 
 .onLoad <- function(libname, pkgname){
   cohortBuilder::add_hook("pre_update_source_hook", pre_update_source_hook)
@@ -234,6 +241,7 @@ post_init_source_hook <- function(public, private, ...) {
   cohortBuilder::add_hook("post_cohort_hook", post_cohort_hook)
   cohortBuilder::add_hook("post_update_source_hook", post_cohort_hook)
   cohortBuilder::add_hook("post_init_source_hook", post_init_source_hook)
+  cohortBuilder::add_hook("post_set_pending_hook", post_set_pending_hook)
 }
 
 .onUnload <- function(libpath) {
@@ -248,4 +256,5 @@ post_init_source_hook <- function(public, private, ...) {
   options("post_cohort_hook" = NULL)
   options("post_update_source_hook" = NULL)
   options("post_init_source_hook" = NULL)
+  options("post_set_pending_hook" = NULL)
 }

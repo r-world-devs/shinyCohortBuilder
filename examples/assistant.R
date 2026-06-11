@@ -42,7 +42,8 @@ chat <- ellmer::chat_azure_openai(
   model = "gpt-4o",
   api_version = "2024-08-01-preview",
   system_prompt = "You are a helpful assistant.",
-  credentials = function() list("api-key" = Sys.getenv("CHAT_KEY"))
+  credentials = function() list("api-key" = Sys.getenv("CHAT_KEY")),
+  echo = "all"
 )
 
 chat |> cb_register_tools(coh)
@@ -63,8 +64,7 @@ shiny::runApp(list(
     )
   ),
   server = function(input, output, session) {
-    shinyCohortBuilder::cb_server(id = "data", coh, run_button = "global", feedback = TRUE)
-    cb_chat_server("data-chat", chat, input, output, session)
+    shinyCohortBuilder::cb_server(id = "data", coh, run_button = "global", feedback = TRUE, chat = chat)
 
     returned_data <- shiny::eventReactive(input[["data-cb_data_updated"]], {
       coh$get_data(step_id = coh$last_step_id(), state = "post")

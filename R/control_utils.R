@@ -5,6 +5,10 @@ if_null_default <- function(val, default) {
   return(val)
 }
 
+if_na_default <- function(val, default) {
+  ifelse(is.na(val), default, val)
+}
+
 is_none <- function(x) {
   identical(x, "none")
 }

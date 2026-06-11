@@ -317,7 +317,7 @@ gui <- function(
   }
   new_step <- rlang::arg_match(new_step)
   require_meta_filters <- identical(new_step, "configure") || manage_step
-  if (require_meta_filters && length(cohort$get_source()$get("available_filters")) == 0) {
+  if (require_meta_filters && length(cohort$get_source()$available_filters) == 0) {
     stop("The `available_filters` in the cohort source wasn't defined.")
   }
 

@@ -40,7 +40,7 @@ dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
     class = c("cb_filters_group", dataset_name, no_filters_class),
     shiny::tags$strong(dataset_name),
     dataset_help_icon(cohort, dataset_name, ns),
-    shiny::htmlOutput(stats_id, inline = TRUE, style = "float: right; "),
+    shiny::span(id = stats_id, style = "float: right; "),
     filters |>
       purrr::map(
         ~ .render_filter(.x, step_id, cohort, ns = ns)
@@ -63,25 +63,24 @@ dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
 .update_data_stats.tblist <- function(source, step_id, cohort, session, ...) {
   stats <- cohort$attributes$stats
   step <- cohort$get_step(step_id)
+  ns <- session$ns
 
   dataset_names <- names(cohort$get_source()$dtconn)
   data_filters <- purrr::map_chr(step$filters, get_filter_dataset)
   dataset_names <- intersect(dataset_names, data_filters)
 
-  dataset_names |> purrr::walk(
-    ~ .sendOutput(
-      paste0(step_id, "-stats_", .x),
-      shiny::renderUI({
-        previous <- cohort$get_cache(step_id, state = "pre")[[.x]]$n_rows
-        if (!previous > 0) {
-          return("No data selected in previous step.")
-        }
-        current <- cohort$get_cache(step_id, state = "post")[[.x]]$n_rows
-        .pre_post_stats(current, previous, percent = TRUE, stats = stats)
-      }),
-      session
-    )
-  )
+  dataset_names |> purrr::walk(function(dataset) {
+    selector <- paste0("#", ns(paste0(step_id, "-stats_", dataset)))
+    previous <- cohort$get_cache(step_id, state = "pre")[[dataset]]$n_rows
+    if (!previous > 0) {
+      ui <- "No data selected in previous step."
+    } else {
+      current <- cohort$get_cache(step_id, state = "post")[[dataset]]$n_rows
+      ui <- .pre_post_stats(current, previous, percent = TRUE, stats = stats)
+    }
+    shiny::removeUI(selector = paste0(selector, " > *"), multiple = TRUE, immediate = TRUE)
+    shiny::insertUI(selector = selector, ui = ui, immediate = TRUE)
+  })
 }
 
 #' @rdname rendering-step-attrition

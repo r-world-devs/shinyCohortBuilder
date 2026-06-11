@@ -1,7 +1,7 @@
 extend_stats <- function(current, parent, inherit_parent = character(0)) {
   missing_stats <- setdiff(names(parent), names(current))
   for (missing_stat in missing_stats) {
-    current[[missing_stat]] <- 0
+    current[[missing_stat]] <- NA
     if (missing_stat %in% inherit_parent) {
       current[[missing_stat]] <- parent[[missing_stat]]
     }
@@ -35,7 +35,7 @@ choice_name <- function(name, parent_stat, current_stat, stats) {
   open_bracket <- empty_if_false(brackets && any(stats %in% c("pre", "post")), "(", FALSE, "")
   post_stat <- empty_if_false(
     "post" %in% stats,
-    glue::glue("<span class = 'cb_delayed'>{current}</span>"),
+    glue::glue("<span class = 'cb_delayed'>{if_na_default(current, '??')}</span>"),
     FALSE, ""
   )
   slash <- empty_if_false(length(stats) == 2, " / ", FALSE, "")
@@ -44,7 +44,7 @@ choice_name <- function(name, parent_stat, current_stat, stats) {
   percent_open_bracket <- empty_if_false(percent && length(stats) == 2, " (", FALSE, "")
   percentage <- empty_if_false(
     percent && length(stats) == 2,
-    glue::glue("<span class = 'cb_delayed'>{round(100 * current / previous, 0)}%</span>"),
+    glue::glue("<span class = 'cb_delayed'>{calc_percent(current, previous)}%</span>"),
     FALSE, ""
   )
   percent_close_bracket <- empty_if_false(percent && length(stats) == 2, ")", FALSE, "")
