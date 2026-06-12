@@ -104,7 +104,7 @@ test_that(".gui_filter.discrete feedback returns girafe output", {
   expect_true("plot_id" %in% names(fb))
   expect_true("output_fun" %in% names(fb))
   expect_true("render_fun" %in% names(fb))
-  expect_equal(fb$output_fun, ggiraph::girafeOutput)
+  expect_equal(fb$output_fun, shiny::uiOutput)
 })
 
 test_that(".keep_na_input renders checkbox with missing count", {

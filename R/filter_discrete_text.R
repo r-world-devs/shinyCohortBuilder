@@ -1,52 +1,3 @@
-plot_feedback_text_bar <- function(plot_data) {
-
-  feedback_data <- data.frame(
-    level = factor(names(plot_data)),
-    n = unlist(plot_data)
-  )
-  n_selected <- feedback_data$n[1]
-  n_total <- sum(feedback_data$n)
-
-  if (NROW(feedback_data) == 0) {
-    gg_object <- ggplot2::ggplot()
-  } else {
-
-    chart_palette <- getOption("scb_chart_palette", scb_chart_palette)
-    color_palette <- c(chart_palette$no_data, chart_palette$discrete[1])
-
-    gg_object <- feedback_data |>
-      ggplot2::ggplot(ggplot2::aes(x = "I", y = n, fill = level)) +
-      ggplot2::geom_col(position = ggplot2::position_stack(reverse = FALSE)) +
-      ggplot2::coord_flip() +
-      ggplot2::scale_x_discrete(expand = c(0, 0)) +
-      ggplot2::scale_y_continuous(expand = c(0, 0)) +
-      ggplot2::theme(
-        axis.title = ggplot2::element_blank(),
-        axis.text  = ggplot2::element_blank(),
-        axis.ticks.length = ggplot2::unit(0, "pt"),
-        panel.background = ggplot2::element_blank(),
-        panel.grid.major = ggplot2::element_blank(),
-        panel.grid.minor = ggplot2::element_blank(),
-        plot.background  = ggplot2::element_blank(),
-        legend.position = "none",
-        plot.margin = ggplot2::unit(c(1, 0, 0, 0),"mm"),
-        panel.border = ggplot2::element_rect(colour = "grey50", fill = NA, linewidth = 1),
-        panel.spacing = ggplot2::unit(c(0, 0, 0, 0), "mm"),
-        plot.subtitle = ggplot2::element_text(color = "dimgray", size = 10, face = "plain")) +
-      ggplot2::labs(
-        x = NULL, y = NULL,
-        subtitle = glue::glue(
-          "Unique values: {format_number(n_selected)}",
-          " / {format_number(n_total)} ",
-          "({round(100 * n_selected / n_total, 1)}%)"
-        )
-      ) +
-      ggplot2::scale_fill_manual(name = NULL, values = color_palette)
-  }
-
-  return(gg_object)
-}
-
 get_matching_vals <- function(selected, original, reset = FALSE) {
 
   if (reset || identical(selected, NA)) {
@@ -165,12 +116,12 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscreteText) <- function(object,
     },
     feedback = function(filter, input_id, cohort, empty = FALSE) {
       list(
-        plot_id = shiny::NS(input_id, "feedback_plot") ,
-        output_fun = shiny::plotOutput,
+        plot_id = shiny::NS(input_id, "feedback_plot"),
+        output_fun = shiny::uiOutput,
         render_fun = if (!is.null(empty)) {
-          shiny::renderPlot(height = 40, {
-            if(empty) {
-              return(ggplot2::ggplot())
+          shiny::renderUI({
+            if (empty) {
+              return(shiny::div(class = "cb_fb_bar"))
             }
             step_id <- filter@step_id
             filter_id <- filter@id
@@ -179,9 +130,9 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscreteText) <- function(object,
             n_total <- filter_cache$n_data
 
             n_selected <- get_n_matching_vals(filter@value, filter_cache$choices)
-            plot_data <- c("selected" = n_selected, "not_seleced" = n_total - n_selected)
+            plot_data <- c("selected" = n_selected, "not_selected" = n_total - n_selected)
 
-            plot_feedback_text_bar(plot_data)
+            html_feedback_text_bar(plot_data)
           })
         }
       )

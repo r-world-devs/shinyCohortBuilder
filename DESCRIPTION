@@ -32,12 +32,10 @@ Imports:
     bslib,
     jsonlite,
     purrr,
-    ggplot2 (>= 3.4.0),
-    ggiraph (>= 0.9.1),
     htmltools,
+    htmlwidgets,
     shiny (>= 1.7.0),
     shinyWidgets (>= 0.7.0),
-    htmlwidgets,
     dplyr,
     cohortBuilder (>= 0.4.0),
     S7,
@@ -66,6 +64,7 @@ Collate:
     'control_utils.R'
     'actions.R'
     'renders.R'
+    'feedback_html.R'
     'filter_discrete.R'
     'filter_range.R'
     'filter_date_range.R'

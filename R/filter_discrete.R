@@ -206,80 +206,6 @@ format_number <- function(number) {
   format(number, nsmall = 0, big.mark = " ")
 }
 
-plot_feedback_bar <- function(plot_data, n_missing) {
-
-  feedback_data <- data.frame(
-    level = factor(names(plot_data)),
-    n = unlist(plot_data)
-  )
-
-  n_rows <- nrow(feedback_data)
-  color_palette <- getOption("scb_chart_palette", scb_chart_palette)$discrete
-  n_colors <- length(color_palette)
-  chart_cols <- color_palette[rep_len(1:n_colors, n_rows)]
-
-
-  if (n_missing > 0) {
-    feedback_data <- rbind(
-      feedback_data,
-      data.frame(level = "(missing)", n = n_missing)
-    )
-    chart_cols <- c(
-      chart_cols,
-      getOption("scb_chart_palette", scb_chart_palette)$no_data
-    )
-  }
-
-  if (NROW(feedback_data) == 0) {
-    gg_object <- ggplot2::ggplot()
-  } else {
-    gg_object <-
-      feedback_data |>
-      dplyr::mutate(
-        tooltip = htmltools::htmlEscape(paste0(level, " (", format_number(n), ")"), TRUE)
-      ) |>
-      ggplot2::ggplot(
-        ggplot2::aes(
-          x = "I", y = n, fill = level,
-          tooltip = paste0(level, " (", format_number(n), ")"),
-          data_id = htmltools::htmlEscape(level, TRUE)
-        )
-      ) +
-      ggplot2::geom_col(position = ggplot2::position_stack(reverse = TRUE)) +
-      ggplot2::coord_flip() +
-      ggplot2::scale_x_discrete(expand = c(0, 0)) +
-      ggplot2::scale_y_continuous(expand = c(0, 0)) +
-      ggplot2::theme(
-        axis.title = ggplot2::element_blank(),
-        axis.text  = ggplot2::element_blank(),
-        axis.ticks.length = ggplot2::unit(0, "pt"),
-        panel.background = ggplot2::element_blank(),
-        panel.grid.major = ggplot2::element_blank(),
-        panel.grid.minor = ggplot2::element_blank(),
-        plot.background  = ggplot2::element_blank(),
-        legend.position = "none",
-        plot.margin = ggplot2::unit(c(0, 0, 0, 0),"mm"),
-        panel.border = ggplot2::element_rect(colour = "grey50", fill = NA, linewidth = 1),
-        panel.spacing = ggplot2::unit(c(0, 0, 0, 0), "mm")) +
-      ggplot2::scale_fill_manual(name = NULL, values = chart_cols) +
-      ggiraph::geom_col_interactive(
-        position = ggplot2::position_stack(reverse = TRUE)
-      )
-  }
-
-  ggiraph::girafe(
-    ggobj = gg_object,
-    width_svg  = 10,
-    height_svg = 1.5,
-    options = list(
-      ggiraph::opts_hover_inv(css = "opacity: 0.2;"),
-      ggiraph::opts_tooltip(offx = 10, offy = 10, opacity = 0.5, zindex = 1100),
-      ggiraph::opts_selection(type = "single", only_shiny = FALSE),
-      ggiraph::opts_toolbar(saveaspng = FALSE)
-    )
-  )
-}
-
 S7::method(.gui_filter, cohortBuilder::CbFilterDiscrete) <- function(object, ...) {
   list(
     input = function(filter, input_id, cohort) {
@@ -314,18 +240,12 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscrete) <- function(object, ...
     },
     feedback = function(filter, input_id, cohort, empty = FALSE) {
       list(
-        plot_id = shiny::NS(input_id, "feedback_plot") ,
-        output_fun = ggiraph::girafeOutput,
+        plot_id = shiny::NS(input_id, "feedback_plot"),
+        output_fun = shiny::uiOutput,
         render_fun = if (!is.null(empty)) {
-          ggiraph::renderGirafe({
-            if(empty) { # when no data in parent step
-              return(
-                ggiraph::girafe(
-                  ggobj      = ggplot2::ggplot(),
-                  width_svg  = 10,
-                  height_svg = 0.1
-                )
-              )
+          shiny::renderUI({
+            if (empty) {
+              return(shiny::div(class = "cb_fb_bar"))
             }
             step_id <- filter@step_id
             filter_id <- filter@id
@@ -338,14 +258,14 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscrete) <- function(object, ...
               n_missing <- 0
             }
 
-            plot_feedback_bar(plot_data, n_missing)
+            html_feedback_bar(plot_data, n_missing, input_id = input_id)
           })
         }
       )
     },
     server = function(filter, input_id, input, output, session, cohort) {
-      shiny::observeEvent(input[[shiny::NS(input_id, "feedback_plot_selected")]], {
-        value <- input[[shiny::NS(input_id, "feedback_plot_selected")]]
+      shiny::observeEvent(input[[shiny::NS(input_id, "feedback_bar_clicked")]], {
+        value <- input[[shiny::NS(input_id, "feedback_bar_clicked")]]
 
         if (!is.na(value)) {
           .trigger_action(session, "update_filter", params = list(

@@ -105,13 +105,15 @@ test_that("Feedback app: deactivating filter removes feedback content", {
   )
   on.exit(app$stop(), add = TRUE)
 
+  app$wait_for_idle(timeout = 10000)
+
   # Deactivate gender filter via jQuery trigger
   app$run_js(
     "var el = document.getElementById('coh-active_1-gender');
      el.checked = false;
      $(el).trigger('change');"
   )
-  app$wait_for_idle(timeout = 10000)
+  app$wait_for_idle(timeout = 15000)
 
   # Filter content should be hidden
   gender_html <- app$get_html(".cb_filter[data-filter_id='gender']")

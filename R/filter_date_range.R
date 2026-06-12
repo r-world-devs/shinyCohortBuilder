@@ -20,14 +20,12 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDateRange) <- function(object, ..
     },
     feedback = function(filter, input_id, cohort, empty = FALSE) {
       list(
-        plot_id = shiny::NS(input_id, "feedback_plot") ,
-        output_fun = shiny::plotOutput,
+        plot_id = shiny::NS(input_id, "feedback_plot"),
+        output_fun = shiny::uiOutput,
         render_fun = if (!is.null(empty)) {
-          shiny::renderPlot(bg = "transparent", height = 60, {
-            if(empty) { # when no data in parent step
-              return(
-                empty_plot()
-              )
+          shiny::renderUI({
+            if (empty) {
+              return(shiny::div(class = "cb_fb_bar"))
             }
             step_id <- filter@step_id
             filter_id <- filter@id
@@ -40,7 +38,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDateRange) <- function(object, ..
             )
 
             plot_data <- filter_cache$frequencies |>
-              dplyr::mutate(# we take l_bound to limit upper cause last break have l_bound == u_bound
+              dplyr::mutate(
                 count = ifelse(l_bound >= filter_range[1] & l_bound <= filter_range[2], count, 0)
               )
 
@@ -52,14 +50,13 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDateRange) <- function(object, ..
                 dplyr::summarise(count = sum(count))
             }
 
-            # todo possibly add modifier to lower number of bars
             n_missing <- filter_cache$n_missing
             n_total <- filter_cache$n_data
             if (identical(filter@keep_na, FALSE)) {
               n_missing <- 0
             }
 
-            plot_feedback_hist(plot_data, n_missing, n_total)
+            html_feedback_hist(plot_data, n_missing, n_total)
           })
         }
       )

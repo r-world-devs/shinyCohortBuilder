@@ -119,7 +119,7 @@ test_that(".gui_filter.range feedback returns plotOutput", {
   gui <- .gui_filter(filter)
 
   fb <- gui$feedback(filter, "1-val_fb", coh, empty = FALSE)
-  expect_equal(fb$output_fun, shiny::plotOutput)
+  expect_equal(fb$output_fun, shiny::uiOutput)
   expect_true(!is.null(fb$render_fun))
 })
 

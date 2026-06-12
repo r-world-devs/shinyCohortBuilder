@@ -17,4 +17,4 @@ coh <- cohort(
       active = FALSE
     )
   )
-gui(coh, run_button = "global")
+gui(coh, run_button = "none")

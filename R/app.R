@@ -164,7 +164,7 @@ demo_app <- function(
           cohortBuilder::bind_key(
             update = cohortBuilder::data_key("therapy", "patient_id"),
             cohortBuilder::data_key("patients", "id"),
-            post = FALSE
+            post = TRUE
           ),
           cohortBuilder::bind_key(
             update = cohortBuilder::data_key("patients", "id"),

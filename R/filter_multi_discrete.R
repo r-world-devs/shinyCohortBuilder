@@ -111,76 +111,6 @@ multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE,
   return(params)
 }
 
-plot_feedback_multi_bar <- function(plot_data, n_missing) {
-
-  gg_object <- ggplot2::ggplot()
-  if (NROW(plot_data) > 0) {
-
-    n_lvls <- length(unique(plot_data$state))
-    color_palette <- getOption("scb_chart_palette", scb_chart_palette)$discrete
-    n_colors <- length(color_palette)
-    chart_cols <- color_palette[rep_len(1:n_colors, n_lvls)]
-
-    if (sum(n_missing$value) > 0) {
-      plot_data <- dplyr::bind_rows(
-        plot_data,
-        n_missing
-      )
-      chart_cols <- c(
-        chart_cols,
-        getOption("scb_chart_palette", scb_chart_palette)$no_data
-      )
-    }
-
-    gg_object <- plot_data |>
-      ggplot2::ggplot(
-        ggplot2::aes(
-          x = variable,
-          y = value,
-          fill = state,
-          tooltip = paste0(variable, ": ", state, " (", format_number(value), ")"),
-          data_id = htmltools::htmlEscape(state, TRUE)
-        )
-      ) +
-      ggplot2::coord_flip() +
-      ggplot2::scale_x_discrete(expand = c(0, 0), limits = rev(unique(plot_data$variable))) +
-      ggplot2::scale_y_continuous(expand = c(0, 0)) +
-      ggplot2::theme(
-        axis.title = ggplot2::element_blank(),
-        axis.text  = ggplot2::element_blank(),
-        axis.ticks.length = ggplot2::unit(0, "pt"),
-        panel.background = ggplot2::element_blank(),
-        panel.grid.major = ggplot2::element_blank(),
-        panel.grid.minor = ggplot2::element_blank(),
-        plot.background  = ggplot2::element_blank(),
-        legend.position = "none",
-        plot.margin = ggplot2::unit(c(0, 0, 0, 0),"mm"),
-        panel.border = ggplot2::element_rect(
-          colour = "grey50",
-          fill = NA,
-          linewidth = 1
-        ),
-        panel.spacing = ggplot2::unit(c(0, 0, 0, 0), "mm")
-      ) +
-      ggplot2::scale_fill_manual(name = NULL, breaks = unique(plot_data$state), values = chart_cols) +
-      ggiraph::geom_bar_interactive(
-        position = ggplot2::position_stack(reverse = TRUE), stat = "identity", width = 1
-      )
-  }
-
-  ggiraph::girafe(
-    ggobj      = gg_object,
-    width_svg  = 10,
-    height_svg = 1.5,
-    options = list(
-      ggiraph::opts_hover_inv(css = "opacity: 0.2;"),
-      ggiraph::opts_tooltip(offx = 10, offy = 10, opacity = 0.5, zindex = 1100),
-      ggiraph::opts_selection(type = "single", only_shiny = FALSE),
-      ggiraph::opts_toolbar(saveaspng = FALSE)
-    )
-  )
-}
-
 grouped_list_to_df <- function(grouped_list) {
   grouped_list |>
     purrr::keep(~length(.) > 0) |>
@@ -222,18 +152,12 @@ S7::method(.gui_filter, cohortBuilder::CbFilterMultiDiscrete) <- function(object
     },
     feedback = function(filter, input_id, cohort, empty = FALSE) {
       list(
-        plot_id = shiny::NS(input_id, "feedback_plot") ,
-        output_fun = ggiraph::girafeOutput,
+        plot_id = shiny::NS(input_id, "feedback_plot"),
+        output_fun = shiny::uiOutput,
         render_fun = if (!is.null(empty)) {
-          ggiraph::renderGirafe({
-            if(empty) { # when no data in parent step
-              return(
-                ggiraph::girafe(
-                  ggobj      = ggplot2::ggplot(),
-                  width_svg  = 10,
-                  height_svg = 0.1
-                )
-              )
+          shiny::renderUI({
+            if (empty) {
+              return(shiny::div(class = "cb_fb_bar"))
             }
             step_id <- filter@step_id
             filter_id <- filter@id
@@ -265,7 +189,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterMultiDiscrete) <- function(object
               n_missing$value <- 0
             }
 
-            plot_feedback_multi_bar(plot_data, n_missing)
+            html_feedback_multi_bar(plot_data, n_missing)
           })
         }
       )

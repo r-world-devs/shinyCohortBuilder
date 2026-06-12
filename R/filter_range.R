@@ -128,41 +128,6 @@ range_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
   return(params)
 }
 
-plot_feedback_hist <- function(plot_data, n_missing, n_total) {
-
-  choosen_color <- getOption("scb_chart_palette", scb_chart_palette)$discrete[1]
-
-  gg_object <- plot_data |>
-    ggplot2::ggplot(ggplot2::aes(x = level, y = count)) +
-    ggplot2::geom_bar(
-      fill = choosen_color,
-      colour = choosen_color,
-      alpha  = 0.5,
-      na.rm  = TRUE,
-      stat = "identity"
-    ) +
-    ggplot2::theme_void() +
-    ggplot2::theme(
-      panel.grid.minor = ggplot2::element_blank(),
-      panel.grid.major = ggplot2::element_blank(),
-      panel.background =
-        ggplot2::element_rect(fill = "transparent", colour = NA),
-      plot.background  =
-        ggplot2::element_rect(fill = "transparent", colour = NA),
-      plot.subtitle =
-        ggplot2::element_text(
-          color = "dimgray", size = 10, face = "plain")) +
-    ggplot2::scale_y_continuous(expand = c(0, 0)) +
-    ggplot2::labs(
-      x = NULL, y = NULL,
-      subtitle = glue::glue(
-        "missing: {format_number(n_missing)}",
-        " / {format_number(n_total)} ",
-        "({round(n_missing / n_total, 1)}%)"))
-
-  gg_object
-}
-
 suff_id <- function(params_list, suffix) {
   params_list$inputId <- paste0(params_list$inputId, "-", suffix)
   return(params_list)
@@ -211,14 +176,12 @@ S7::method(.gui_filter, cohortBuilder::CbFilterRange) <- function(object, ...) {
     },
     feedback = function(filter, input_id, cohort, empty = FALSE) {
       list(
-        plot_id = shiny::NS(input_id, "feedback_plot") ,
-        output_fun = shiny::plotOutput,
+        plot_id = shiny::NS(input_id, "feedback_plot"),
+        output_fun = shiny::uiOutput,
         render_fun = if (!is.null(empty)) {
-          shiny::renderPlot(bg = "transparent", height = 60, {
-            if(empty) { # when no data in parent step
-              return(
-                ggplot2::ggplot()
-              )
+          shiny::renderUI({
+            if (empty) {
+              return(shiny::div(class = "cb_fb_bar"))
             }
             step_id <- filter@step_id
             filter_id <- filter@id
@@ -231,7 +194,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterRange) <- function(object, ...) {
             )
 
             plot_data <- filter_cache$frequencies |>
-              dplyr::mutate(# we take l_bound to limit upper cause last break have l_bound == u_bound
+              dplyr::mutate(
                 count = ifelse(l_bound >= filter_range[1] & l_bound <= filter_range[2], count, 0)
               )
             n_missing <- filter_cache$n_missing
@@ -240,7 +203,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterRange) <- function(object, ...) {
               n_missing <- 0
             }
 
-            plot_feedback_hist(plot_data, n_missing, n_total)
+            html_feedback_hist(plot_data, n_missing, n_total)
           })
         }
       )
