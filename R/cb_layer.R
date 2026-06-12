@@ -144,15 +144,13 @@ post_add_step_hook <- function(public, private, step_id) {
 }
 
 post_update_filter_hook <- function(public, private, step_id, filter_id, ..., active,
-                                    hook_args = list(update_active = FALSE, update = NULL)) {
+                                    hook_args = list(update = "input")) {
 
   session <- public$attributes$session
   if (is.null(session)) {
     return(invisible(FALSE))
   }
-  if (missing(active)) {
-    active <- NULL
-  }
+  update_active <- !missing(active)
 
   run_on_request <- !is_none(public$attributes$run_button)
   if (!run_on_request) {
@@ -161,7 +159,7 @@ post_update_filter_hook <- function(public, private, step_id, filter_id, ..., ac
 
   force_render <- getOption("scb_render_all", default = FALSE)
   run_update <- TRUE
-  if (!force_render && !is.null(active)) {
+  if (!force_render && update_active) {
     run_update <- !insert_filter(step_id, filter_id, public, session)
   }
 
@@ -185,7 +183,7 @@ post_update_filter_hook <- function(public, private, step_id, filter_id, ..., ac
     gui_update_filters_loop(public, step_id, FALSE, update, exclude = filter_id, session)
   }
 
-  if (isTRUE(hook_args$update_active)) {
+  if (isTRUE(update_active)) {
     gui_update_filter_class(step_id, filter_id, active, "hidden-input", session)
   }
 
@@ -194,6 +192,8 @@ post_update_filter_hook <- function(public, private, step_id, filter_id, ..., ac
     update_next_step(public, step_id, FALSE, session)
   }
 }
+
+debug(post_update_filter_hook)
 
 enable_panel <- function(cohort, session) {
   if (cohort$last_step_id() != "0") {
@@ -234,7 +234,7 @@ post_add_filter_hook <- function(public, private, step_id, filter) {
   if (is.null(session)) {
     return(invisible(FALSE))
   }
-  gui_add_step_filter(step_id = step_id, filter_id = filter@id, cohort = public, session = session)
+  gui_add_filter_to_step(step_id = step_id, filter_id = filter@id, cohort = public, session = session)
 }
 
 post_rm_filter_hook <- function(public, private, step_id, filter_id) {
@@ -242,7 +242,7 @@ post_rm_filter_hook <- function(public, private, step_id, filter_id) {
   if (is.null(session)) {
     return(invisible(FALSE))
   }
-  gui_rm_step_filter(step_id = step_id, filter_id = filter_id, cohort = public, session = session)
+  gui_rm_filter_from_step(step_id = step_id, filter_id = filter_id, cohort = public, session = session)
 }
 
 .onLoad <- function(libname, pkgname){

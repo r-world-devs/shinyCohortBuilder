@@ -421,6 +421,7 @@ convert_input_value <- function(changed_input, step_id, filter_id, cohort, updat
 gui_update_filter <- function(cohort, changed_input, session) {
 
   run_on_request <- !is_none(cohort$attributes$run_button)
+
   update_active <- changed_input$input_name == "active"
   update <- changed_input$update
 
@@ -433,7 +434,7 @@ gui_update_filter <- function(cohort, changed_input, session) {
   changed_input <- convert_input_value(changed_input, step_id, filter_id, cohort, update_active)
   changed_input$hook_args <- list(
     pre = list(),
-    post = list(update_active = update_active, update = update)
+    post = list(update = update)
   )
   do.call(
     cohort$update_filter,
@@ -462,7 +463,7 @@ insert_filter <- function(step_id, filter_id, cohort, session) {
   return(invisible(TRUE))
 }
 
-gui_add_step_filter <- function(step_id, filter_id, cohort, session) {
+gui_add_filter_to_step <- function(step_id, filter_id, cohort, session) {
 
   ns <- session$ns
   step_filter_id <- sf_id(step_id, filter_id)
@@ -484,9 +485,13 @@ gui_add_step_filter <- function(step_id, filter_id, cohort, session) {
     immediate = TRUE,
     session = session
   )
+  session$sendCustomMessage(
+    "validate_filter_groups",
+    list(step_id = step_id, ns_prefix = session$ns(""))
+  )
 }
 
-gui_rm_step_filter <- function(step_id, filter_id, cohort, session) {
+gui_rm_filter_from_step <- function(step_id, filter_id, cohort, session) {
   ns <- session$ns
   step_filter_id <- sf_id(step_id, filter_id)
   session$userData$rendered_filters <- setdiff(
@@ -498,6 +503,10 @@ gui_rm_step_filter <- function(step_id, filter_id, cohort, session) {
     selector = glue::glue("#{ns(step_filter_id)}"),
     immediate = TRUE,
     session = session
+  )
+  session$sendCustomMessage(
+    "validate_filter_groups",
+    list(step_id = step_id, ns_prefix = session$ns(""))
   )
 }
 
@@ -616,11 +625,6 @@ gui_manage_step_configured <- function(cohort, changed_input, session) {
   if (!run_on_request) {
     cohort$run_step(step_id)
   }
-
-  session$sendCustomMessage(
-    "validate_filter_groups",
-    list(step_id = step_id, ns_prefix = session$ns(""))
-  )
 }
 
 gui_run_step <- function(cohort, changed_input, session) {

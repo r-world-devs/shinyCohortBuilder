@@ -985,6 +985,7 @@ cb_server <- function(id, cohort, run_button = "none", stats = c("pre", "post"),
         for (attrib in names(attribs)) {
           cohort$attributes[[attrib]] <- NULL
         }
+        options(cb_tool_run_cohort = NULL)
       }, session = session)
 
       bookmark_restore(cohort, enable_bookmarking)
@@ -992,6 +993,9 @@ cb_server <- function(id, cohort, run_button = "none", stats = c("pre", "post"),
       render_steps(cohort, cohort$attributes$session, init = TRUE)
 
       if (!is.null(chat)) {
+        if (!is_none(cohort$attributes$run_button)) {
+          options(cb_tool_run_cohort = FALSE)
+        }
         cb_chat_server("chat", chat, input, output, session)
       }
     }

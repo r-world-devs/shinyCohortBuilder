@@ -43,7 +43,8 @@ chat <- ellmer::chat_azure_openai(
   api_version = "2024-08-01-preview",
   system_prompt = "You are a helpful assistant.",
   credentials = function() list("api-key" = Sys.getenv("CHAT_KEY")),
-  echo = "all"
+  echo = "all"#,
+  #api_args = list(parallel_tool_calls = FALSE)
 )
 
 chat |> cb_register_tools(coh)
