@@ -31,7 +31,7 @@ test_that(".trigger_action_js with empty params works", {
 test_that(".trigger_action_js generates correct action IDs", {
   actions <- c(
     "update_filter", "add_step", "rm_step", "clear_step",
-    "update_step", "update_data_stats", "show_repro_code",
+    "update_data_stats", "show_repro_code",
     "run_step", "show_state", "input_state", "restore_state",
     "show_attrition", "show_help", "manage_step_modal"
   )

@@ -100,7 +100,11 @@ post_run_step_hook <- function(public, private, step_id) {
     return(invisible(FALSE))
   }
 
-  .update_data_stats(public$get_source(), step_id, public, session)
+  gui_update_filters_loop(
+    public, step_id, reset = FALSE,
+    update = c("input", "plot"), session = session
+  )
+  gui_update_data_stats(public, list(step_id = step_id), session)
 
   session$sendCustomMessage(
     "inform_data_updated",
@@ -187,13 +191,14 @@ post_update_filter_hook <- function(public, private, step_id, filter_id, ..., ac
     gui_update_filter_class(step_id, filter_id, active, "hidden-input", session)
   }
 
-  if (is_none(public$attributes$run_button)) {
-    gui_update_data_stats(public, list(step_id = step_id), session)
-    update_next_step(public, step_id, FALSE, session)
+  # Cascade to subsequent steps
+  if (!run_on_request) {
+    next_step_id <- as.integer(step_id) + 1
+    if (next_step_id <= length(public$get_step())) {
+      public$run_flow(min_step = as.character(next_step_id))
+    }
   }
 }
-
-debug(post_update_filter_hook)
 
 enable_panel <- function(cohort, session) {
   if (cohort$last_step_id() != "0") {

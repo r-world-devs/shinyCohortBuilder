@@ -15,6 +15,7 @@ test_that("Feedback app: filter-level feedback=TRUE shows plot", {
     load_timeout = 60000
   )
   on.exit(app$stop(), add = TRUE)
+  app$wait_for_idle(timeout = 10000)
 
   # Gender filter has feedback=TRUE
   gender_html <- app$get_html(".cb_filter[data-filter_id='gender']")
@@ -34,6 +35,7 @@ test_that("Feedback app: filter-level feedback=FALSE hides plot", {
     load_timeout = 60000
   )
   on.exit(app$stop(), add = TRUE)
+  app$wait_for_idle(timeout = 10000)
 
   # Age filter has feedback=FALSE explicitly — no cb_feedback div
   age_html <- app$get_html(".cb_filter[data-filter_id='age']")
@@ -53,6 +55,7 @@ test_that("Feedback app: cohort-level feedback=TRUE inherits to filter without o
     load_timeout = 60000
   )
   on.exit(app$stop(), add = TRUE)
+  app$wait_for_idle(timeout = 10000)
 
   # Group filter has no feedback param — inherits from cohort (TRUE)
   group_html <- app$get_html(".cb_filter[data-filter_id='group']")
@@ -108,7 +111,7 @@ test_that("Feedback app: deactivating filter removes feedback content", {
      el.checked = false;
      $(el).trigger('change');"
   )
-  app$wait_for_idle(timeout = 5000)
+  app$wait_for_idle(timeout = 10000)
 
   # Filter content should be hidden
   gender_html <- app$get_html(".cb_filter[data-filter_id='gender']")

@@ -17,7 +17,6 @@
 #' \item{\code{add_step} - Calls `shinyCohortBuilder:::gui_add_step` that triggers adding a new filtering step (based on configuration of the previous one).}
 #' \item{\code{rm_step} - Calls `shinyCohortBuilder:::gui_rm_step` used to remove a selected filtering step.},
 #' \item{\code{clear_step} - Calls `shinyCohortBuilder:::gui_clear_step` used to clear filters configuration in selected step.}
-#' \item{\code{update_step} - Calls `shinyCohortBuilder:::gui_update_step` used to update filters and feedback plots for the specific filter GUI panel.}
 #' \item{\code{update_data_stats} - Calls `shinyCohortBuilder:::gui_update_data_stats` that is called to update data statistics. }
 #' \item{\code{show_repro_code} - Calls `shinyCohortBuilder:::gui_show_repro_code` that is used to show reproducible code. }
 #' \item{\code{run_step} - Calls `shinyCohortBuilder:::gui_run_step` used to trigger specific step data calculation. }
@@ -355,22 +354,6 @@ gui_update_plot <- function(step_id, filter_id, cohort, session) {
   session$output[[feedback$plot_id]] <- feedback$render_fun
 }
 
-update_next_step <- function(cohort, step_id, reset, session) {
-  next_step_id <- as.integer(step_id) + 1
-  if (next_step_id <= length(cohort$get_step())) {
-    if (reset) {
-      reset_filters(cohort, as.character(next_step_id))
-    }
-    gui_update_step(
-      cohort,
-      list(
-        step_id = as.character(next_step_id), run_flow = TRUE,
-        reset = reset, update = c("input", "plot")
-      ),
-      session
-    )
-  }
-}
 
 overwrite_input_handler <- list(
   "sw.airdatepicker" = function() ...
@@ -628,12 +611,10 @@ gui_manage_step_configured <- function(cohort, changed_input, session) {
 }
 
 gui_run_step <- function(cohort, changed_input, session) {
-  ns <- session$ns
-
   print_state("run_step", changed_input)
   input_state("run_step", changed_input)
 
-  gui_update_step(cohort, changed_input, session)
+  cohort$run_flow(min_step = changed_input$step_id)
 }
 
 gui_show_state <- function(cohort, changed_input, session) {
@@ -821,36 +802,6 @@ trigger_pending_state <- function(step_id, action, session) {
   )
 }
 
-# idea
-# when updating filter run only `run_step` for current step
-# then in gui_update_step:
-# 1. update gui filters first
-# 2. take parameters from gui filters and update the ones in cohort
-# 3. call run_step
-# this should allow to have fron-back always up to date
-# probably impossible due to cache being called before rendering
-gui_update_step <- function(cohort, changed_input, session) {
-  ns <- session$ns
-
-  print_state("update_step", changed_input)
-  input_state("update_step", changed_input)
-  filter_ids <- names(cohort$get_step(changed_input$step_id)$filters)
-
-  # todo make sure this is needed
-  if (changed_input$run_flow) {
-    cohort$run_step(step_id = changed_input$step_id)
-  }
-
-  gui_update_filters_loop(
-    cohort, changed_input$step_id, changed_input$reset,
-    changed_input$update, session = session
-  )
-  gui_update_data_stats(cohort, list(step_id = changed_input$step_id), session)
-
-  if (changed_input$run_flow) {
-    update_next_step(cohort, changed_input$step_id, FALSE, session)
-  }
-}
 
 add_trailing_space <- function(string) {
   n_spaces <- nchar(regmatches(string, regexpr("^\\s+", string)))
@@ -1251,11 +1202,15 @@ gui_clear_step <- function(cohort, changed_input, session) {
     reset_filters(cohort, changed_input$step_id)
   }
 
-  if (!is_none(cohort$attributes$run_button)) {
-    changed_input$run_flow <- FALSE
+  if (is_none(cohort$attributes$run_button)) {
+    cohort$run_flow(min_step = changed_input$step_id)
+  } else {
+    gui_update_filters_loop(
+      cohort, changed_input$step_id, reset = changed_input$reset,
+      update = c("input", "plot"), session = session
+    )
+    gui_update_data_stats(cohort, list(step_id = changed_input$step_id), session)
   }
-  changed_input$update <- c("input", "plot")
-  gui_update_step(cohort, changed_input, session)
 }
 
 gui_show_help <- function(cohort, changed_input, session) {

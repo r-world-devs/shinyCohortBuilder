@@ -387,7 +387,6 @@ render_steps <- function(cohort, session, init = TRUE) {
         manage_step_modal = gui_manage_step_modal,
         manage_step_configure = gui_manage_step_configured,
         clear_step = gui_clear_step,
-        update_step = gui_update_step,
         update_data_stats = gui_update_data_stats,
         show_repro_code = gui_show_repro_code,
         run_step = gui_run_step,
