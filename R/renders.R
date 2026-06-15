@@ -277,14 +277,14 @@ render_step <- function(cohort, step_id, active, allow_rm, input, output, sessio
     )
   )
 
-  gui_update_pending_state(session, cohort, step_id)
+  ui_update_pending_state(session, cohort, step_id)
   .update_data_stats(cohort$get_source(), step_id, cohort, session)
 }
 
-gui_update_pending_state <- function(session, cohort, step_id) {
+ui_update_pending_state <- function(session, cohort, step_id) {
   if (!is_none(cohort$attributes$run_button)) {
     action <- if (cohort$is_pending(step_id)) "add" else "remove"
-    trigger_pending_state(step_id, action, session)
+    ui_trigger_pending_state(step_id, action, session)
   }
 }
 
@@ -377,27 +377,27 @@ render_steps <- function(cohort, session, init = TRUE) {
     shiny::observeEvent(session$input$action, {
       action <- session$input$action
 
-      gui_method <- switch(
+      action_method <- switch(
         action$id,
-        update_filter = gui_update_filter,
-        add_step = gui_add_step,
-        add_step_modal = gui_show_step_filter_modal,
-        add_step_configure = gui_add_step_configured,
-        rm_step = gui_rm_step,
-        manage_step_modal = gui_manage_step_modal,
-        manage_step_configure = gui_manage_step_configured,
-        clear_step = gui_clear_step,
-        update_data_stats = gui_update_data_stats,
-        show_repro_code = gui_show_repro_code,
-        run_step = gui_run_step,
-        show_state = gui_show_state,
-        input_state = gui_input_state,
-        restore_state = gui_restore_state,
-        show_attrition = gui_show_attrition,
-        show_help = gui_show_help
+        update_filter = action_update_filter,
+        add_step = action_add_step,
+        add_step_modal = action_show_step_filter_modal,
+        add_step_configure = action_add_step_configured,
+        rm_step = action_rm_step,
+        manage_step_modal = action_manage_step_modal,
+        manage_step_configure = action_manage_step_configured,
+        clear_step = action_clear_step,
+        update_data_stats = action_update_data_stats,
+        show_repro_code = action_show_repro_code,
+        run_step = action_run_step,
+        show_state = action_show_state,
+        input_state = action_input_state,
+        restore_state = action_restore_state,
+        show_attrition = action_show_attrition,
+        show_help = action_show_help
       )
       tryCatchLog::tryCatchLog(
-        gui_method(cohort, action$params, session),
+        action_method(cohort, action$params, session),
         error = function(e) {
           intro_message <- glue::glue("An error occured during execution of {sQuote(action$id)} method.")
           cat(intro_message, sep = "\n")
@@ -409,7 +409,7 @@ render_steps <- function(cohort, session, init = TRUE) {
               list(info = paste(intro_message, post_message, sep = "\n"))
             )
             action$params$state <- cohort$attributes$pre_restore_state
-            gui_method(cohort, action$params, session)
+            action_method(cohort, action$params, session)
           } else {
             session$sendCustomMessage(
               "show_alert",

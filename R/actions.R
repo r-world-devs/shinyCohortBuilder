@@ -13,17 +13,17 @@
 #' The list of possible actions:
 #'
 #' \itemize{
-#' \item{\code{update_filter} - Calls `shinyCohortBuilder:::gui_update_filter` that triggers filter arguments update.}
-#' \item{\code{add_step} - Calls `shinyCohortBuilder:::gui_add_step` that triggers adding a new filtering step (based on configuration of the previous one).}
-#' \item{\code{rm_step} - Calls `shinyCohortBuilder:::gui_rm_step` used to remove a selected filtering step.},
-#' \item{\code{clear_step} - Calls `shinyCohortBuilder:::gui_clear_step` used to clear filters configuration in selected step.}
-#' \item{\code{update_data_stats} - Calls `shinyCohortBuilder:::gui_update_data_stats` that is called to update data statistics. }
-#' \item{\code{show_repro_code} - Calls `shinyCohortBuilder:::gui_show_repro_code` that is used to show reproducible code. }
-#' \item{\code{run_step} - Calls `shinyCohortBuilder:::gui_run_step` used to trigger specific step data calculation. }
-#' \item{\code{show_state} - Calls `shinyCohortBuilder:::gui_show_state` that is used to show filtering panel state json. }
-#' \item{\code{input_state} - Calls `shinyCohortBuilder:::gui_input_state` that is used to generate modal in which filtering panel state can be provided (as json). }
-#' \item{\code{restore_state} - Calls `shinyCohortBuilder:::gui_restore_state` used for restoring filtering panel state based on provided json. }
-#' \item{\code{show_attrition} - Calls `shinyCohortBuilder:::gui_show_attrition` a method used to show attrition data plot(s).}
+#' \item{\code{update_filter} - Calls `shinyCohortBuilder:::action_update_filter` that triggers filter arguments update.}
+#' \item{\code{add_step} - Calls `shinyCohortBuilder:::action_add_step` that triggers adding a new filtering step (based on configuration of the previous one).}
+#' \item{\code{rm_step} - Calls `shinyCohortBuilder:::action_rm_step` used to remove a selected filtering step.},
+#' \item{\code{clear_step} - Calls `shinyCohortBuilder:::action_clear_step` used to clear filters configuration in selected step.}
+#' \item{\code{update_data_stats} - Calls `shinyCohortBuilder:::action_update_data_stats` that is called to update data statistics. }
+#' \item{\code{show_repro_code} - Calls `shinyCohortBuilder:::action_show_repro_code` that is used to show reproducible code. }
+#' \item{\code{run_step} - Calls `shinyCohortBuilder:::action_run_step` used to trigger specific step data calculation. }
+#' \item{\code{show_state} - Calls `shinyCohortBuilder:::action_show_state` that is used to show filtering panel state json. }
+#' \item{\code{input_state} - Calls `shinyCohortBuilder:::action_input_state` that is used to generate modal in which filtering panel state can be provided (as json). }
+#' \item{\code{restore_state} - Calls `shinyCohortBuilder:::action_restore_state` used for restoring filtering panel state based on provided json. }
+#' \item{\code{show_attrition} - Calls `shinyCohortBuilder:::action_show_attrition` a method used to show attrition data plot(s).}
 #' }
 #'
 #' Both `.trigger_action` and `.trigger_action_js` methods are exported for advanced use only.
@@ -242,7 +242,7 @@ clear_step_data <- function(id, .session) {
   session$output[[name]] <- function() value
 }
 
-gui_update_filter_class <- function(step_id, filter_id, show, class, session, child = ".cb_filter_content") {
+ui_update_filter_class <- function(step_id, filter_id, show, class, session, child = ".cb_filter_content") {
   session$sendCustomMessage(
     "update_filter_class",
     list(
@@ -253,7 +253,7 @@ gui_update_filter_class <- function(step_id, filter_id, show, class, session, ch
   )
 }
 
-update_filter_gui <- function(cohort, step_id, filter_id, update, reset, session) {
+ui_update_filter <- function(cohort, step_id, filter_id, update, reset, session) {
   filter <- cohort$get_filter(step_id, filter_id)
   updated_input <- FALSE
   updated_plot <- FALSE
@@ -284,7 +284,7 @@ update_filter_gui <- function(cohort, step_id, filter_id, update, reset, session
     if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
       show <- FALSE
     }
-    gui_update_filter_class(
+    ui_update_filter_class(
       step_id, filter_id, show, "cb_no_data", session,
       child = ".cb_filter_content .cb_no_data_placeholder"
     )
@@ -294,18 +294,18 @@ update_filter_gui <- function(cohort, step_id, filter_id, update, reset, session
     )
     if (show_feedback) {
       updated_plot <- TRUE
-      gui_update_plot(step_id, filter_id, cohort, session) # todo optmize to not extract filter again inside plot
+      ui_update_plot(step_id, filter_id, cohort, session) # todo optmize to not extract filter again inside plot
     }
   }
   input_state(
-    "update_filter_gui",
+    "ui_update_filter",
     list(
       step_id = step_id, filter_id = filter_id, reset = reset,
       updated_plot = updated_plot, updated_input = updated_input
     )
   )
   print_state(
-    "update_filter_gui",
+    "ui_update_filter",
     list(
       step_id = step_id, filter_id = filter_id, reset = reset,
       updated_plot = updated_plot, updated_input = updated_input
@@ -313,7 +313,7 @@ update_filter_gui <- function(cohort, step_id, filter_id, update, reset, session
   )
 }
 
-gui_update_filters_loop <- function(cohort, step_id, reset, update, exclude = character(0), session) {
+ui_update_filters_loop <- function(cohort, step_id, reset, update, exclude = character(0), session) {
   filter_ids <- cohort$list_active_filters(step_id)
 
   updated_inputs <- updated_plots <- character(0)
@@ -329,11 +329,11 @@ gui_update_filters_loop <- function(cohort, step_id, reset, update, exclude = ch
     if (filter_id %in% exclude) {
       next()
     }
-    update_filter_gui(cohort, step_id, filter_id, update, reset, session)
+    ui_update_filter(cohort, step_id, filter_id, update, reset, session)
   }
 }
 
-gui_update_plot <- function(step_id, filter_id, cohort, session) {
+ui_update_plot <- function(step_id, filter_id, cohort, session) {
   ns <- session$ns
 
   print_state("update_plot", list(step_id = step_id, filter_id = filter_id))
@@ -392,7 +392,7 @@ convert_input_value <- function(changed_input, step_id, filter_id, cohort, updat
   return(changed_input)
 }
 
-gui_update_filter <- function(cohort, changed_input, session) {
+action_update_filter <- function(cohort, changed_input, session) {
 
   run_on_request <- !is_none(cohort$attributes$run_button)
 
@@ -416,7 +416,7 @@ gui_update_filter <- function(cohort, changed_input, session) {
   )
 }
 
-insert_filter <- function(step_id, filter_id, cohort, session) {
+ui_insert_filter_content <- function(step_id, filter_id, cohort, session) {
   ns <- session$ns
   step_filter_id <- sf_id(step_id, filter_id)
   rendered_already <- ns(step_filter_id) %in% session$userData$rendered_filters
@@ -437,7 +437,7 @@ insert_filter <- function(step_id, filter_id, cohort, session) {
   return(invisible(TRUE))
 }
 
-gui_add_filter_to_step <- function(step_id, filter_id, cohort, session) {
+ui_insert_filter <- function(step_id, filter_id, cohort, session) {
 
   ns <- session$ns
   step_filter_id <- sf_id(step_id, filter_id)
@@ -465,7 +465,7 @@ gui_add_filter_to_step <- function(step_id, filter_id, cohort, session) {
   )
 }
 
-gui_rm_filter_from_step <- function(step_id, filter_id, cohort, session) {
+ui_remove_filter <- function(step_id, filter_id, cohort, session) {
   ns <- session$ns
   step_filter_id <- sf_id(step_id, filter_id)
   session$userData$rendered_filters <- setdiff(
@@ -484,20 +484,14 @@ gui_rm_filter_from_step <- function(step_id, filter_id, cohort, session) {
   )
 }
 
-gui_rm_step <- function(cohort, changed_input, session) {
-  ns <- session$ns
-
+action_rm_step <- function(cohort, changed_input, session) {
   # todo make sure to diasble delete button when source is updated
   print_state("rm_step", changed_input)
   input_state("rm_step", changed_input)
   cohort$remove_step(run_flow = TRUE)
-
-  clear_step_data(changed_input$step_id, session)
-  shiny::removeUI(glue::glue("#{ns(changed_input$step_id)}"), session = session, immediate = TRUE)
-  session$sendCustomMessage("post_rm_step_action", list(id = changed_input$step_id, ns_prefix = ns("")))
 }
 
-gui_manage_step_modal <- function(cohort, changed_input, session) {
+action_manage_step_modal <- function(cohort, changed_input, session) {
   ns <- session$ns
 
   print_state("manage_step_modal", changed_input)
@@ -507,7 +501,7 @@ gui_manage_step_modal <- function(cohort, changed_input, session) {
 
   if (length(available_filters) == 0) {
     warning_nl("`available_filters` was not defined, configure step will not be working. Cloning last step.")
-    return(gui_add_step(cohort, changed_input, session))
+    return(action_add_step(cohort, changed_input, session))
   }
 
   choices <- .available_filters_choices(cohort$get_source(), cohort)
@@ -556,7 +550,7 @@ gui_manage_step_modal <- function(cohort, changed_input, session) {
   )
 }
 
-gui_manage_step_configured <- function(cohort, changed_input, session) {
+action_manage_step_configured <- function(cohort, changed_input, session) {
 
   run_on_request <- !is_none(cohort$attributes$run_button)
 
@@ -601,14 +595,14 @@ gui_manage_step_configured <- function(cohort, changed_input, session) {
   }
 }
 
-gui_run_step <- function(cohort, changed_input, session) {
+action_run_step <- function(cohort, changed_input, session) {
   print_state("run_step", changed_input)
   input_state("run_step", changed_input)
 
   cohort$run_flow(min_step = changed_input$step_id)
 }
 
-gui_show_state <- function(cohort, changed_input, session) {
+action_show_state <- function(cohort, changed_input, session) {
   ns <- session$ns
 
   print_state("show_state", changed_input)
@@ -636,7 +630,7 @@ file_string_value <- function(filepath, string) {
   }
 }
 
-gui_input_state <- function(cohort, changed_input, session) {
+action_input_state <- function(cohort, changed_input, session) {
   ns <- session$ns
 
   print_state("input_state", changed_input)
@@ -667,7 +661,7 @@ gui_input_state <- function(cohort, changed_input, session) {
   ))
 }
 
-gui_restore_state <- function(cohort, changed_input, session) {
+action_restore_state <- function(cohort, changed_input, session) {
   ns <- session$ns
 
   print_state("restore_state", changed_input)
@@ -685,7 +679,7 @@ gui_restore_state <- function(cohort, changed_input, session) {
   cohort$restore(state)
 }
 
-gui_add_step <- function(cohort, changed_input, session) {
+action_add_step <- function(cohort, changed_input, session) {
   ns <- session$ns
 
   print_state("add_step", changed_input)
@@ -705,18 +699,18 @@ gui_add_step <- function(cohort, changed_input, session) {
 
 }
 
-gui_add_step_configured <- function(cohort, changed_input, session) {
+action_add_step_configured <- function(cohort, changed_input, session) {
   ns <- session$ns
 
-  print_state("gui_add_step_configured", changed_input)
-  input_state("gui_add_step_configured", changed_input)
+  print_state("action_add_step_configured", changed_input)
+  input_state("action_add_step_configured", changed_input)
 
   chosed_filters <- session$input[["configure_step"]]
   available_filters <- cohort$attributes$available_filters
 
   if (length(available_filters) == 0) {
     warning_nl("`available_filters` was not defined, configure step will not be working. Cloning last step.")
-    return(gui_add_step(cohort, changed_input, session))
+    return(action_add_step(cohort, changed_input, session))
   }
 
   filters <- available_filters |>
@@ -730,7 +724,7 @@ gui_add_step_configured <- function(cohort, changed_input, session) {
   # gui actions are handled via post_add_step_hook hook
 }
 
-gui_show_step_filter_modal <- function(cohort, changed_input, session) {
+action_show_step_filter_modal <- function(cohort, changed_input, session) {
   ns <- session$ns
 
   print_state("add_step_modal", changed_input)
@@ -740,7 +734,7 @@ gui_show_step_filter_modal <- function(cohort, changed_input, session) {
 
   if (length(available_filters) == 0) {
     warning_nl("`available_filters` was not defined, configure step will not be working. Cloning last step.")
-    return(gui_add_step(cohort, changed_input, session))
+    return(action_add_step(cohort, changed_input, session))
   }
 
   choices <- .available_filters_choices(cohort$get_source(), cohort)
@@ -783,7 +777,7 @@ gui_show_step_filter_modal <- function(cohort, changed_input, session) {
   )
 }
 
-trigger_pending_state <- function(step_id, action, session) {
+ui_trigger_pending_state <- function(step_id, action, session) {
   session$sendCustomMessage(
     "update_class",
     list(
@@ -802,7 +796,7 @@ add_trailing_space <- function(string) {
   gsub("^\\s+", paste(rep("&nbsp", n_spaces), collapse = ""), string)
 }
 
-gui_show_repro_code <- function(cohort, changed_input, session) {
+action_show_repro_code <- function(cohort, changed_input, session) {
   ns <- session$ns
 
   print_state("show_code", changed_input)
@@ -1039,7 +1033,7 @@ navs <- function(..., id = NULL, selected = NULL, type = c("tabs", "pills", "hid
   return(tabset)
 }
 
-gui_show_attrition <- function(cohort, changed_input, session) {
+action_show_attrition <- function(cohort, changed_input, session) {
   ns <- session$ns
 
   print_state("show_attrition", changed_input)
@@ -1167,7 +1161,7 @@ no_ws <- c("before", "after", "outside", "after-begin", "before-end", "inside")
   shiny::insertUI(selector = selector, ui = ui, immediate = TRUE)
 }
 
-gui_update_data_stats <- function(cohort, changed_input, session) {
+action_update_data_stats <- function(cohort, changed_input, session) {
 
   print_state("update_data_stats", changed_input)
   input_state("update_data_stats", changed_input)
@@ -1185,7 +1179,7 @@ reset_filters <- function(cohort, step_id) {
   }
 }
 
-gui_clear_step <- function(cohort, changed_input, session) {
+action_clear_step <- function(cohort, changed_input, session) {
   print_state("clear_step", changed_input)
   input_state("clear_step", changed_input)
 
@@ -1196,15 +1190,15 @@ gui_clear_step <- function(cohort, changed_input, session) {
   if (is_none(cohort$attributes$run_button)) {
     cohort$run_flow(min_step = changed_input$step_id)
   } else {
-    gui_update_filters_loop(
+    ui_update_filters_loop(
       cohort, changed_input$step_id, reset = changed_input$reset,
       update = c("input", "plot"), session = session
     )
-    gui_update_data_stats(cohort, list(step_id = changed_input$step_id), session)
+    action_update_data_stats(cohort, list(step_id = changed_input$step_id), session)
   }
 }
 
-gui_show_help <- function(cohort, changed_input, session) {
+action_show_help <- function(cohort, changed_input, session) {
   description <- do.call(cohort$show_help, changed_input)
   if(is.null(description)) return(invisible(FALSE))
   name <-if (is.null(changed_input$field)) {

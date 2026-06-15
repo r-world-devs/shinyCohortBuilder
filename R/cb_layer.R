@@ -27,7 +27,7 @@ pre_update_source_hook <- function(public, private, keep_steps, ...) {
   open_step <- 1
   if (identical(keep_steps, FALSE)) {
     for (step_id in as.character(n_steps:1)) {
-      gui_rm_step(public, list(step_id = step_id), session)
+      action_rm_step(public, list(step_id = step_id), session)
     }
     return(invisible(TRUE))
   }
@@ -37,7 +37,7 @@ pre_update_source_hook <- function(public, private, keep_steps, ...) {
   if (is.integer(keep_steps)) {
     open_step <- length(keep_steps)
     for (step_id in as.character(setdiff(n_steps:1, keep_steps))) {
-      gui_rm_step(public, list(step_id = step_id), session)
+      action_rm_step(public, list(step_id = step_id), session)
     }
   }
   session$sendCustomMessage("enroll_accordion", list(id = session$ns("cb_steps"), index = open_step - 1))
@@ -80,7 +80,7 @@ pre_restore_hook <- function(public, private, ...) {
     return(invisible(TRUE))
   }
   for (step_id in as.character(n_steps:1)) {
-    gui_rm_step(public, list(step_id = step_id), session)
+    action_rm_step(public, list(step_id = step_id), session)
   }
 
   return(invisible(TRUE))
@@ -100,11 +100,11 @@ post_run_step_hook <- function(public, private, step_id) {
     return(invisible(FALSE))
   }
 
-  gui_update_filters_loop(
+  ui_update_filters_loop(
     public, step_id, reset = FALSE,
     update = c("input", "plot"), session = session
   )
-  gui_update_data_stats(public, list(step_id = step_id), session)
+  action_update_data_stats(public, list(step_id = step_id), session)
 
   session$sendCustomMessage(
     "inform_data_updated",
@@ -125,6 +125,15 @@ post_rm_step_hook <- function(public, private, step_id) {
     return(invisible(FALSE))
   }
 
+  clear_step_data(step_id, session)
+  shiny::removeUI(
+    glue::glue("#{session$ns(step_id)}"),
+    session = session, immediate = TRUE
+  )
+  session$sendCustomMessage(
+    "post_rm_step_action",
+    list(id = step_id, ns_prefix = session$ns(""))
+  )
   session$sendCustomMessage(
     "inform_data_updated",
     list(steps = `%:::%`("cohortBuilder", "prev_step")(step_id), ns_prefix = session$ns(""))
@@ -164,7 +173,7 @@ post_update_filter_hook <- function(public, private, step_id, filter_id, ..., ac
   force_render <- getOption("scb_render_all", default = FALSE)
   run_update <- TRUE
   if (!force_render && update_active) {
-    run_update <- !insert_filter(step_id, filter_id, public, session)
+    run_update <- !ui_insert_filter_content(step_id, filter_id, public, session)
   }
 
   data_filter <- public$get_filter(step_id, filter_id)
@@ -179,16 +188,16 @@ post_update_filter_hook <- function(public, private, step_id, filter_id, ..., ac
     if (!run_on_request && post_stats_visible) {
       update <- c(update, "post_input")
     }
-    update_filter_gui(public, step_id, filter_id, update, FALSE, session)
+    ui_update_filter(public, step_id, filter_id, update, FALSE, session)
   }
 
   if (!run_on_request && ("post" %in% public$attributes$stats)) {
     update <- "post_input"
-    gui_update_filters_loop(public, step_id, FALSE, update, exclude = filter_id, session)
+    ui_update_filters_loop(public, step_id, FALSE, update, exclude = filter_id, session)
   }
 
   if (isTRUE(update_active)) {
-    gui_update_filter_class(step_id, filter_id, active, "hidden-input", session)
+    ui_update_filter_class(step_id, filter_id, active, "hidden-input", session)
     session$sendCustomMessage(
       "update_filter_active",
       list(
@@ -238,7 +247,7 @@ post_set_pending_hook <- function(public, private, step_id, ...) {
     return(invisible(FALSE))
   }
 
-  gui_update_pending_state(session, public, step_id)
+  ui_update_pending_state(session, public, step_id)
 }
 
 post_add_filter_hook <- function(public, private, step_id, filter) {
@@ -246,7 +255,7 @@ post_add_filter_hook <- function(public, private, step_id, filter) {
   if (is.null(session)) {
     return(invisible(FALSE))
   }
-  gui_add_filter_to_step(step_id = step_id, filter_id = filter@id, cohort = public, session = session)
+  ui_insert_filter(step_id = step_id, filter_id = filter@id, cohort = public, session = session)
 }
 
 post_rm_filter_hook <- function(public, private, step_id, filter_id) {
@@ -254,7 +263,7 @@ post_rm_filter_hook <- function(public, private, step_id, filter_id) {
   if (is.null(session)) {
     return(invisible(FALSE))
   }
-  gui_rm_filter_from_step(step_id = step_id, filter_id = filter_id, cohort = public, session = session)
+  ui_remove_filter(step_id = step_id, filter_id = filter_id, cohort = public, session = session)
 }
 
 .onLoad <- function(libname, pkgname){
