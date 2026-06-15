@@ -189,6 +189,13 @@ post_update_filter_hook <- function(public, private, step_id, filter_id, ..., ac
 
   if (isTRUE(update_active)) {
     gui_update_filter_class(step_id, filter_id, active, "hidden-input", session)
+    session$sendCustomMessage(
+      "update_filter_active",
+      list(
+        step_id = step_id, filter_id = filter_id,
+        active = active, ns_prefix = session$ns("")
+      )
+    )
   }
 
   # Cascade to subsequent steps
