@@ -187,7 +187,7 @@ test_that("Clear filters resets filter values", {
   output_before <- app$get_html("#datasets")
 
   # Click the clear filters button (sync icon in step header)
-  app$click(selector = "#coh-1 .panel-heading button[title='Clear Filters']")
+  app$click(selector = "#coh-1 .card-header button[title='Clear Filters']")
   app$wait_for_idle(timeout = 5000)
 
   # Data should change because filters were reset to select all

@@ -10,17 +10,17 @@ test_that("Panel has correct structure ", {
   content <- "Content"
   panel_no_heading <- panel(body = content)
   panel_no_heading_tag <- htmltools::tagQuery(panel_no_heading)
-  expect_true(grepl("panel", htmltools::tagGetAttribute(panel_no_heading, "class")))
+  expect_true(grepl("card", htmltools::tagGetAttribute(panel_no_heading, "class")))
   expect_true(
-    length(panel_no_heading_tag$find(".panel-heading")$selectedTags()) == 0
+    length(panel_no_heading_tag$find(".card-header")$selectedTags()) == 0
   )
   expect_true(
-    length(panel_no_heading_tag$find(".panel-body")$selectedTags()) == 1
+    length(panel_no_heading_tag$find(".card-body")$selectedTags()) == 1
   )
   panel_with_heading <- panel(heading = heading, body = content)
   panel_with_heading_tag <- htmltools::tagQuery(panel_with_heading)
   expect_true(
-    length(panel_with_heading_tag$find(".panel-heading")$selectedTags()) == 1
+    length(panel_with_heading_tag$find(".card-header")$selectedTags()) == 1
   )
 })
 

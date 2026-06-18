@@ -92,7 +92,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscreteText) <- function(object,
                 inputId = input_id,
                 label = "Accept",
                 selector = paste0("[data-id=\"", input_params$inputId, "\""),
-                `data-dismiss` = "modal", `data-bs-dismiss` = "modal",
+                !!!bs_data_attr("dismiss", "modal"),
                 onclick = move_dialog_back_js, try_binding = FALSE
               ),
               filter@private$input_param,
@@ -107,8 +107,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscreteText) <- function(object,
             getOption("scb_icons", scb_labels)$filter_discrete_text_bttn_label,
             icon = getOption("scb_icons", scb_icons)$filter_discrete_text_bttn_icon,
             class = "btn-sm scb-input-button",
-            `data-toggle` = "modal", `data-target` = paste0("#", modal_dialog_id),
-            `data-bs-toggle` = "modal", `data-bs-target` = paste0("#", modal_dialog_id),
+            !!!bs_data_attr("toggle", "modal"), !!!bs_data_attr("target", paste0("#", modal_dialog_id)),
             onclick = move_dialog_to_body_js
           )
         )

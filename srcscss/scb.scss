@@ -137,7 +137,7 @@ div.cb_container .cb_no_assistant {
   font-size: 0.9em;
 }
 
-.cb_input[data-param="value"] .checkbox-inline > input {
+.cb_input[data-param="value"] .form-check-inline > input {
   transform: scale(0.9);
   vertical-align: middle;
   margin-top: 0;
@@ -209,7 +209,7 @@ div.cb_container .cb_no_assistant {
   margin-top: 5rem;
 }
 
-.cb_container .input-daterange .input-group-addon {
+.cb_container .input-daterange .input-group-text {
   padding: 0;
 }
 

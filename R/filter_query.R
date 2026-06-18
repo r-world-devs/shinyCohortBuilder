@@ -152,7 +152,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterQuery) <- function(object, ...) {
                 inputId = input_id,
                 label = "Accept",
                 selector = paste0("#", input_params$inputId),
-                `data-dismiss` = "modal", `data-bs-dismiss` = "modal",
+                !!!bs_data_attr("dismiss", "modal"),
                 onclick = move_dialog_back_js
               ),
               filter@private$input_param,
@@ -167,8 +167,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterQuery) <- function(object, ...) {
             getOption("scb_labels", scb_labels)$filter_query_bttn_label,
             icon = getOption("scb_icons", scb_icons)$filter_query_bttn_icon,
             class = "btn-sm scb-input-button",
-            `data-toggle` = "modal", `data-target` = paste0("#", modal_dialog_id),
-            `data-bs-toggle` = "modal", `data-bs-target` = paste0("#", modal_dialog_id),
+            !!!bs_data_attr("toggle", "modal"), !!!bs_data_attr("target", paste0("#", modal_dialog_id)),
             onclick = move_dialog_to_body_js
           )
         ),
@@ -203,8 +202,7 @@ S7::method(.gui_filter, cohortBuilder::CbFilterQuery) <- function(object, ...) {
                   getOption("scb_labels", scb_labels)$filter_show_query_bttn_label,
                   icon = getOption("scb_icons", scb_icons)$filter_show_query_bttn_icon,
                   class = "btn-sm scb-input-button",
-                  `data-toggle` = "modal", `data-target` = paste0("#", modal_dialog_id),
-                  `data-bs-toggle` = "modal", `data-bs-target` = paste0("#", modal_dialog_id),
+                  !!!bs_data_attr("toggle", "modal"), !!!bs_data_attr("target", paste0("#", modal_dialog_id)),
                   onclick = move_dialog_to_body_js
                 ),
                 footer = shiny::modalButton("Dismiss") |>

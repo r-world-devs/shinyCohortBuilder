@@ -1,18 +1,36 @@
-button <- function(..., icon = NULL, type = getOption("scb_button_type", "btn-default btn-outline-dark")) {
+get_bs <- function() {
+  theme <- shiny::getCurrentTheme()
+  if (!bslib::is_bs_theme(theme)) {
+    theme <- bslib::bs_global_get()
+  }
+  if (bslib::is_bs_theme(theme)) {
+    bslib::theme_version(theme)
+  } else {
+    "5"
+  }
+}
+
+bs_data_attr <- function(attr, value) {
+  bs <- get_bs()
+  name <- if (bs >= "5") paste0("data-bs-", attr) else paste0("data-", attr)
+  stats::setNames(list(value), name)
+}
+
+button <- function(..., icon = NULL, type = getOption("scb_button_type", "btn-outline-dark")) {
   shiny::tags$button(type = "button", class = paste("scb_button btn", type), icon, ...)
 }
 
 panel <- function(heading, body, ...) {
   shiny::div(
-    class = "panel panel-default card",
+    class = "card",
     if (!missing(heading)) {
       shiny::div(
-        class = "panel-heading card-header",
+        class = "card-header",
         heading
       )
     },
     shiny::div(
-      class = "panel-body card-body",
+      class = "card-body",
       body
     ),
     ...

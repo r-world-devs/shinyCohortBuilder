@@ -224,8 +224,8 @@ render_step <- function(cohort, step_id, active, allow_rm, input, output, sessio
     accordionItem = shinyGizmo::accordionItem(
       id = ns(step_id),
       `data-step_id` = step_id,
-      class = "cb_step panel panel-default card",
-      header_class = "panel-heading card-header",
+      class = "cb_step card",
+      header_class = "card-header",
       header = shiny::tagList(
         shiny::tags$strong(class = "cb_step_name", glue::glue("{getOption('scb_labels', scb_labels)$step} {step_id}")),
         shiny::tags$div(style = "float: right;",
@@ -270,7 +270,7 @@ render_step <- function(cohort, step_id, active, allow_rm, input, output, sessio
           }
         )
       ),
-      content_class = "panel-body card-body",
+      content_class = "card-body",
       content = .render_filters(cohort$get_source(), cohort, step_id, ns = ns),
       enroll_callback = FALSE,
       active = active
@@ -892,8 +892,10 @@ cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition =
         button(
           getOption("scb_labels", scb_labels)$show_assistant,
           class = c("cb_show_assistant btn-sm", no_assistant_class),
-          icon = getOption("scb_icons", scb_icons)$show_assistant,
-          `data-bs-toggle` = "modal", `data-bs-target` = glue::glue("#{assistant_modal_id}")
+          icon = getOption("scb_icons", scb_icons)$show_assistant
+        ) |> htmltools::tagAppendAttributes(
+          !!!bs_data_attr("toggle", "modal"),
+          !!!bs_data_attr("target", glue::glue("#{assistant_modal_id}"))
         ),
         shinyGizmo::modalDialogUI(
           modalId = assistant_modal_id,

@@ -33,7 +33,7 @@ div.cb_container .cb_no_assistant {
 }
 
 .btn-outline-dark:hover:disabled {
-  border-color: #cccccc;
+  border-color: rgb(204, 204, 204);
 }
 
 .cb_panel > button:not(:first-of-type) {
@@ -46,7 +46,7 @@ div.cb_container .cb_no_assistant {
 }
 
 .cb_filter_content {
-  border-left: 1px solid var(--scb-filter-indent-color, #01174550);
+  border-left: 1px solid var(--scb-filter-indent-color, rgba(1, 23, 69, 0.3137254902));
   padding: 3px 5px 5px 5px;
   margin-left: 5px;
 }
@@ -56,7 +56,7 @@ div.cb_container .cb_no_assistant {
 }
 
 .cb_filters_group > .cb_filter:last-of-type > .cb_filter_content {
-  border-bottom: 1px solid var(--scb-filter-indent-color, #01174550);
+  border-bottom: 1px solid var(--scb-filter-indent-color, rgba(1, 23, 69, 0.3137254902));
 }
 
 .cb_na_input > .checkbox {
@@ -106,10 +106,9 @@ div.cb_container .cb_no_assistant {
 .cb_filter .filter_tooltip {
   float: right;
   clear: both;
-  margin-bottom: -2.0em;
+  margin-bottom: -2em;
   position: relative;
 }
-
 .cb_filter .filter_tooltip > i {
   color: var(--bs-gray, gray);
 }
@@ -118,26 +117,26 @@ div.cb_container .cb_no_assistant {
   margin-bottom: 0;
 }
 
-.cb_input[data-param="keep_na"] {
+.cb_input[data-param=keep_na] {
   color: #8a8a8a;
   font-size: 0.8em;
 }
 
-.cb_input[data-param="keep_na"] input {
+.cb_input[data-param=keep_na] input {
   transform: scale(0.8);
   vertical-align: middle;
   margin-top: 0;
 }
 
-.cb_input[data-param="range"]:not(:first-of-type) {
+.cb_input[data-param=range]:not(:first-of-type) {
   margin-top: 3px;
 }
 
-.cb_input[data-param="value"] {
+.cb_input[data-param=value] {
   font-size: 0.9em;
 }
 
-.cb_input[data-param="value"] .checkbox-inline > input {
+.cb_input[data-param=value] .form-check-inline > input {
   transform: scale(0.9);
   vertical-align: middle;
   margin-top: 0;
@@ -218,7 +217,7 @@ div.cb_container .cb_no_assistant {
   margin-top: 5rem;
 }
 
-.cb_container .input-daterange .input-group-addon {
+.cb_container .input-daterange .input-group-text {
   padding: 0;
 }
 
@@ -250,7 +249,6 @@ code.hl.background {
 .cb_fb_seg {
   transition: opacity 0.15s;
 }
-
 .cb_fb_seg:hover {
   opacity: 0.7;
 }

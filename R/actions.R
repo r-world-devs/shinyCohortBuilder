@@ -538,7 +538,7 @@ action_manage_step_modal <- function(cohort, changed_input, session) {
           label = "Accept",
           selector = paste0("[data-id=\"", ns("manage_step"), "\"]"),
           onclick = .trigger_action_js("manage_step_configure", ns = ns),
-          `data-dismiss` = "modal", `data-bs-dismiss` = "modal",
+          !!!bs_data_attr("dismiss", "modal"),
           disabled = NA
         ),
         shiny::modalButton("Dismiss")
@@ -765,7 +765,7 @@ action_show_step_filter_modal <- function(cohort, changed_input, session) {
           label = "Accept",
           selector = paste0("[data-id=\"", ns("configure_step"), "\"]"),
           onclick = .trigger_action_js("add_step_configure", ns = ns),
-          `data-dismiss` = "modal", `data-bs-dismiss` = "modal",
+          !!!bs_data_attr("dismiss", "modal"),
           disabled = NA
         ),
         shiny::modalButton("Dismiss")
@@ -998,39 +998,11 @@ action_show_repro_code <- function(cohort, changed_input, session) {
   UseMethod(".custom_attrition", source)
 }
 
-get_bs <- function () {
-  theme <- shiny::getCurrentTheme()
-  if (bslib::is_bs_theme(theme)) {
-    bslib::theme_version(theme)
-  } else {
-    "3"
-  }
-}
-
-bump_tab_version <- function(li_item, selected) {
-  li_item$attribs$class <- "nav-item"
-  link_class <- "nav-link"
-  if (li_item$children[[1]]$attribs$`data-value` == selected) {
-    link_class <- paste(link_class, "active")
-  }
-  li_item$children[[1]]$attribs$class <- link_class
-  return(li_item)
-}
-
 navs <- function(..., id = NULL, selected = NULL, type = c("tabs", "pills", "hidden"),
                  header = NULL,  footer = NULL) {
-  tabset <- shiny::tabsetPanel(
+  shiny::tabsetPanel(
     ..., id = id, selected = selected, type = type, header = header, footer = footer
   )
-  if (get_bs() == "3") {
-    if (is.null(selected)) {
-      # todo write it as it should be
-      selected <- tabset$children[[1]]$children[[1]]$children[[1]]$attribs$`data-value`
-    }
-    tabset$children[[1]]$children <- tabset$children[[1]]$children |>
-      purrr::modify(bump_tab_version, selected = selected)
-  }
-  return(tabset)
 }
 
 action_show_attrition <- function(cohort, changed_input, session) {
