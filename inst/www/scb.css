@@ -29,7 +29,7 @@ div.cb_container .cb_no_code,
 div.cb_container .cb_no_attrition,
 div.cb_container .cb_no_manage_step,
 div.cb_container .cb_no_assistant {
-  display: none;
+  display: none !important;
 }
 
 .btn-outline-dark:hover:disabled {

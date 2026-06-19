@@ -27,7 +27,10 @@ div.cb_container .cb_no_code,
 div.cb_container .cb_no_attrition,
 div.cb_container .cb_no_manage_step,
 div.cb_container .cb_no_assistant {
-  display: none;
+  // !important keeps these hide flags winning over the themed button rule
+  // (`.cb_container .scb_button.btn`), which otherwise has higher specificity
+  // and would re-show disabled buttons.
+  display: none !important;
 }
 
 .btn-outline-dark:hover:disabled {
