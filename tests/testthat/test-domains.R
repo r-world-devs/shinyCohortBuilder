@@ -213,6 +213,39 @@ test_that("render_source = 'domain' shows full vocabulary for discrete", {
   expect_setequal(values, c("setosa", "versicolor", "virginica"))
 })
 
+test_that("render_source = 'domain' overlays pre and post counts, 0 for absent", {
+  for (as_char in c(FALSE, TRUE)) {
+    dat <- iris
+    if (as_char) dat$Species <- as.character(dat$Species)
+    source <- cohortBuilder::set_source(cohortBuilder::tblist(iris = dat))
+    coh <- cohortBuilder::cohort(
+      source,
+      cohortBuilder::filter(
+        "discrete", id = "species", dataset = "iris", variable = "Species",
+        domain = c("setosa", "versicolor", "virginica")
+      ),
+      cache = TRUE
+    )
+    coh$attributes$stats <- c("pre", "post")
+    coh$attributes$feedback <- TRUE
+    coh$attributes$render_source <- "domain"
+    coh <- cohortBuilder::update_filter(
+      coh, 1, "species", value = c("setosa", "versicolor")
+    ) |> cohortBuilder::run()
+
+    filter <- coh$get_filter("1", "species")
+    params <- discrete_input_params(filter, "1-species", coh)
+    labels <- vapply(params$choiceNames, as.character, character(1))
+
+    # Both pre and post stats are shown (post / pre).
+    expect_true(all(grepl(" / ", labels)), info = paste("as_char =", as_char))
+    # The filtered-out value reads 0, never the literal "NULL".
+    virginica <- labels[grepl("virginica", labels)]
+    expect_match(virginica, ">0<")
+    expect_false(grepl("NULL", virginica), info = paste("as_char =", as_char))
+  }
+})
+
 # -- edge case: domain mode but no domain -------------------------------------
 
 test_that("domain mode with NULL domain warns and renders nothing", {

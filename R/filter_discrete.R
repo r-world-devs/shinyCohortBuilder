@@ -149,8 +149,25 @@ inherit_parent_stats <- function(filter_values, parent_options, is_cached) {
   }
 }
 
+# Align a discrete `choices` cache (a named list of counts) to the filter's
+# full domain, returning a named integer vector with absent values filled as 0.
+# Indexing the list with `[domain]` is unsafe: missing names yield `NULL`
+# elements (named `<NA>`) that `is.na()` does not flag, which leaks a literal
+# "NULL" into the rendered label.
+.align_domain_counts <- function(counts, domain) {
+  vapply(
+    domain,
+    function(value) {
+      count <- counts[[value]]
+      if (is.null(count)) 0L else as.integer(count)
+    },
+    integer(1)
+  )
+}
+
 discrete_domain_input_params <- function(filter, input_id, cohort, reset = FALSE,
-                                         update = FALSE, counts = NULL, ...) {
+                                         update = FALSE, pre = NULL, post = NULL,
+                                         stats = NULL, ...) {
   filter_params <- get_filter_params(filter)
   domain <- cohortBuilder::filter_domain(filter)
 
@@ -169,12 +186,15 @@ discrete_domain_input_params <- function(filter, input_id, cohort, reset = FALSE
   }
 
   choice_labels <- value_mapping(domain, cohort)
-  # In stats mode with render_source = "domain", overlay counts where available.
-  if (!is.null(counts)) {
-    overlay <- counts[domain]
-    overlay[is.na(overlay)] <- 0
-    choice_labels <- glue::glue(
-      "<span>{choice_labels} (<span class = 'cb_delayed'>{overlay}</span>)</span>"
+  # In stats mode with render_source = "domain", overlay pre/post counts aligned
+  # to the full domain (absent values shown as 0), matching the pre/post display
+  # used in regular stats mode.
+  if (!is.null(stats) && (!is.null(pre) || !is.null(post))) {
+    choice_labels <- .pre_post_stats_text(
+      name = value_mapping(domain, cohort),
+      current = .align_domain_counts(post, domain),
+      previous = .align_domain_counts(pre, domain),
+      stats = stats
     )
   }
 
@@ -224,15 +244,18 @@ discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, updat
   }
 
   # Stats mode, but render_source = "domain": build choices from the full domain
-  # and overlay counts from statistics where available.
+  # and overlay pre/post counts from statistics, aligned to the domain.
   if (identical(render$render_source, "domain")) {
     if (is.null(domain)) {
       inform_domain_fallback(filter_id)
     } else {
-      counts <- cohort$get_cache(step_id, filter_id, state = "post")$choices
       return(
         discrete_domain_input_params(
-          filter, input_id, cohort, reset = reset, update = update, counts = counts, ...
+          filter, input_id, cohort, reset = reset, update = update,
+          pre = cohort$get_cache(step_id, filter_id, state = "pre")$choices,
+          post = cohort$get_cache(step_id, filter_id, state = "post")$choices,
+          stats = if_null_default(filter_params$stats, cohort$attributes$stats),
+          ...
         )
       )
     }
