@@ -23,8 +23,10 @@ cb_server(
   run_button = "none",
   stats = c("pre", "post"),
   feedback = FALSE,
+  render_source = "auto",
   enable_bookmarking = shiny::getShinyOption("bookmarkStore", default = "disable"),
   show_help = TRUE,
+  chat = NULL,
   ...
 )
 }
@@ -60,6 +62,14 @@ Possible options are: "pre" - previous step stat, "post" - current step stats,
 `c("pre", "post")` - for both and NULL for no stats.}
 
 \item{feedback}{Set to TRUE (default) if feedback plots should be displayed at each filter.}
+
+\item{render_source}{Controls how filter inputs (choices/ranges) are sourced when a
+filter declares a `domain`. Possible options are: "auto" (default) - use cached
+statistics in stats mode, and the filter's domain when stats are disabled
+(`stats = NULL` and `feedback = FALSE`); "domain" - in stats mode, build choices and
+range bounds from the full domain vocabulary and overlay counts from statistics where
+available. A filter without a domain always falls back to statistics. The value can be
+overridden per filter via `filter@extra$render_source`.}
 
 \item{enable_bookmarking}{Set to TRUE (default) if panel should be compatible with native shiny bookmarking.}
 

@@ -62,6 +62,11 @@ dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
 #' @export
 .update_data_stats.tblist <- function(source, step_id, cohort, session, ...) {
   stats <- cohort$attributes$stats
+  # Data statistics follow the `stats` setting. When stats are disabled the
+  # cache is not read, so this is a no-op (avoids forcing a source scan).
+  if (is.null(stats)) {
+    return(invisible(NULL))
+  }
   step <- cohort$get_step(step_id)
   ns <- session$ns
 

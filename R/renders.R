@@ -1,7 +1,6 @@
 call_filter <- function(filter_id, step_id, cohort, session, feedback) {
   ns <- session$ns
   filter <- cohort$get_filter(step_id, filter_id)
-  no_data <- cohort$get_cache(step_id, filter_id, state = "pre")$n_data == 0
 
   filter@private$gui$server(filter, sf_id(step_id, filter_id), session$input, session$output, session, cohort)
 
@@ -81,17 +80,18 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
     cohort$attributes$session$userData$rendered_filters,
     ns(step_filter_id)
   )
-  show_feedback <- if_null_default(
-    filter@extra$feedback,
-    cohort$attributes$feedback
-  )
+  render <- resolve_render_mode(filter, cohort)
+  show_feedback <- render$mode == "stats" && isTRUE(render$feedback)
 
   filter_id <- filter@id
   step_id <- gsub(paste0("-", filter_id), "", step_filter_id)
 
   no_data_class <- ""
   empty <- FALSE
-  if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
+  # The "no data in previous step" gate only applies in stats mode. In domain
+  # mode there is no empirical row count, so skip the cache read entirely.
+  if (render$mode == "stats" &&
+      !cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
     no_data_class <- "cb_no_data"
     empty <- TRUE
   }
@@ -955,8 +955,11 @@ bookmark_restore <- function(cohort, enable_bookmarking) {
 #' @return `shiny::moduleServer` output providing server logic for filtering panel module.
 #' @export
 cb_server <- function(id, cohort, run_button = "none", stats = c("pre", "post"), feedback = FALSE,
+                      render_source = "auto",
                       enable_bookmarking = shiny::getShinyOption("bookmarkStore", default = "disable"),
                       show_help = TRUE, chat = NULL, ...) {
+
+  render_source <- match.arg(render_source, c("auto", "domain"))
 
   if (is.logical(run_button)) {
     lifecycle::deprecate_stop("0.2.0", "shinyCohorBuilder::cb_server(arg = 'must be a scalar character')")
@@ -973,6 +976,7 @@ cb_server <- function(id, cohort, run_button = "none", stats = c("pre", "post"),
       restore_attribute(cohort, "run_button", run_button)
       restore_attribute(cohort, "stats", stats)
       restore_attribute(cohort, "feedback", feedback)
+      restore_attribute(cohort, "render_source", render_source)
       restore_attribute(cohort, "show_help", show_help)
       for (attrib in names(attribs)) {
         restore_attribute(cohort, attrib, attribs[[attrib]])
@@ -984,6 +988,7 @@ cb_server <- function(id, cohort, run_button = "none", stats = c("pre", "post"),
         cohort$attributes$run_button <- NULL
         cohort$attributes$stats <- NULL
         cohort$attributes$feedback <- NULL
+        cohort$attributes$render_source <- NULL
         cohort$attributes$show_help <- NULL
         for (attrib in names(attribs)) {
           cohort$attributes[[attrib]] <- NULL

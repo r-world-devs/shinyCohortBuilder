@@ -280,21 +280,22 @@ ui_update_filter <- function(cohort, step_id, filter_id, update, reset, session)
     updated_input <- TRUE
   }
   if ("plot" %in% update) {
-    show <- TRUE
-    if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
-      show <- FALSE
-    }
-    ui_update_filter_class(
-      step_id, filter_id, show, "cb_no_data", session,
-      child = ".cb_filter_content .cb_no_data_placeholder"
-    )
-    show_feedback <- if_null_default(
-      filter@extra$feedback,
-      cohort$attributes$feedback
-    )
-    if (show_feedback) {
-      updated_plot <- TRUE
-      ui_update_plot(step_id, filter_id, cohort, session) # todo optmize to not extract filter again inside plot
+    render <- resolve_render_mode(filter, cohort)
+    # The "no data" gate and feedback plots only apply in stats mode. In domain
+    # mode there is no cache to read and no feedback plot to refresh.
+    if (render$mode == "stats") {
+      show <- TRUE
+      if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
+        show <- FALSE
+      }
+      ui_update_filter_class(
+        step_id, filter_id, show, "cb_no_data", session,
+        child = ".cb_filter_content .cb_no_data_placeholder"
+      )
+      if (isTRUE(render$feedback)) {
+        updated_plot <- TRUE
+        ui_update_plot(step_id, filter_id, cohort, session) # todo optmize to not extract filter again inside plot
+      }
     }
   }
   input_state(
@@ -579,7 +580,11 @@ action_manage_step_configured <- function(cohort, changed_input, session) {
       step_id = step_id,
       run_flow = FALSE
     )
-    cohort$update_cache(step_id, filter@id, state = "pre")
+    # Pre-warm the filter cache only when statistics are in use. With stats
+    # disabled the filter renders from its domain, so avoid a source scan.
+    if (!is.null(cohort$attributes$stats)) {
+      cohort$update_cache(step_id, filter@id, state = "pre")
+    }
   }
 
   for (filter_id in to_rm_ids) {
@@ -1011,6 +1016,16 @@ action_show_attrition <- function(cohort, changed_input, session) {
   print_state("show_attrition", changed_input)
   input_state("show_attrition", changed_input)
 
+  # Attrition is computed from per-step statistics. When stats are disabled there
+  # is nothing to show, and computing it would force a source scan.
+  if (is.null(cohort$attributes$stats)) {
+    shiny::showNotification(
+      "Attrition requires statistics; enable `stats` to use this feature.",
+      type = "warning"
+    )
+    return(invisible(NULL))
+  }
+
   custom_method <- cohortBuilder::.get_method(
     paste0(".custom_attrition.", class(cohort$get_source())[1])
   )
@@ -1120,6 +1135,11 @@ no_ws <- c("before", "after", "outside", "after-begin", "before-end", "inside")
 .update_data_stats.default <- function(source, step_id, cohort, session, ...) {
   ns <- session$ns
   stats <- cohort$attributes$stats
+  # Data statistics follow the `stats` setting. When stats are disabled the
+  # cache is not read, so this is a no-op (avoids forcing a source scan).
+  if (is.null(stats)) {
+    return(invisible(NULL))
+  }
   selector <- paste0("#", ns(paste0(step_id, "-stats")))
 
   previous <- cohort$get_cache(step_id, state = "pre")$n_rows

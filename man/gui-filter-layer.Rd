@@ -5,10 +5,10 @@
 \alias{.gui_filter}
 \title{Return GUI layer methods for filter of specified type}
 \usage{
-.gui_filter(filter, ...)
+.gui_filter(object, ...)
 }
 \arguments{
-\item{filter}{Filter object.}
+\item{object}{Filter object (used for S7 method dispatch).}
 
 \item{...}{Extra arguments passed to a specific method.}
 }

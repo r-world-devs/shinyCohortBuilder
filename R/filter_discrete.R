@@ -98,8 +98,7 @@ is_vs <- function(filter) {
 
   filter_id <- filter@id
   step_id <- filter@step_id
-  na_message <- cohort$get_cache(step_id, filter_id, state = "pre")$n_missing |>
-    msg_fun()
+  na_message <- keep_na_message(filter, cohort, msg_fun)
 
   shiny::tagList(
     shiny::checkboxInput(
@@ -111,6 +110,18 @@ is_vs <- function(filter) {
   )
 }
 
+# Build the keep-NA checkbox label. In stats mode it includes the missing-value
+# count from the cache; in domain mode (stats disabled) it uses a neutral label
+# without reading the cache.
+keep_na_message <- function(filter, cohort, msg_fun) {
+  render <- resolve_render_mode(filter, cohort)
+  if (render$mode == "domain") {
+    return("Keep missing values")
+  }
+  cohort$get_cache(filter@step_id, filter@id, state = "pre")$n_missing |>
+    msg_fun()
+}
+
 #' @rdname keep_na_input
 #' @export
 .update_keep_na_input <- function(session, input_id, filter, cohort,
@@ -118,8 +129,7 @@ is_vs <- function(filter) {
 
   filter_id <- filter@id
   step_id <- filter@step_id
-  na_message <- cohort$get_cache(step_id, filter_id, state = "pre")$n_missing |>
-    msg_fun()
+  na_message <- keep_na_message(filter, cohort, msg_fun)
   shiny::updateCheckboxInput(
     session,
     inputId = paste0(input_id, "-keep_na"),
@@ -139,11 +149,94 @@ inherit_parent_stats <- function(filter_values, parent_options, is_cached) {
   }
 }
 
+discrete_domain_input_params <- function(filter, input_id, cohort, reset = FALSE,
+                                         update = FALSE, counts = NULL, ...) {
+  filter_params <- get_filter_params(filter)
+  domain <- cohortBuilder::filter_domain(filter)
+
+  value_mapping <- function(x, cohort) x
+  if (!is.null(filter_params$value_mapping)) {
+    value_mapping <- cohort$get_source()$attributes$value_mappings[[filter_params$value_mapping]]
+  }
+
+  selected_value <- if (reset) {
+    domain
+  } else {
+    suppressWarnings(cohortBuilder::filter_effective_value(filter))
+  }
+  if (identical(selected_value, NA)) {
+    selected_value <- domain
+  }
+
+  choice_labels <- value_mapping(domain, cohort)
+  # In stats mode with render_source = "domain", overlay counts where available.
+  if (!is.null(counts)) {
+    overlay <- counts[domain]
+    overlay[is.na(overlay)] <- 0
+    choice_labels <- glue::glue(
+      "<span>{choice_labels} (<span class = 'cb_delayed'>{overlay}</span>)</span>"
+    )
+  }
+
+  params <- list(
+    inputId = input_id,
+    choiceValues = domain,
+    choiceNames = choice_labels,
+    selected = selected_value,
+    inline = TRUE,
+    label = if (update) character(0) else NULL,
+    ...
+  )
+
+  if (is_vs(filter)) {
+    params$choices <- params$choiceValues |>
+      stats::setNames(params$choiceNames)
+    params$choiceValues <- NULL
+    params$choiceNames <- NULL
+    params$inline <- FALSE
+  } else {
+    params$choiceNames <- params$choiceNames |> purrr::map(shiny::HTML)
+  }
+
+  params
+}
+
 discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
   input_id <- suff(input_id, "val")
   step_id <- filter@step_id
   filter_id <- filter@id
   filter_params <- get_filter_params(filter)
+
+  render <- resolve_render_mode(filter, cohort)
+  domain <- cohortBuilder::filter_domain(filter)
+
+  # Domain mode: render from the declared domain without touching the cache.
+  if (render$mode == "domain") {
+    if (is.null(domain)) {
+      warn_no_domain(filter_id)
+      return(
+        list(inputId = input_id, choices = character(0), selected = character(0), label = NULL)
+      )
+    }
+    return(
+      discrete_domain_input_params(filter, input_id, cohort, reset = reset, update = update, ...)
+    )
+  }
+
+  # Stats mode, but render_source = "domain": build choices from the full domain
+  # and overlay counts from statistics where available.
+  if (identical(render$render_source, "domain")) {
+    if (is.null(domain)) {
+      inform_domain_fallback(filter_id)
+    } else {
+      counts <- cohort$get_cache(step_id, filter_id, state = "post")$choices
+      return(
+        discrete_domain_input_params(
+          filter, input_id, cohort, reset = reset, update = update, counts = counts, ...
+        )
+      )
+    }
+  }
 
   if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
     return(

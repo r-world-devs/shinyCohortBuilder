@@ -43,4 +43,19 @@ test_that("cb_server works within a shinyApp definition", {
   expect_s3_class(app, "shiny.appobj")
 })
 
+test_that("cb_server validates render_source", {
+  source <- cohortBuilder::set_source(
+    cohortBuilder::tblist(df = data.frame(x = 1:3))
+  )
+  coh <- cohortBuilder::cohort(
+    source,
+    cohortBuilder::filter("range", id = "xf", dataset = "df", variable = "x", range = c(1, 3))
+  )
+
+  expect_error(
+    cb_server("t", coh, render_source = "invalid"),
+    "should be one of"
+  )
+})
+
 # Integration tests (AppDriver) moved to test-ui-basic.R

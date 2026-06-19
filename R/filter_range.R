@@ -57,9 +57,77 @@ range_input_defaults <- function(id, type = "range") {
   )
 }
 
+range_domain_input_params <- function(filter, input_id, cohort, reset = FALSE,
+                                      update = FALSE, ...) {
+  domain <- cohortBuilder::filter_domain(filter)
+  domain_range <- c(domain[1], domain[2])
+
+  if (filter@type == "datetime_range") {
+    selected_range <- extract_selected_datetime_range(filter@range, domain_range, reset)
+  } else {
+    selected_range <- extract_selected_range(filter@range, domain_range, reset)
+  }
+
+  params <- list(
+    inputId = input_id,
+    min = domain_range[1],
+    max = domain_range[2],
+    value = selected_range,
+    label = if (update) character(0) else NULL,
+    width = "100%",
+    ...
+  )
+
+  if (filter@type == "range") {
+    params$step <- if (!is.null(filter@extra$step)) filter@extra$step else NULL
+  }
+  if (filter@type == "date_range") {
+    params$start <- params$value[1]
+    params$end <- params$value[2]
+    params$value <- NULL
+  }
+  if (filter@type == "datetime_range") {
+    params$step <- if (!is.null(filter@extra$step)) filter@extra$step else NULL
+    params$min <- as.POSIXct(params$min, origin = "1970-01-01 UTC")
+    params$max <- as.POSIXct(params$max, origin = "1970-01-01 UTC")
+    params$value <- c(
+      as.POSIXct(params$value[1], origin = "1970-01-01 UTC"),
+      as.POSIXct(params$value[2], origin = "1970-01-01 UTC")
+    )
+  }
+  if (update) {
+    params$width <- NULL
+  }
+
+  params
+}
+
 range_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
   step_id <- filter@step_id
   filter_id <- filter@id
+
+  render <- resolve_render_mode(filter, cohort)
+  domain <- cohortBuilder::filter_domain(filter)
+
+  # Domain mode (or stats mode with render_source = "domain"): build bounds from
+  # the declared domain without reading the cache.
+  use_domain <- render$mode == "domain" ||
+    (identical(render$render_source, "domain") && !is.null(domain))
+
+  if (render$mode == "domain" && is.null(domain)) {
+    warn_no_domain(filter_id)
+    return(range_input_defaults(input_id, filter@type))
+  }
+  if (identical(render$render_source, "domain") && is.null(domain) &&
+      render$mode == "stats") {
+    inform_domain_fallback(filter_id)
+  }
+
+  if (use_domain) {
+    return(
+      range_domain_input_params(filter, input_id, cohort, reset = reset, update = update, ...)
+    )
+  }
 
   if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
     return(
