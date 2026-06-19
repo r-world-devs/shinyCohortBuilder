@@ -853,18 +853,18 @@ cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition =
         id = ns("cb_panel"),
         class = "cb_panel disabled",
         shiny::div(
-          class = no_state_class,
+          class = paste("cb_state_buttons", no_state_class),
           button(
             getOption("scb_labels", scb_labels)$set_state,
             icon = getOption("scb_icons", scb_icons)$get_state,
             onclick = .trigger_action_js("input_state", ns = ns),
-            style = "width: 49%", class = "btn-sm"
+            class = "btn-sm"
           ),
           button(
             getOption("scb_labels", scb_labels)$get_state,
             icon = getOption("scb_icons", scb_icons)$set_state,
             onclick = .trigger_action_js("show_state", ns = ns),
-            style = "width: 49%", class = "btn-sm"
+            class = "btn-sm"
           )
         ),
         button(
