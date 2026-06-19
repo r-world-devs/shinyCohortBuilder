@@ -13,7 +13,7 @@ coh <- cohort(
   )
 ) %>%
   add_filter(
-    filter("discrete", id = "species", dataset = "iris", variable = "Species", value = c("setosa", "versicolor")),
+    filter("discrete", id = "species", name = "Species", dataset = "iris", variable = "Species", value = c("setosa", "versicolor")),
     step_id = "1"
   ) %>%
   add_filter(

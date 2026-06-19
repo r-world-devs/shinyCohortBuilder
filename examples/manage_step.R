@@ -33,7 +33,7 @@ librarian_source <- set_source(
 librarian_cohort <- cohort(
   librarian_source,
   filter(
-    "range",
+    "date_range",
     id = "registered",
     dataset = "borrowers",
     variable = "registered",

@@ -359,8 +359,10 @@ render_steps <- function(cohort, session, init = TRUE) {
         allow_rm <- TRUE
       }
     }
+    cohort$modify(function(public, private) {
+      private$steps[[step_name]] <- attach_filters_gui(private$steps[[step_name]])
+    })
     cohort$run_step(step_name)
-    # todo attach gui here?
     render_step(
       cohort,
       step_name,
