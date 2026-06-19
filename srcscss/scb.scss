@@ -340,14 +340,15 @@ code.hl.background {color: #000 !important}
   margin-top: 4px;
 }
 
-.cb_container .cb_no_state {
+.cb_container .cb_state_buttons {
   display: flex;
   gap: 4px;
   margin-bottom: 4px;
 
   > button {
-    flex: 1;
-    width: auto !important;
+    flex: 1 1 0;
+    min-width: 0;
+    width: auto;
     justify-content: center;
   }
 }
