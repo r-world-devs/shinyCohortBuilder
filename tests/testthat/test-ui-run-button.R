@@ -8,11 +8,8 @@ test_that("Global run button appears and is initially disabled", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "run-button")
-  app <- AppDriver$new(
-    app_dir, name = "run-button-init",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "run-button-init"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -28,11 +25,8 @@ test_that("Filter change marks step as pending", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "run-button")
-  app <- AppDriver$new(
-    app_dir, name = "run-button-pending",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "run-button-pending"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -55,11 +49,8 @@ test_that("Clicking global run button processes pending steps", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "run-button")
-  app <- AppDriver$new(
-    app_dir, name = "run-button-execute",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "run-button-execute"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -86,11 +77,8 @@ test_that("Add step with global run button creates pending step", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "run-button")
-  app <- AppDriver$new(
-    app_dir, name = "run-button-add-step",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "run-button-add-step"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -112,11 +100,8 @@ test_that("Global run button initial screenshot", {
   skip_without_screenshot_tests()
 
   app_dir <- test_path("apps", "run-button")
-  app <- AppDriver$new(
-    app_dir, name = "run-button-screenshot",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "run-button-screenshot"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -131,11 +116,8 @@ test_that("Global run button with pending step screenshot", {
   skip_without_screenshot_tests()
 
   app_dir <- test_path("apps", "run-button")
-  app <- AppDriver$new(
-    app_dir, name = "run-button-pending-screenshot",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "run-button-pending-screenshot"
   )
   on.exit(app$stop(), add = TRUE)
 

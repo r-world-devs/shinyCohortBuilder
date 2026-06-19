@@ -8,11 +8,8 @@ test_that("Basic app renders panel, steps, and filters", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "basic")
-  app <- AppDriver$new(
-    app_dir, name = "basic-init",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "basic-init"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -46,11 +43,8 @@ test_that("Discrete filter: toggling checkbox updates data", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "basic")
-  app <- AppDriver$new(
-    app_dir, name = "basic-discrete-toggle",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "basic-discrete-toggle"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -78,11 +72,8 @@ test_that("Toggling filter active switch hides content", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "basic")
-  app <- AppDriver$new(
-    app_dir, name = "basic-deactivate",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "basic-deactivate"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -107,11 +98,8 @@ test_that("Add step (clone) creates second step", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "basic")
-  app <- AppDriver$new(
-    app_dir, name = "basic-add-step",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "basic-add-step"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -142,11 +130,8 @@ test_that("Remove step removes second step", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "basic")
-  app <- AppDriver$new(
-    app_dir, name = "basic-rm-step",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "basic-rm-step"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -176,11 +161,8 @@ test_that("Clear filters resets filter values", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "basic")
-  app <- AppDriver$new(
-    app_dir, name = "basic-clear",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "basic-clear"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -203,11 +185,8 @@ test_that("Get State modal shows JSON state", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "basic")
-  app <- AppDriver$new(
-    app_dir, name = "basic-get-state",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "basic-get-state"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -229,11 +208,8 @@ test_that("Show Reproducible Code modal displays code", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "basic")
-  app <- AppDriver$new(
-    app_dir, name = "basic-repro-code",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "basic-repro-code"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -256,11 +232,8 @@ test_that("Get State modal contains JSON with filter info", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "basic")
-  app <- AppDriver$new(
-    app_dir, name = "basic-get-state-json",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "basic-get-state-json"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -284,11 +257,8 @@ test_that("Set State modal shows file input and textarea", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "basic")
-  app <- AppDriver$new(
-    app_dir, name = "basic-set-state-modal",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "basic-set-state-modal"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -310,11 +280,8 @@ test_that("Set State via textarea restores cohort state", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "basic")
-  app <- AppDriver$new(
-    app_dir, name = "basic-set-state-restore",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "basic-set-state-restore"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -352,11 +319,8 @@ test_that("Repro code modal contains R code and copy button", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "basic")
-  app <- AppDriver$new(
-    app_dir, name = "basic-repro-code-deep",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "basic-repro-code-deep"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -380,11 +344,8 @@ test_that("Attrition modal shows cohort attrition", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "basic")
-  app <- AppDriver$new(
-    app_dir, name = "basic-attrition",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "basic-attrition"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -405,11 +366,8 @@ test_that("Basic app initial screenshot", {
   skip_without_screenshot_tests()
 
   app_dir <- test_path("apps", "basic")
-  app <- AppDriver$new(
-    app_dir, name = "basic-screenshot",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "basic-screenshot"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -424,11 +382,8 @@ test_that("Basic app with two steps screenshot", {
   skip_without_screenshot_tests()
 
   app_dir <- test_path("apps", "basic")
-  app <- AppDriver$new(
-    app_dir, name = "basic-two-steps-screenshot",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "basic-two-steps-screenshot"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -445,11 +400,8 @@ test_that("Get State modal screenshot", {
   skip_without_screenshot_tests()
 
   app_dir <- test_path("apps", "basic")
-  app <- AppDriver$new(
-    app_dir, name = "basic-get-state-screenshot",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "basic-get-state-screenshot"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -467,11 +419,8 @@ test_that("Set State restored screenshot", {
   skip_without_screenshot_tests()
 
   app_dir <- test_path("apps", "basic")
-  app <- AppDriver$new(
-    app_dir, name = "basic-set-state-screenshot",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "basic-set-state-screenshot"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -505,11 +454,8 @@ test_that("Reproducible code modal screenshot", {
   skip_without_screenshot_tests()
 
   app_dir <- test_path("apps", "basic")
-  app <- AppDriver$new(
-    app_dir, name = "basic-repro-code-screenshot",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "basic-repro-code-screenshot"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -527,11 +473,8 @@ test_that("Attrition modal screenshot", {
   skip_without_screenshot_tests()
 
   app_dir <- test_path("apps", "basic")
-  app <- AppDriver$new(
-    app_dir, name = "basic-attrition-screenshot",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "basic-attrition-screenshot"
   )
   on.exit(app$stop(), add = TRUE)
 

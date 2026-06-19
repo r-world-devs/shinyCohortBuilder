@@ -11,11 +11,8 @@ test_that("Stats pre+post: both pre and post stats are displayed", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "stats-pre-post")
-  app <- AppDriver$new(
-    app_dir, name = "stats-pre-post",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "stats-pre-post"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -33,11 +30,8 @@ test_that("Stats pre+post: step stats show pre/post separator", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "stats-pre-post")
-  app <- AppDriver$new(
-    app_dir, name = "stats-pre-post-sep",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "stats-pre-post-sep"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -54,11 +48,8 @@ test_that("Stats pre only: shows pre stats without cb_delayed", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "stats-pre")
-  app <- AppDriver$new(
-    app_dir, name = "stats-pre-only",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "stats-pre-only"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -78,11 +69,8 @@ test_that("Stats post only: shows post stats with cb_delayed", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "stats-post")
-  app <- AppDriver$new(
-    app_dir, name = "stats-post-only",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "stats-post-only"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -102,11 +90,8 @@ test_that("Stats NULL: no stats content rendered", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "stats-none")
-  app <- AppDriver$new(
-    app_dir, name = "stats-none",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "stats-none"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -125,11 +110,8 @@ test_that("Stats pre+post screenshot", {
   skip_without_screenshot_tests()
 
   app_dir <- test_path("apps", "stats-pre-post")
-  app <- AppDriver$new(
-    app_dir, name = "stats-pre-post-screenshot",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "stats-pre-post-screenshot"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -144,11 +126,8 @@ test_that("Stats none screenshot", {
   skip_without_screenshot_tests()
 
   app_dir <- test_path("apps", "stats-none")
-  app <- AppDriver$new(
-    app_dir, name = "stats-none-screenshot",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "stats-none-screenshot"
   )
   on.exit(app$stop(), add = TRUE)
 

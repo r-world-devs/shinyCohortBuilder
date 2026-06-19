@@ -8,11 +8,8 @@ test_that("Configure step: Add Step opens filter selection modal", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "configure-step")
-  app <- AppDriver$new(
-    app_dir, name = "configure-step-modal",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "configure-step-modal"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -33,11 +30,8 @@ test_that("Configure step: selecting filters and accepting creates step", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "configure-step")
-  app <- AppDriver$new(
-    app_dir, name = "configure-step-create",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "configure-step-create"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -75,11 +69,8 @@ test_that("Manage step: opens modal with current filter selection", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "configure-step")
-  app <- AppDriver$new(
-    app_dir, name = "manage-step-modal",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "manage-step-modal"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -100,11 +91,8 @@ test_that("Manage step: adding filter via manage modal", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "configure-step")
-  app <- AppDriver$new(
-    app_dir, name = "manage-step-add-filter",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "manage-step-add-filter"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -143,11 +131,8 @@ test_that("Manage step: removing filter via manage modal", {
   skip_if_screenshot_only()
 
   app_dir <- test_path("apps", "configure-step")
-  app <- AppDriver$new(
-    app_dir, name = "manage-step-rm-filter",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "manage-step-rm-filter"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -182,11 +167,8 @@ test_that("Configure step initial screenshot", {
   skip_without_screenshot_tests()
 
   app_dir <- test_path("apps", "configure-step")
-  app <- AppDriver$new(
-    app_dir, name = "configure-step-screenshot",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "configure-step-screenshot"
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -201,11 +183,8 @@ test_that("Configure step modal screenshot", {
   skip_without_screenshot_tests()
 
   app_dir <- test_path("apps", "configure-step")
-  app <- AppDriver$new(
-    app_dir, name = "configure-step-modal-screenshot",
-    height = 900, width = 1200,
-    variant = platform_variant(),
-    load_timeout = 60000
+  app <- cb_app_driver(
+    app_dir, name = "configure-step-modal-screenshot"
   )
   on.exit(app$stop(), add = TRUE)
 

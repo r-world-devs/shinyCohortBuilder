@@ -534,13 +534,18 @@ action_manage_step_modal <- function(cohort, changed_input, session) {
         )
       ),
       footer = shiny::tagList(
-        shinyGizmo::valueButton(
-          inputId = ns("manage_step_configured"),
-          label = "Accept",
-          selector = paste0("[data-id=\"", ns("manage_step"), "\"]"),
-          onclick = .trigger_action_js("manage_step_configure", ns = ns),
-          !!!bs_data_attr("dismiss", "modal"),
-          disabled = NA
+        # `data-bs-dismiss` is attached after construction because
+        # shinyGizmo::valueButton() does not accept extra spliced tag
+        # attributes via `...` (it errors with "invalid argument type").
+        htmltools::tagAppendAttributes(
+          shinyGizmo::valueButton(
+            inputId = ns("manage_step_configured"),
+            label = "Accept",
+            selector = paste0("[data-id=\"", ns("manage_step"), "\"]"),
+            onclick = .trigger_action_js("manage_step_configure", ns = ns),
+            disabled = NA
+          ),
+          !!!bs_data_attr("dismiss", "modal")
         ),
         shiny::modalButton("Dismiss")
       ),
@@ -765,13 +770,18 @@ action_show_step_filter_modal <- function(cohort, changed_input, session) {
         )
       ),
       footer = shiny::tagList(
-        shinyGizmo::valueButton(
-          inputId = ns("add_step_configured"),
-          label = "Accept",
-          selector = paste0("[data-id=\"", ns("configure_step"), "\"]"),
-          onclick = .trigger_action_js("add_step_configure", ns = ns),
-          !!!bs_data_attr("dismiss", "modal"),
-          disabled = NA
+        # `data-bs-dismiss` is attached after construction because
+        # shinyGizmo::valueButton() does not accept extra spliced tag
+        # attributes via `...` (it errors with "invalid argument type").
+        htmltools::tagAppendAttributes(
+          shinyGizmo::valueButton(
+            inputId = ns("add_step_configured"),
+            label = "Accept",
+            selector = paste0("[data-id=\"", ns("configure_step"), "\"]"),
+            onclick = .trigger_action_js("add_step_configure", ns = ns),
+            disabled = NA
+          ),
+          !!!bs_data_attr("dismiss", "modal")
         ),
         shiny::modalButton("Dismiss")
       ),
