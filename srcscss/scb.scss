@@ -137,10 +137,18 @@ div.cb_container .cb_no_assistant {
   font-size: 0.9em;
 }
 
-.cb_input[data-param="value"] .form-check-inline > input {
+// Discrete-filter choices render as `label.checkbox-inline > input + span`.
+// Use flexbox so the (scaled) checkbox stays vertically centered with its
+// label text instead of sitting on the text baseline.
+.cb_input[data-param="value"] .checkbox-inline {
+  display: inline-flex;
+  align-items: center;
+}
+
+.cb_input[data-param="value"] .checkbox-inline > input {
   transform: scale(0.9);
-  vertical-align: middle;
   margin-top: 0;
+  margin-right: 0.35em;
 }
 
 .scb-input-button {
@@ -260,4 +268,203 @@ code.hl.background {color: #000 !important}
   color: dimgray;
   font-size: 0.85em;
   margin-top: 2px;
+}
+
+// ---------------------------------------------------------------------------
+// Modern panel theme
+//
+// A cohesive visual layer for the filtering panel. Everything is scoped to
+// `.cb_container` and driven by CSS custom properties so downstream apps can
+// re-theme by overriding the `--scb-*` variables.
+// ---------------------------------------------------------------------------
+.cb_container {
+  --scb-accent: var(--bs-primary, #2c6e9b);
+  --scb-accent-soft: color-mix(in srgb, var(--scb-accent) 12%, transparent);
+  --scb-border: var(--bs-border-color, #e2e6ea);
+  --scb-surface: #ffffff;
+  --scb-surface-muted: #f6f8fa;
+  --scb-text: var(--bs-body-color, #1f2933);
+  --scb-text-muted: #6b7785;
+  --scb-radius: 8px;
+  --scb-radius-sm: 6px;
+  --scb-shadow: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.04);
+  --scb-filter-indent-color: color-mix(in srgb, var(--scb-accent) 28%, transparent);
+
+  color: var(--scb-text);
+  font-size: 0.95rem;
+}
+
+// --- Action buttons -------------------------------------------------------
+.cb_container .scb_button.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  text-align: left;
+  font-weight: 500;
+  border-radius: var(--scb-radius-sm);
+  border-color: var(--scb-border);
+  color: var(--scb-text);
+  background: var(--scb-surface);
+  box-shadow: none;
+  transition: background-color 0.12s ease, border-color 0.12s ease,
+    color 0.12s ease, box-shadow 0.12s ease;
+
+  > i {
+    color: var(--scb-text-muted);
+    transition: color 0.12s ease;
+  }
+
+  &:hover:not(:disabled) {
+    background: var(--scb-accent-soft);
+    border-color: var(--scb-accent);
+    color: var(--scb-accent);
+    box-shadow: var(--scb-shadow);
+
+    > i {
+      color: var(--scb-accent);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--scb-accent);
+    outline-offset: 1px;
+  }
+}
+
+// Full-width primary action stack at the top of the panel.
+.cb_container div.cb_panel > button {
+  justify-content: flex-start;
+}
+
+.cb_container .cb_panel > button:not(:first-of-type) {
+  margin-top: 4px;
+}
+
+.cb_container .cb_no_state {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 4px;
+
+  > button {
+    flex: 1;
+    width: auto !important;
+    justify-content: center;
+  }
+}
+
+// The "Run All Steps" trigger reads as the primary call to action.
+.cb_container .cb_trigger_run.scb_button.btn {
+  margin-top: 8px;
+  justify-content: center;
+  font-weight: 600;
+  color: #fff;
+  background: var(--scb-accent);
+  border-color: var(--scb-accent);
+
+  > i { color: rgba(255, 255, 255, 0.9); }
+
+  &:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--scb-accent) 85%, #000);
+    border-color: color-mix(in srgb, var(--scb-accent) 85%, #000);
+    color: #fff;
+    > i { color: #fff; }
+  }
+
+  &:disabled,
+  &.up-to-date {
+    background: var(--scb-surface-muted);
+    border-color: var(--scb-border);
+    color: var(--scb-text-muted);
+    > i { color: var(--scb-text-muted); }
+  }
+}
+
+// --- Step cards -----------------------------------------------------------
+.cb_container .cb_step.card {
+  border: 1px solid var(--scb-border);
+  border-radius: var(--scb-radius);
+  background: var(--scb-surface);
+  box-shadow: var(--scb-shadow);
+  overflow: hidden;
+}
+
+.cb_container .cb_step > .header.card-header {
+  background: var(--scb-surface-muted);
+  border-bottom: 1px solid var(--scb-border);
+  padding-top: 8px;
+  padding-bottom: 8px;
+  font-weight: 600;
+}
+
+.cb_container .cb_step > .content.card-body {
+  padding: 12px 14px;
+}
+
+// --- Dataset groups -------------------------------------------------------
+.cb_container .cb_filters_group:not(.no-filters) {
+  margin-bottom: 14px;
+
+  &:last-child { margin-bottom: 0; }
+
+  > strong {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--scb-text-muted);
+  }
+}
+
+// Per-dataset row count rendered as a soft pill badge.
+.cb_container .cb_filters_group > span[id*="stats_"] {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--scb-text-muted);
+  background: var(--scb-surface-muted);
+  border: 1px solid var(--scb-border);
+  border-radius: 999px;
+  padding: 1px 9px;
+}
+
+// --- Filter rows ----------------------------------------------------------
+.cb_container .cb_filter {
+  border-radius: var(--scb-radius-sm);
+  padding: 4px 6px;
+  margin: 2px 0;
+  transition: background-color 0.12s ease;
+
+  &:hover {
+    background: var(--scb-surface-muted);
+  }
+}
+
+// Filter activation switch label = the filter's display name.
+.cb_container .cb_activate_filter .state label span {
+  font-weight: 500;
+  color: var(--scb-text);
+}
+
+// --- Filter content (active) ---------------------------------------------
+.cb_container .cb_filter_content:not(.hidden-input) {
+  border-left: 2px solid var(--scb-filter-indent-color);
+  margin-left: 8px;
+  margin-top: 4px;
+  padding: 6px 6px 6px 12px;
+}
+
+.cb_container .cb_filters_group > .cb_filter:last-of-type > .cb_filter_content {
+  border-bottom: none;
+}
+
+// "Keep missing values" reads as a quiet secondary control.
+.cb_container .cb_input[data-param="keep_na"] {
+  margin-top: 4px;
+  color: var(--scb-text-muted);
+}
+
+// Discrete choices get a little more breathing room between options.
+.cb_container .cb_input[data-param="value"] .checkbox-inline {
+  margin-right: 0.9em;
+  margin-bottom: 2px;
 }
