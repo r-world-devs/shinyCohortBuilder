@@ -223,8 +223,47 @@ div.cb_container .cb_no_assistant {
   margin-top: 5rem;
 }
 
-.cb_container .input-daterange .input-group-text {
-  padding: 0;
+.cb_container .input-daterange.input-group {
+  flex-wrap: nowrap;
+  align-items: stretch;
+}
+
+.cb_container .input-daterange.input-group > .form-control {
+  text-align: center;
+  border-color: var(--scb-border);
+}
+
+.cb_container .input-daterange.input-group > .form-control:first-child {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.cb_container .input-daterange.input-group > .form-control:last-child {
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.cb_container .input-daterange.input-group .input-group-addon {
+  display: flex;
+  align-items: stretch;
+  margin-left: -1px;
+  margin-right: -1px;
+}
+
+.cb_container .input-daterange.input-group .input-group-text {
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
+  border-radius: 0;
+  border-color: var(--scb-border);
+  background: var(--scb-surface-muted);
+  color: var(--scb-text-muted);
+}
+
+.cb_container .input-daterange.input-group > .form-control:focus {
+  border-color: var(--scb-accent);
+  box-shadow: none;
+  z-index: 2;
 }
 
 .cb_step > .header {

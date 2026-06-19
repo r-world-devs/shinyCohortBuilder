@@ -217,8 +217,56 @@ div.cb_container .cb_no_assistant {
   margin-top: 5rem;
 }
 
-.cb_container .input-daterange .input-group-text {
-  padding: 0;
+// Date-range inputs ship with Bootstrap 3/4 leftover wrapper classes
+// (input-group-addon / input-group-prepend / input-group-append) that break
+// Bootstrap 5's connected input-group layout, leaving two detached rounded
+// boxes with a gap. Stitch the two date fields and the " to " separator back
+// into a single connected control.
+.cb_container .input-daterange.input-group {
+  flex-wrap: nowrap;
+  align-items: stretch;
+
+  > .form-control {
+    text-align: center;
+    border-color: var(--scb-border);
+  }
+
+  // First date field: round only the outer (left) corners.
+  > .form-control:first-child {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  // Last date field: round only the outer (right) corners.
+  > .form-control:last-child {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+
+  // The " to " separator wrapper sits between the fields with borders
+  // overlapped so the group reads as one piece.
+  .input-group-addon {
+    display: flex;
+    align-items: stretch;
+    margin-left: -1px;
+    margin-right: -1px;
+  }
+
+  .input-group-text {
+    display: flex;
+    align-items: center;
+    padding: 0 0.5rem;
+    border-radius: 0;
+    border-color: var(--scb-border);
+    background: var(--scb-surface-muted);
+    color: var(--scb-text-muted);
+  }
+
+  > .form-control:focus {
+    border-color: var(--scb-accent);
+    box-shadow: none;
+    z-index: 2;
+  }
 }
 
 .cb_step > .header {
