@@ -264,10 +264,29 @@ post_propagate_domains_hook <- function(public, private, step_id, ...) {
     return(invisible(FALSE))
   }
 
+  # Skip steps that are not yet rendered. When a step is added, its domain is
+  # propagated eagerly (before render), but its filters have no GUI attached yet
+  # and there are no inputs to update. The step is rendered fresh with the
+  # already-narrowed domain by post_add_step_hook, so refreshing here is both
+  # unnecessary and unsafe (filter@private$gui$update is NULL).
+  step <- public$get_step(step_id)
+  if (is.null(step) || !step_gui_attached(step)) {
+    return(invisible(FALSE))
+  }
+
   ui_update_filters_loop(
     public, step_id, reset = FALSE,
     update = "input", session = session
   )
+}
+
+# A step's filters get their GUI attached during render (attach_filters_gui).
+# Until then there are no rendered inputs to refresh.
+step_gui_attached <- function(step) {
+  if (length(step$filters) == 0L) {
+    return(FALSE)
+  }
+  all(purrr::map_lgl(step$filters, ~ !is.null(.x@private$gui)))
 }
 
 post_add_filter_hook <- function(public, private, step_id, filter) {
