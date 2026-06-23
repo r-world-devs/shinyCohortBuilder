@@ -345,11 +345,40 @@ insert_global_run_button <- function(session) {
   )
 }
 
+# Decide whether a step should be run during a render loop (R9).
+#
+# - Initial render (init = TRUE):
+#   - non-run_button: run only pending steps (others are already computed).
+#   - run_button: never run at init (steps render from their snapshot / source).
+# - Restore (init = FALSE):
+#   - non-run_button: always run.
+#   - run_button: run only steps that are not pending, so a state saved with
+#     pending steps restores them as pending (greyed), not run.
+should_run_step_on_render <- function(cohort, step_id, init, run_on_request) {
+  if (init) {
+    if (run_on_request) {
+      return(FALSE)
+    }
+    return(cohort$is_pending(step_id))
+  }
+  # restore / update_source rebuild
+  if (run_on_request) {
+    # Step 1's input is the source (always available), so it can always render
+    # even when pending; steps 2+ need a computed parent and stay pending.
+    if (identical(as.character(step_id), "1")) {
+      return(TRUE)
+    }
+    return(!cohort$is_pending(step_id))
+  }
+  TRUE
+}
+
 render_steps <- function(cohort, session, init = TRUE) {
 
   ns <- session$ns
   enable_panel(cohort, session)
   step_names <- names(cohort$get_step())
+  run_on_request <- !is_none(cohort$attributes$run_button)
   active <- FALSE
   allow_rm <- FALSE
   for (step_name in step_names) {
@@ -362,7 +391,11 @@ render_steps <- function(cohort, session, init = TRUE) {
     cohort$modify(function(public, private) {
       private$steps[[step_name]] <- attach_filters_gui(private$steps[[step_name]])
     })
-    cohort$run_step(step_name)
+    # Conditional run_step (R9). Whether a step is computed during rendering
+    # depends on context (initial render vs restore) and per-step pending state.
+    if (should_run_step_on_render(cohort, step_name, init, run_on_request)) {
+      cohort$run_step(step_name)
+    }
     render_step(
       cohort,
       step_name,
@@ -960,6 +993,20 @@ cb_server <- function(id, cohort, run_button = "none", stats = c("pre", "post"),
                       show_help = TRUE, chat = NULL, ...) {
 
   render_source <- match.arg(render_source, c("auto", "domain"))
+
+  # render_source = "domain" requires the cohort to actually narrow domains.
+  # A cohort built with propagate_domains = "none" never populates filter
+  # domains, so domain-based rendering would have nothing to render from.
+  if (identical(render_source, "domain") &&
+      identical(cohort$get_propagate_domains_mode(), "none")) {
+    stop(
+      "`render_source = \"domain\"` requires a cohort that propagates domains, ",
+      "but the provided cohort was built with `propagate_domains = \"none\"`. ",
+      "Construct the cohort with a propagating mode, e.g. ",
+      "`cohort(..., propagate_domains = \"filter\")`.",
+      call. = FALSE
+    )
+  }
 
   if (is.logical(run_button)) {
     lifecycle::deprecate_stop("0.2.0", "shinyCohorBuilder::cb_server(arg = 'must be a scalar character')")

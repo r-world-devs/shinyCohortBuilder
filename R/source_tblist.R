@@ -76,8 +76,14 @@ dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
 
   dataset_names |> purrr::walk(function(dataset) {
     selector <- paste0("#", ns(paste0(step_id, "-stats_", dataset)))
-    previous <- cohort$get_cache(step_id, state = "pre")[[dataset]]$n_rows
-    if (!previous > 0) {
+    # Guard against a missing parent snapshot. Read the parent (pre) cache
+    # without forcing an on-demand recompute: if the parent step was never run
+    # its cache is absent, and recomputing here would error and crash the app
+    # (e.g. run_button mode / cache = FALSE / freshly added step). In that case,
+    # show the placeholder instead. Also handle NULL/zero `previous` safely.
+    pre_cache <- cohort$get_cache(step_id, state = "pre", .recalc_when_missing = FALSE)
+    previous <- pre_cache[[dataset]]$n_rows
+    if (is.null(previous) || !isTRUE(previous > 0)) {
       ui <- "No data selected in previous step."
     } else {
       current <- cohort$get_cache(step_id, state = "post")[[dataset]]$n_rows

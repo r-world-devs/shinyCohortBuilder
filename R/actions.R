@@ -696,13 +696,19 @@ action_add_step <- function(cohort, changed_input, session) {
   input_state("add_step", changed_input)
   available_filters <- cohort$attributes$available_filters
 
+  # In run_button mode the new step renders from the parent's copied snapshot
+  # (seeded by add_step) and stays pending until the user runs the flow, so we
+  # must not force a flow here.
+  run_on_request <- !is_none(cohort$attributes$run_button)
+  run_flow <- !run_on_request
+
   if (length(cohort$get_step()) == 0 && length(available_filters) > 0) {
     cohort$copy_step(
       filters = available_filters,
-      run_flow = TRUE
+      run_flow = run_flow
     )
   } else {
-    cohort$copy_step(run_flow = TRUE)
+    cohort$copy_step(run_flow = run_flow)
   }
 
   # gui actions are handled via post_add_step_hook hook
@@ -726,9 +732,11 @@ action_add_step_configured <- function(cohort, changed_input, session) {
   filters <- available_filters |>
     purrr::keep(function(x) {x@id %in% chosed_filters})
 
+  run_on_request <- !is_none(cohort$attributes$run_button)
+
   cohort$copy_step(
     filters = filters,
-    run_flow = TRUE
+    run_flow = !run_on_request
   )
 
   # gui actions are handled via post_add_step_hook hook

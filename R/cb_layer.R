@@ -250,6 +250,26 @@ post_set_pending_hook <- function(public, private, step_id, ...) {
   ui_update_pending_state(session, public, step_id)
 }
 
+post_propagate_domains_hook <- function(public, private, step_id, ...) {
+  session <- public$attributes$session
+  if (is.null(session)) {
+    return(invisible(FALSE))
+  }
+
+  # Only refresh rendered inputs when the app is actually rendering from domains.
+  # In stats mode the cache-driven refresh (post_run_step_hook / update_filter
+  # hook) already covers downstream changes and must not be duplicated.
+  render_source <- public$attributes$render_source
+  if (is.null(render_source) || !identical(render_source, "domain")) {
+    return(invisible(FALSE))
+  }
+
+  ui_update_filters_loop(
+    public, step_id, reset = FALSE,
+    update = "input", session = session
+  )
+}
+
 post_add_filter_hook <- function(public, private, step_id, filter) {
   session <- public$attributes$session
   if (is.null(session)) {
@@ -281,6 +301,7 @@ post_rm_filter_hook <- function(public, private, step_id, filter_id) {
   cohortBuilder::add_hook("post_set_pending_hook", post_set_pending_hook)
   cohortBuilder::add_hook("post_add_filter_hook", post_add_filter_hook)
   cohortBuilder::add_hook("post_rm_filter_hook", post_rm_filter_hook)
+  cohortBuilder::add_hook("post_propagate_domains_hook", post_propagate_domains_hook)
 }
 
 .onUnload <- function(libpath) {
