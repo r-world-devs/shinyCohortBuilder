@@ -994,18 +994,16 @@ cb_server <- function(id, cohort, run_button = "none", stats = c("pre", "post"),
 
   render_source <- match.arg(render_source, c("auto", "domain"))
 
-  # render_source = "domain" requires the cohort to actually narrow domains.
-  # A cohort built with propagate_domains = "none" never populates filter
-  # domains, so domain-based rendering would have nothing to render from.
-  if (identical(render_source, "domain") &&
-      identical(cohort$get_propagate_domains_mode(), "none")) {
-    stop(
-      "`render_source = \"domain\"` requires a cohort that propagates domains, ",
-      "but the provided cohort was built with `propagate_domains = \"none\"`. ",
-      "Construct the cohort with a propagating mode, e.g. ",
-      "`cohort(..., propagate_domains = \"filter\")`.",
-      call. = FALSE
-    )
+  # render_source = "domain" renders inputs from each filter's declared domain.
+  # Propagation mode (including "none") is a cohortBuilder concern and is
+  # respected as-is: a user may configure filter domains by hand and expect them
+  # honoured even without propagation. The only hard requirement is that every
+  # filter in every step actually has a domain to render from. Validating
+  # per-filter (rather than rejecting propagate_domains = "none" wholesale) means
+  # user-authored domains are respected and operations like add_step/copy_step
+  # work, because the copied step inherits the parent filters' domains.
+  if (identical(render_source, "domain")) {
+    validate_domains_present(cohort)
   }
 
   if (is.logical(run_button)) {

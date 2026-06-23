@@ -308,3 +308,60 @@ test_that("get_state/restore preserves filter domains", {
   cached <- coh2$get_cache("1", "species", state = "pre", .recalc_when_missing = FALSE)
   expect_null(cached)
 })
+
+# -- render_source = "domain" domain-presence validation (req 1) ---------------
+
+test_that("validate_domains_present passes when every filter has a domain", {
+  coh <- build_domain_cohort()
+  expect_true(validate_domains_present(coh))
+})
+
+test_that("validate_domains_present errors listing filters without a domain", {
+  source <- cohortBuilder::set_source(cohortBuilder::tblist(iris = iris))
+  coh <- cohortBuilder::cohort(
+    source,
+    cohortBuilder::filter(
+      "discrete", id = "species", dataset = "iris", variable = "Species",
+      domain = c("setosa", "versicolor", "virginica")
+    ),
+    # No domain declared.
+    cohortBuilder::filter("range", id = "sl", dataset = "iris", variable = "Sepal.Length")
+  )
+  expect_error(
+    validate_domains_present(coh),
+    "requires every filter to declare a domain"
+  )
+  expect_error(validate_domains_present(coh), "filter 'sl'")
+})
+
+test_that("render_source = 'domain' is allowed with propagate_domains = 'none' when domains are set", {
+  source <- cohortBuilder::set_source(cohortBuilder::tblist(iris = iris))
+  coh <- cohortBuilder::cohort(
+    source,
+    cohortBuilder::filter(
+      "discrete", id = "species", dataset = "iris", variable = "Species",
+      domain = c("setosa", "versicolor", "virginica")
+    ),
+    cohortBuilder::filter(
+      "range", id = "sl", dataset = "iris", variable = "Sepal.Length",
+      domain = c(4, 8)
+    ),
+    propagate_domains = "none"
+  )
+  # Domains are user-declared, so domain rendering is honoured even without
+  # propagation: validation must not reject the "none" mode itself.
+  expect_true(validate_domains_present(coh))
+})
+
+test_that("render_source = 'domain' errors when a filter lacks a domain regardless of propagation", {
+  source <- cohortBuilder::set_source(cohortBuilder::tblist(iris = iris))
+  coh <- cohortBuilder::cohort(
+    source,
+    cohortBuilder::filter("range", id = "sl", dataset = "iris", variable = "Sepal.Length"),
+    propagate_domains = "filter"
+  )
+  expect_error(
+    validate_domains_present(coh),
+    "requires every filter to declare a domain"
+  )
+})

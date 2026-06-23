@@ -68,6 +68,43 @@ resolve_render_mode <- function(filter, cohort) {
   )
 }
 
+# Validate that every filter in every step of the cohort has a declared domain.
+#
+# render_source = "domain" renders inputs from each filter's `domain`; a filter
+# without one has nothing to render. We error eagerly (at cb_server() time)
+# rather than per-render so misconfiguration surfaces immediately, while still
+# allowing any propagate_domains mode (including "none") as long as domains are
+# present. Filters can set their domain explicitly or receive it via propagation
+# / step copying.
+validate_domains_present <- function(cohort) {
+  step_ids <- names(cohort$get_step())
+  missing <- list()
+  for (step_id in step_ids) {
+    step <- cohort$get_step(step_id)
+    for (filter in step$filters) {
+      if (is.null(cohortBuilder::filter_domain(filter))) {
+        missing[[length(missing) + 1]] <- sprintf(
+          "step %s / filter '%s'", step_id, filter@id
+        )
+      }
+    }
+  }
+
+  if (length(missing) > 0) {
+    stop(
+      "`render_source = \"domain\"` requires every filter to declare a domain, ",
+      "but the following have none: ",
+      paste(unlist(missing), collapse = ", "), ". ",
+      "Set a `domain` on each filter (e.g. ",
+      "`filter(\"discrete\", ..., domain = c(...))`), or use ",
+      "`render_source = \"auto\"`.",
+      call. = FALSE
+    )
+  }
+
+  invisible(TRUE)
+}
+
 # Notify (once per filter) that a filter in domain mode has no domain to render.
 warn_no_domain <- function(filter_id) {
   msg <- glue::glue(
