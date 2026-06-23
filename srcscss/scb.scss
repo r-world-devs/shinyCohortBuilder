@@ -437,7 +437,7 @@ code.hl.background {color: #000 !important}
   border-radius: var(--scb-radius);
   background: var(--scb-surface);
   box-shadow: var(--scb-shadow);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .cb_container .cb_step > .header.card-header {

@@ -56,8 +56,16 @@ html_feedback_bar <- function(plot_data, n_missing, input_id = NULL) {
 #' @param n_total Total number of observations
 #' @return shiny::tagList
 #' @noRd
-html_feedback_hist <- function(plot_data, n_missing, n_total) {
+html_feedback_hist <- function(plot_data, n_missing, n_total, max_bars = 30) {
   color <- getOption("scb_chart_palette", scb_chart_palette)$discrete[1]
+
+  if (NROW(plot_data) > max_bars) {
+    bin_size <- ceiling(nrow(plot_data) / max_bars)
+    plot_data <- plot_data |>
+      dplyr::mutate(.bin = ceiling(dplyr::row_number() / bin_size)) |>
+      dplyr::group_by(.bin) |>
+      dplyr::summarise(count = sum(count, na.rm = TRUE), .groups = "drop")
+  }
 
   bars <- NULL
   if (NROW(plot_data) > 0) {

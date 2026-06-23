@@ -21,6 +21,8 @@ library(magrittr)
 library(cohortBuilder)
 library(shinyCohortBuilder)
 
+iris$Species <- as.character(iris$Species)
+
 # Filters declare a `domain` so they can be rendered without reading the data.
 build_cohort <- function(cache = TRUE) {
   cohort(
@@ -50,7 +52,7 @@ panel <- function(title, id) {
   shiny::column(
     width = 4,
     shiny::h4(title),
-    cb_ui(id, steps = FALSE, state = FALSE, code = TRUE, attrition = TRUE)
+    cb_ui(id, steps = TRUE, state = FALSE, code = TRUE, attrition = TRUE)
   )
 }
 
