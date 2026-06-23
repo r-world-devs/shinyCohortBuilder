@@ -53,7 +53,9 @@ Suggests:
     sass,
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    shinytest2,
+    withr
 Encoding: UTF-8
 VignetteBuilder: knitr
 URL: https://r-world-devs.github.io/shinyCohortBuilder/, https://github.com/r-world-devs/shinyCohortBuilder
