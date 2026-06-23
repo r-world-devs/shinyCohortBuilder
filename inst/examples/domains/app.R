@@ -25,6 +25,8 @@
 # Run with:
 #   shiny::runApp(system.file("examples/domains", package = "shinyCohortBuilder"))
 
+options("tryCatchLog.include.full.call.stack" = FALSE)
+
 library(shiny)
 library(magrittr)
 library(cohortBuilder)
@@ -33,29 +35,54 @@ library(shinyCohortBuilder)
 iris$Species <- as.character(iris$Species)
 
 # Filters declare a `domain` so they can be rendered without reading the data.
-build_cohort <- function(cache = TRUE, propagate_domains = "filter") {
-  cohort(
-    source = set_source(tblist(iris = iris)),
+# `species_domain` / `sepal_domain` may be NULL to drop the declared domain for
+# that filter (the filter then falls back to data-derived values).
+build_filters <- function(species_domain = c("setosa", "versicolor", "virginica"),
+                          sepal_domain = c(4, 8)) {
+  list(
+    filter(
+      "discrete",
+      id = "species", name = "Species",
+      dataset = "iris", variable = "Species",
+      # Full declared vocabulary - a superset of what any single step contains.
+      domain = species_domain
+    ),
+    filter(
+      "range",
+      id = "sepal_length", name = "Sepal length",
+      dataset = "iris", variable = "Sepal.Length",
+      domain = sepal_domain
+    )
+  )
+}
+
+# The two flags are independent:
+#   * `available_filters` attaches the filters to the source as available
+#     filters (so the user can add them via the "manage step" UI).
+#   * `add_initial` adds the filters as active step filters on initial build.
+# With both FALSE the cohort starts empty and offers nothing to add.
+build_cohort <- function(cache = TRUE, propagate_domains = "filter",
+                         species_domain = c("setosa", "versicolor", "virginica"),
+                         sepal_domain = c(4, 8),
+                         available_filters = TRUE,
+                         add_initial = TRUE) {
+  filters <- build_filters(species_domain, sepal_domain)
+  source <- if (available_filters) {
+    set_source(tblist(iris = iris), available_filters = filters)
+  } else {
+    set_source(tblist(iris = iris))
+  }
+  coh <- cohort(
+    source = source,
     cache = cache,
     propagate_domains = propagate_domains
-  ) %>%
-    add_filter(
-      filter(
-        "discrete",
-        id = "species", name = "Species",
-        dataset = "iris", variable = "Species",
-        # Full declared vocabulary - a superset of what any single step contains.
-        domain = c("setosa", "versicolor", "virginica")
-      )
-    ) %>%
-    add_filter(
-      filter(
-        "range",
-        id = "sepal_length", name = "Sepal length",
-        dataset = "iris", variable = "Sepal.Length",
-        domain = c(4, 8)
-      )
-    )
+  )
+  if (add_initial) {
+    coh <- coh %>%
+      add_filter(filters[[1]]) %>%
+      add_filter(filters[[2]])
+  }
+  coh
 }
 
 # Map the "stats" selectInput value to the cb_server() `stats` argument.
@@ -80,6 +107,7 @@ config_sidebar <- function() {
       selected = "pre+post"
     ),
     shiny::checkboxInput("cfg_feedback", "feedback", value = TRUE),
+    shiny::checkboxInput("cfg_cache", "cache", value = TRUE),
     shiny::selectInput(
       "cfg_propagate", "propagate_domains",
       choices = c("none", "filter", "cache", "data"),
@@ -95,6 +123,19 @@ config_sidebar <- function() {
       choices = c("none", "local", "global"),
       selected = "none"
     ),
+    shiny::selectInput(
+      "cfg_species_domain", "Species domain",
+      choices = c("setosa", "versicolor", "virginica"),
+      selected = c("setosa", "versicolor", "virginica"),
+      multiple = TRUE
+    ),
+    shiny::checkboxInput("cfg_sepal_domain_on", "Sepal length domain", value = TRUE),
+    shiny::sliderInput(
+      "cfg_sepal_domain", NULL,
+      min = 0, max = 10, value = c(4, 8), step = 0.1
+    ),
+    shiny::checkboxInput("cfg_available_filters", "available_filters", value = TRUE),
+    shiny::checkboxInput("cfg_add_initial", "filters on initial build", value = TRUE),
     shiny::actionButton(
       "cfg_apply", "Apply",
       class = "btn-primary", width = "100%"
@@ -138,8 +179,20 @@ server <- function(input, output, session) {
     apply_counter(n)
     module_id <- paste0("cohort_", n)
 
-    # cache only matters for stats; keep it on so stats modes have data to show.
-    coh <- build_cohort(cache = TRUE, propagate_domains = input$cfg_propagate)
+    # A filter with no selected / disabled domain is built with domain = NULL.
+    species_domain <- input$cfg_species_domain
+    if (length(species_domain) == 0) species_domain <- NULL
+    sepal_domain <- if (isTRUE(input$cfg_sepal_domain_on)) input$cfg_sepal_domain else NULL
+
+    # cache mainly affects stats; with it off, stats modes have no cached data.
+    coh <- build_cohort(
+      cache = isTRUE(input$cfg_cache),
+      propagate_domains = input$cfg_propagate,
+      species_domain = species_domain,
+      sepal_domain = sepal_domain,
+      available_filters = isTRUE(input$cfg_available_filters),
+      add_initial = isTRUE(input$cfg_add_initial)
+    )
 
     # render_source = "domain" needs every filter to have a domain. Validate up
     # front so a bad combination surfaces as a friendly notification instead of
@@ -161,14 +214,28 @@ server <- function(input, output, session) {
     applied$id <- module_id
     applied$cohort <- coh
 
-    cb_server(
-      module_id,
-      coh,
-      run_button = input$cfg_run_button,
-      stats = stats_arg(input$cfg_stats),
-      feedback = isTRUE(input$cfg_feedback),
-      render_source = input$cfg_render
-    )
+    # Capture config values now; the onFlushed callback below runs outside a
+    # reactive context and cannot read input$ values directly.
+    cfg_run_button <- input$cfg_run_button
+    cfg_stats <- stats_arg(input$cfg_stats)
+    cfg_feedback <- isTRUE(input$cfg_feedback)
+    cfg_render <- input$cfg_render
+
+    # cb_server() renders steps by inserting UI into the cb_ui() accordion. That
+    # accordion is produced by output$filter_panel (a renderUI reacting to
+    # applied$id) which only flushes after this observer completes. Defer
+    # cb_server() until the panel is in the DOM, otherwise the "Step 1" insert
+    # targets an element that does not exist yet and is lost.
+    session$onFlushed(function() {
+      cb_server(
+        module_id,
+        coh,
+        run_button = cfg_run_button,
+        stats = cfg_stats,
+        feedback = cfg_feedback,
+        render_source = cfg_render
+      )
+    }, once = TRUE)
   })
 
   output$filter_panel <- shiny::renderUI({
@@ -180,7 +247,8 @@ server <- function(input, output, session) {
     }
     cb_ui(
       applied$id,
-      steps = TRUE, state = FALSE, code = TRUE, attrition = TRUE
+      steps = TRUE, state = FALSE, code = TRUE, attrition = TRUE,
+      manage_step = TRUE
     )
   })
 
@@ -195,6 +263,10 @@ server <- function(input, output, session) {
   output$filtered_summary <- shiny::renderPrint({
     data <- filtered_data()
     tbl <- data$iris
+    if (is.null(tbl)) {
+      cat("No data yet - run the step to compute the filtered result.\n")
+      return(invisible(NULL))
+    }
     cat("Rows:", nrow(tbl), "of", nrow(iris), "\n")
     cat("Species:", paste(sort(unique(tbl$Species)), collapse = ", "), "\n")
     cat(
@@ -206,6 +278,7 @@ server <- function(input, output, session) {
 
   output$filtered_table <- shiny::renderTable({
     data <- filtered_data()
+    shiny::req(data$iris)
     utils::head(data$iris, 20)
   })
 }

@@ -44,18 +44,29 @@ restricts gender to `"F"`, every `"A"` row is gone — the remaining groups are
 
 ---
 
-## Finding 1 — Adding a step does NOT narrow on its own
+## Finding 1 — Adding a step does NOT narrow it, even when the parent already filters
 
-A cloned (added) step shows the **declared full domain**; propagation narrows a
-downstream step only when the **parent** step is later updated/re-run, not at the
-moment of cloning.
+This is the counter-intuitive one. You might expect a newly added step to start
+from the parent's *remaining* data — i.e. if the parent already restricts gender
+to `F` (which removes every `A` row), the new step's `group` domain should open
+as `{B, C}`. It does **not**. The new step shows the **full declared domain**
+`{A, B, C}`.
+
+Why: domain propagation in `data`/`cache` mode fires when a step runs and pushes
+its snapshot to its **successor** (`run` → `propagate_domains_to(next_step)` in
+`cohort_methods.R:838`). Clicking **+ add step** calls `copy_step(run_flow=TRUE)`,
+which runs only the *new* step, not the parent — so no parent→child propagation
+happens. Narrowing appears only later, when you update the parent and it re-runs
+(that is Finding 2).
 
 Steps:
 
 1. Config: `propagate_domains = data`, `render_source = domain`,
    `run_button = none`, `cache = checked`. Click **Apply**.
-2. In the panel, set the **Gender** filter to **both** `F` and `M` (check both
-   boxes). The inspector still shows `step 1 | group domain={A,B,C}`.
+2. Leave **Gender = `F`** (the app's default). All `A` rows are gender `M`, so the
+   remaining data contains no `A`. The inspector shows
+   `step 1 | group domain={A,B,C}` (the *declared* domain — the first step is
+   itself never narrowed, since nothing propagates into it).
 3. Click **+ (add step)** in the panel header to clone step 1.
 4. **Observe** the inspector:
 
@@ -64,20 +75,26 @@ Steps:
    step 2 | pending=FALSE | group domain={A,B,C} | age domain={18,80}
    ```
 
-   The new step 2 shows the **full** `{A,B,C}` / `{18,80}` — no narrowing
-   happened just from adding the step.
+   Step 2 is `{A,B,C}` even though the upstream data (gender `F`) contains no
+   `A` rows at all. Adding the step did **not** narrow it — that is the
+   surprise. Contrast with Finding 2, where *updating* the parent finally
+   pushes the narrowed `{B,C}` domain into step 2.
 
 ---
 
 ## Finding 2 — Updating a NON-LAST step narrows downstream (cache/data modes)
 
-With `propagate_domains = cache` or `data`, editing an upstream (non-last) step
-re-runs it and narrows the downstream step's domain from the remaining data.
+With `propagate_domains = cache` or `data`, *editing* (re-running) an upstream
+(non-last) step narrows the downstream step's domain from the remaining data.
+This is the run that Finding 1 was missing.
 
-Continue from Finding 1 (you have steps 1 and 2, gender = `{F, M}`):
+Continue from Finding 1 (steps 1 and 2 exist; step 2 is still `{A,B,C}`):
 
-1. In **step 1**, set **Gender** to **only `F`** (uncheck `M`).
-2. **Observe** the inspector — step 2 narrows:
+1. In **step 1**, change **Gender**: tick `M` so gender = `{F, M}`, then untick
+   it again back to **only `F`**. (You need an actual *change* to step 1 to make
+   it re-run and propagate. If your panel already shows the `M` box ticked from a
+   previous click, just toggle it.)
+2. **Observe** the inspector — step 2 now narrows:
 
    ```
    step 2 | pending=FALSE | group domain={B,C} | age domain={35,50}
@@ -85,8 +102,13 @@ Continue from Finding 1 (you have steps 1 and 2, gender = `{F, M}`):
 
    and the rendered step-2 **Group** checkboxes now offer only `B` and `C`.
 
+The key point: the domain change in step 2 is driven by **re-running step 1**,
+not by step 2 itself — exactly the propagation that adding the step (Finding 1)
+did not trigger.
+
 > Contrast: set `propagate_domains = none` (Apply, redo the steps) and step 2
-> stays `{A,B,C}` after the same edit.
+> stays `{A,B,C}` after the same edit. `filter` mode also leaves it `{A,B,C}`
+> (see Finding 4).
 
 ---
 
@@ -144,6 +166,26 @@ Steps:
 > `run_button = local` behaves the same but with a run button per step.
 
 ---
+
+## Finding 6 — (fixed bug) Factor columns zeroed the downstream post-stats
+
+Originally, propagating a domain in `data` mode for a **factor** column stored the
+narrowed domain as a *factor*. The discrete filter then ran
+`column %in% c(value, NA)`, and because `c(factor, NA)` coerces the factor to its
+integer codes, the match failed and step 2's post-data collapsed to **0 / 0%** —
+even though no filter in step 2 excluded anything. (In the screenshot that
+triggered this: step 2 showed `0 / 7 (0%)` with every level at `(0 / N)`.)
+
+Fix: `domain_from_data_discrete_impl` now returns a **character** domain
+(consistent with `cache` mode), and `cb_filter_data` defensively coerces a factor
+value to character. Regression tests:
+
+- `test-source_tblist.R` — "discrete filter handles a factor-valued effective value"
+- `test-cohort_methods.R` — "propagate_domains = 'data' keeps a factor column's post-data intact"
+
+To confirm it stays fixed in the app: the `group` column is a factor, so reproduce
+Findings 1–2 and check the panel header for step 2 shows the full row count
+(`7 / 7`), not `0 / 7`.
 
 ## Quick reference: expected inspector lines
 
