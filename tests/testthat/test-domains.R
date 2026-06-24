@@ -307,7 +307,51 @@ test_that(".update_data_stats.default shows placeholder when parent cache is abs
       .package = "shiny"
     )
   )
-  expect_identical(captured, "No data selected in previous step.")
+  # The placeholder must be a tag element (not a bare string): a bare string is
+  # inserted as a text node, which the removeUI(" > *") cleanup cannot remove,
+  # leaving stale text next to freshly computed stats after a run.
+  expect_s3_class(captured, "shiny.tag")
+  expect_match(as.character(captured), "No data selected in previous step\\.")
+  expect_match(as.character(captured), "^<span")
+})
+
+test_that(".update_data_stats.tblist placeholder is an element removable on rerun", {
+  # Regression for the placeholder lingering next to stats: in run_button mode a
+  # freshly added step has no parent (pre) cache, so the placeholder is shown.
+  # After the run the pre cache exists and stats are shown. The removeUI(" > *")
+  # cleanup only matches element children, so the placeholder must be an element
+  # (not a bare text node) to be removed before the stats are inserted.
+  coh <- build_domain_cohort(cache = TRUE, stats = c("pre", "post"), feedback = FALSE)
+  session <- list(ns = function(x) x)
+
+  capture_stats <- function(cohort) {
+    captured <- list()
+    testthat::with_mocked_bindings(
+      .update_data_stats.tblist(cohort$get_source(), "1", cohort, session),
+      removeUI = function(...) invisible(NULL),
+      insertUI = function(selector, ui, ...) {
+        captured[[length(captured) + 1L]] <<- ui
+        invisible(NULL)
+      },
+      .package = "shiny"
+    )
+    captured
+  }
+
+  # Before running: pre cache absent -> placeholder, and it must be an element.
+  expect_null(coh$get_cache("1", state = "pre", .recalc_when_missing = FALSE))
+  before <- capture_stats(coh)
+  expect_length(before, 1L)
+  expect_s3_class(before[[1]], "shiny.tag")
+  expect_match(as.character(before[[1]]), "No data selected in previous step\\.")
+
+  # After running: stats are shown and no placeholder text remains.
+  coh$run_flow()
+  after <- capture_stats(coh)
+  expect_length(after, 1L)
+  after_html <- as.character(after[[1]])
+  expect_no_match(after_html, "No data selected in previous step")
+  expect_match(after_html, "150")
 })
 
 # -- state round-trip preserves domain (R5c) ----------------------------------

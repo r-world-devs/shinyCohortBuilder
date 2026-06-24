@@ -84,7 +84,11 @@ dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
     pre_cache <- cohort$get_cache(step_id, state = "pre", .recalc_when_missing = FALSE)
     previous <- pre_cache[[dataset]]$n_rows
     if (is.null(previous) || !isTRUE(previous > 0)) {
-      ui <- "No data selected in previous step."
+      # Wrap in an element so the removeUI(" > *") cleanup below can remove it on
+      # the next update. A bare string is inserted as a text node, which the
+      # child-element selector cannot match, leaving stale text behind (e.g. the
+      # placeholder lingering next to freshly computed stats after a run).
+      ui <- shiny::tags$span("No data selected in previous step.")
     } else {
       current <- cohort$get_cache(step_id, state = "post")[[dataset]]$n_rows
       ui <- .pre_post_stats(current, previous, percent = TRUE, stats = stats)

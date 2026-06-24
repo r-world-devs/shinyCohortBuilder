@@ -1169,7 +1169,11 @@ no_ws <- c("before", "after", "outside", "after-begin", "before-end", "inside")
   # "argument is of length zero".
   previous <- cohort$get_cache(step_id, state = "pre", .recalc_when_missing = FALSE)$n_rows
   if (is.null(previous) || !isTRUE(previous > 0)) {
-    ui <- "No data selected in previous step."
+    # Wrap in an element so the removeUI(" > *") cleanup can remove it on the
+    # next update. A bare string is inserted as a text node, which the
+    # child-element selector cannot match, leaving stale text behind (e.g. the
+    # placeholder lingering next to freshly computed stats after a run).
+    ui <- shiny::tags$span("No data selected in previous step.")
   } else {
     current <- cohort$get_cache(step_id, state = "post")$n_rows
     ui <- .pre_post_stats(current, previous, percent = TRUE, stats = stats)
