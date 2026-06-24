@@ -118,7 +118,7 @@ keep_na_message <- function(filter, cohort, msg_fun) {
   if (render$mode == "domain") {
     return("Keep missing values")
   }
-  cohort$get_cache(filter@step_id, filter@id, state = "pre")$n_missing |>
+  cohort$get_cache(filter@step_id, filter@id, state = "pre", name = "n_missing") |>
     msg_fun()
 }
 
@@ -252,8 +252,8 @@ discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, updat
       return(
         discrete_domain_input_params(
           filter, input_id, cohort, reset = reset, update = update,
-          pre = cohort$get_cache(step_id, filter_id, state = "pre")$choices,
-          post = cohort$get_cache(step_id, filter_id, state = "post")$choices,
+          pre = cohort$get_cache(step_id, filter_id, state = "pre", name = "choices"),
+          post = cohort$get_cache(step_id, filter_id, state = "post", name = "choices"),
           stats = if_null_default(filter_params$stats, cohort$attributes$stats),
           ...
         )
@@ -261,15 +261,15 @@ discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, updat
     }
   }
 
-  if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
+  if (!cohort$get_cache(step_id, filter_id, state = "pre", name = "n_data")) {
     return(
       list(inputId = input_id, choices = character(0), selected = character(0), label = NULL)
     )
   }
 
-  parent_filter_stats <- cohort$get_cache(step_id, filter_id, state = "pre")$choices
+  parent_filter_stats <- cohort$get_cache(step_id, filter_id, state = "pre", name = "choices")
   filter_stats <- extend_stats(
-    cohort$get_cache(step_id, filter_id, state = "post")$choices,
+    cohort$get_cache(step_id, filter_id, state = "post", name = "choices"),
     parent_filter_stats,
     inherit_parent = inherit_parent_stats(
       filter_params$value,

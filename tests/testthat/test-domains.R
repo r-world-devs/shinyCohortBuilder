@@ -282,6 +282,34 @@ test_that(".update_data_stats is a no-op when stats is NULL", {
   expect_null(cached)
 })
 
+test_that(".update_data_stats.default shows placeholder when parent cache is absent", {
+  # Regression: the default method used to read a flat `$n_rows` (which never
+  # exists, the step cache nests per-dataset) and then evaluate `if (!previous >
+  # 0)`. When the parent step was never run the cache is NULL, so `previous` was
+  # NULL and the comparison errored with "argument is of length zero", crashing
+  # the app (run_button mode / cache = FALSE / freshly added step). The method
+  # must instead read without forcing a recompute and fall back to the
+  # placeholder.
+  coh <- build_domain_cohort(cache = FALSE, stats = c("pre", "post"), feedback = FALSE)
+  # Not run: step "1" pre cache is absent.
+  expect_null(coh$get_cache("1", state = "pre", .recalc_when_missing = FALSE))
+
+  session <- list(ns = function(x) x)
+  captured <- NULL
+  expect_no_error(
+    testthat::with_mocked_bindings(
+      .update_data_stats.default(coh$get_source(), "1", coh, session),
+      removeUI = function(...) invisible(NULL),
+      insertUI = function(selector, ui, ...) {
+        captured <<- ui
+        invisible(NULL)
+      },
+      .package = "shiny"
+    )
+  )
+  expect_identical(captured, "No data selected in previous step.")
+})
+
 # -- state round-trip preserves domain (R5c) ----------------------------------
 
 test_that("get_state/restore preserves filter domains", {

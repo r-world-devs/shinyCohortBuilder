@@ -34,13 +34,13 @@ discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, 
   step_id <- filter@step_id
   filter_id <- filter@id
 
-  if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
+  if (!cohort$get_cache(step_id, filter_id, state = "pre", name = "n_data")) {
     return(
       list(inputId = input_id, value = "", label = NULL)
     )
   }
 
-  parent_choices <- cohort$get_cache(step_id, filter_id, state = "pre")$choices
+  parent_choices <- cohort$get_cache(step_id, filter_id, state = "pre", name = "choices")
   selected_value <- get_matching_vals(
     filter@value,
     parent_choices,

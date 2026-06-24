@@ -285,7 +285,7 @@ ui_update_filter <- function(cohort, step_id, filter_id, update, reset, session)
     # mode there is no cache to read and no feedback plot to refresh.
     if (render$mode == "stats") {
       show <- TRUE
-      if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
+      if (!cohort$get_cache(step_id, filter_id, state = "pre", name = "n_data")) {
         show <- FALSE
       }
       ui_update_filter_class(
@@ -341,7 +341,7 @@ ui_update_plot <- function(step_id, filter_id, cohort, session) {
   input_state("update_plot", list(step_id = step_id, filter_id = filter_id))
 
   filter <- cohort$get_filter(step_id, filter_id)
-  no_data <- cohort$get_cache(step_id, filter_id, state = "pre")$n_data == 0
+  no_data <- cohort$get_cache(step_id, filter_id, state = "pre", name = "n_data") == 0
   feedback <- filter@private$gui$feedback(filter, sf_id(step_id, filter_id), cohort, no_data)
   session$output[[feedback$plot_id]] <- feedback$render_fun
 }
@@ -1160,8 +1160,15 @@ no_ws <- c("before", "after", "outside", "after-begin", "before-end", "inside")
   }
   selector <- paste0("#", ns(paste0(step_id, "-stats")))
 
-  previous <- cohort$get_cache(step_id, state = "pre")$n_rows
-  if (!previous > 0) {
+  # Guard against a missing parent snapshot. Read the parent (pre) cache without
+  # forcing an on-demand recompute: if the parent step was never run its cache is
+  # absent, and recomputing here would error and crash the app (e.g. run_button
+  # mode / cache = FALSE / freshly added step). In that case, show the
+  # placeholder instead. Also handle NULL/zero `previous` safely: a NULL cache
+  # yields a NULL `previous`, and `if (!NULL > 0)` would otherwise error with
+  # "argument is of length zero".
+  previous <- cohort$get_cache(step_id, state = "pre", .recalc_when_missing = FALSE)$n_rows
+  if (is.null(previous) || !isTRUE(previous > 0)) {
     ui <- "No data selected in previous step."
   } else {
     current <- cohort$get_cache(step_id, state = "post")$n_rows

@@ -129,13 +129,13 @@ range_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
     )
   }
 
-  if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
+  if (!cohort$get_cache(step_id, filter_id, state = "pre", name = "n_data")) {
     return(
       range_input_defaults(input_id, filter@type)
     )
   }
 
-  parent_filter_stats <- cohort$get_cache(step_id, filter_id, state = "pre")$frequencies
+  parent_filter_stats <- cohort$get_cache(step_id, filter_id, state = "pre", name = "frequencies")
   parent_range <- freq_range(parent_filter_stats)
 
   if (filter@type == "datetime_range") {

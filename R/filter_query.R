@@ -85,7 +85,7 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
   step_id <- filter@step_id
   filter_id <- filter@id
 
-  if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
+  if (!cohort$get_cache(step_id, filter_id, state = "pre", name = "n_data")) {
     return(
       list(inputId = input_id)
     )
@@ -96,7 +96,7 @@ query_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
     gui_args$filters <- list()
   }
 
-  parent_specs <- cohort$get_cache(step_id, filter_id, state = "pre")$specs
+  parent_specs <- cohort$get_cache(step_id, filter_id, state = "pre", name = "specs")
   setting_from_stat <- base::get("setting_from_stat", envir = asNamespace("shinyQueryBuilder"), inherits = FALSE)
 
   filters <- filter@variables |>

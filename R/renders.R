@@ -91,7 +91,7 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
   # The "no data in previous step" gate only applies in stats mode. In domain
   # mode there is no empirical row count, so skip the cache read entirely.
   if (render$mode == "stats" &&
-      !cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
+      !cohort$get_cache(step_id, filter_id, state = "pre", name = "n_data")) {
     no_data_class <- "cb_no_data"
     empty <- TRUE
   }

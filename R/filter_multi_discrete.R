@@ -49,17 +49,17 @@ multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE,
   filter_id <- filter@id
   filter_params <- get_filter_params(filter)
 
-  max_groups <- length(cohort$get_cache("1", filter_id, state = "pre")$choices)
+  max_groups <- length(cohort$get_cache("1", filter_id, state = "pre", name = "choices"))
 
-  if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
+  if (!cohort$get_cache(step_id, filter_id, state = "pre", name = "n_data")) {
     return(
       list(inputId = input_id, label = NULL, choices = NULL, choicesNames = NULL, selected = NULL, max_groups = max_groups)
     )
   }
 
-  parent_filter_stats <- cohort$get_cache(step_id, filter_id, state = "pre")$choices
+  parent_filter_stats <- cohort$get_cache(step_id, filter_id, state = "pre", name = "choices")
   filter_stats <- complete_stats_list(
-    cohort$get_cache(step_id, filter_id, state = "post")$choices,
+    cohort$get_cache(step_id, filter_id, state = "post", name = "choices"),
     parent_filter_stats
   ) |>
     purrr::map2(parent_filter_stats, extend_stats)
