@@ -42,10 +42,11 @@ patients <- data.frame(
   age    = c(50L, 28L, 38L, 49L, 45L, 33L, 43L, 35L, 40L, 61L, NA, 47L)
 )
 
-# Build a cohort. Gender starts at "F"; in the walkthrough you first WIDEN it to
-# {F, M} (so step 2 sees the full domain), then NARROW it back to {F} to trigger
-# downstream propagation. Starting from a concrete value (rather than NULL) keeps
-# the discrete filter's update semantics straightforward.
+# Build a cohort. Gender starts at "F"; adding a step (Finding 1) narrows the new
+# step from the resolved parent. In Finding 2 you WIDEN gender to {F, M} and then
+# NARROW it back to {F} to watch downstream propagation re-run. Starting from a
+# concrete value (rather than NULL) keeps the discrete filter's update semantics
+# straightforward.
 build_cohort <- function(cache, propagate_domains) {
   cohort(
     set_source(tblist(patients = patients)),

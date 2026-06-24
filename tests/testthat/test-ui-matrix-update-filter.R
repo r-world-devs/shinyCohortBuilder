@@ -43,9 +43,12 @@ test_that("Update non-last step: data-mode narrows downstream group + age (domai
   )
   on.exit(app$stop(), add = TRUE)
 
-  # Before the update the downstream domain is the full declared domain.
+  # Before the narrowing update, step 1 already allows gender {F, M}, so the
+  # step was added against the parent's full-data domain: all groups {A, B, C}
+  # are present and the age range spans the data (28-61), not the declared
+  # {18, 80}. (Adding a step propagates from the resolved parent.)
   expect_setequal(cb_discrete_choices(app, "2", "group"), c("A", "B", "C"))
-  expect_equal(cb_range_bounds(app, "2", "age"), c(18, 80))
+  expect_equal(cb_range_bounds(app, "2", "age"), c(28, 61))
 
   narrow_step1_to_F(app)
 

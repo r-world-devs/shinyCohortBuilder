@@ -44,71 +44,78 @@ restricts gender to `"F"`, every `"A"` row is gone — the remaining groups are
 
 ---
 
-## Finding 1 — Adding a step does NOT narrow it, even when the parent already filters
+## Finding 1 — Adding a step narrows it immediately from a resolved parent (cache/data)
 
-This is the counter-intuitive one. You might expect a newly added step to start
-from the parent's *remaining* data — i.e. if the parent already restricts gender
-to `F` (which removes every `A` row), the new step's `group` domain should open
-as `{B, C}`. It does **not**. The new step shows the **full declared domain**
-`{A, B, C}`.
+A newly added step starts from the parent's **remaining** data. If the parent
+already restricts gender to `F` (which removes every `A` row), the new step's
+`group` domain opens as `{B, C}` and its `age` range as the F-rows' range — not
+the full declared `{A, B, C}` / `{18, 80}`.
 
-Why: domain propagation in `data`/`cache` mode fires when a step runs and pushes
-its snapshot to its **successor** (`run` → `propagate_domains_to(next_step)` in
-`cohort_methods.R:838`). Clicking **+ add step** calls `copy_step(run_flow=TRUE)`,
-which runs only the *new* step, not the parent — so no parent→child propagation
-happens. Narrowing appears only later, when you update the parent and it re-runs
-(that is Finding 2).
+Why: domain propagation in `data`/`cache` mode recomputes a step's domains from
+its parent's snapshot at the **start of `run_step`** (step n from step n-1). So
+running the newly added step narrows it from the already-resolved parent.
+
+> Historical note: this used to be a bug. Propagation fired at the *end* of
+> `run_step` and targeted the *next* step (`run → propagate_domains_to(n+1)`).
+> Adding+running a step runs only the *new* step, never the parent, so the new
+> step kept the parent's un-narrowed domain. The fix moved propagation to the
+> start of `run_step`, targeting the step being run (`n` from `n-1`). This is
+> simpler (one propagation point, no special add-step handling) and also fixes
+> partial runs `run_flow(min_step = m)`, which previously skipped re-propagating
+> step `m` itself. Regression tests: `test-cohort_methods.R` ("narrows a step
+> added after a resolved parent", "defers narrowing when added step is not run")
+> and the add-step UI matrix.
 
 Steps:
 
 1. Config: `propagate_domains = data`, `render_source = domain`,
    `run_button = none`, `cache = checked`. Click **Apply**.
 2. Leave **Gender = `F`** (the app's default). All `A` rows are gender `M`, so the
-   remaining data contains no `A`. The inspector shows
-   `step 1 | group domain={A,B,C}` (the *declared* domain — the first step is
-   itself never narrowed, since nothing propagates into it).
+   remaining data contains no `A`. Step 1 is run on startup, so it is resolved
+   (not pending).
 3. Click **+ (add step)** in the panel header to clone step 1.
 4. **Observe** the inspector:
 
    ```
    step 1 | pending=FALSE | group domain={A,B,C} | age domain={18,80}
-   step 2 | pending=FALSE | group domain={A,B,C} | age domain={18,80}
+   step 2 | pending=FALSE | group domain={B,C}   | age domain={35,50}
    ```
 
-   Step 2 is `{A,B,C}` even though the upstream data (gender `F`) contains no
-   `A` rows at all. Adding the step did **not** narrow it — that is the
-   surprise. Contrast with Finding 2, where *updating* the parent finally
-   pushes the narrowed `{B,C}` domain into step 2.
+   Step 2 opens already narrowed to `{B,C}` / `{35,50}`, matching the parent's
+   remaining (gender `F`) data. (Step 1 itself is never narrowed — nothing
+   propagates into the first step.)
+
+> Exception — a **pending** parent defers: under a run button, step 1 is not run
+> at startup, so adding a step does *not* eagerly narrow. The new step inherits
+> the full domain until you run the flow, at which point propagation narrows it.
+> `filter` mode also keeps `{A,B,C}` here, because it narrows from a filter's own
+> upstream *value*, not from the parent's remaining data (see Finding 4).
 
 ---
 
-## Finding 2 — Updating a NON-LAST step narrows downstream (cache/data modes)
+## Finding 2 — Updating a NON-LAST step re-narrows downstream (cache/data modes)
 
 With `propagate_domains = cache` or `data`, *editing* (re-running) an upstream
-(non-last) step narrows the downstream step's domain from the remaining data.
-This is the run that Finding 1 was missing.
+(non-last) step recomputes the downstream step's domain from the remaining data.
 
-Continue from Finding 1 (steps 1 and 2 exist; step 2 is still `{A,B,C}`):
+Continue from Finding 1 (steps 1 and 2 exist). To see the domain move, first
+**widen** then **narrow** the parent:
 
-1. In **step 1**, change **Gender**: tick `M` so gender = `{F, M}`, then untick
-   it again back to **only `F`**. (You need an actual *change* to step 1 to make
-   it re-run and propagate. If your panel already shows the `M` box ticked from a
-   previous click, just toggle it.)
-2. **Observe** the inspector — step 2 now narrows:
+1. In **step 1**, tick `M` so gender = `{F, M}`. Step 2 widens — the inspector
+   shows `group domain={A,B,C}` and `age domain={28,61}` (the full-data range).
+2. Untick `M` so gender is **only `F`** again. Step 2 re-narrows:
 
    ```
    step 2 | pending=FALSE | group domain={B,C} | age domain={35,50}
    ```
 
-   and the rendered step-2 **Group** checkboxes now offer only `B` and `C`.
+   and the rendered step-2 **Group** checkboxes again offer only `B` and `C`.
 
-The key point: the domain change in step 2 is driven by **re-running step 1**,
-not by step 2 itself — exactly the propagation that adding the step (Finding 1)
-did not trigger.
+The key point: each change to step 1 re-runs it and re-propagates to step 2,
+keeping the downstream domain in sync with the upstream remaining data.
 
-> Contrast: set `propagate_domains = none` (Apply, redo the steps) and step 2
-> stays `{A,B,C}` after the same edit. `filter` mode also leaves it `{A,B,C}`
-> (see Finding 4).
+> Contrast: with `propagate_domains = none` step 2 never changes from its added
+> state. `filter` mode does not narrow from upstream data either (Finding 4).
 
 ---
 

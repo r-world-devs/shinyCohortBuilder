@@ -43,14 +43,16 @@ test_that("Add step: new step clones parent filters and choices (auto render)", 
 
 # ── Domain on add: new step shows the cloned/declared domain ─────────────────
 
-test_that("Add step: new step shows declared domain on add (narrows only after parent update)", {
+test_that("Add step: data/cache narrow the new step from a resolved parent", {
   skip_on_cran(); skip_on_ci(); skip_if_screenshot_only()
 
-  # Propagation (filter/cache/data) narrows a downstream step when the *parent*
-  # step is updated/re-run, not at the moment of cloning. So immediately after
-  # add the new step renders the declared full domain {A,B,C} / {18,80}. The
-  # post-update narrowing is asserted in test-ui-matrix-update-filter.R.
-  for (mode in c("filter", "data")) {
+  # The matrix app's step 1 already restricts gender to "F" (removing every "A"
+  # row) and is run on startup, so it is resolved (not pending) when we add a
+  # step. Under data/cache propagation, the new step must open already narrowed
+  # to the parent's remaining data: group {B,C} and the F-rows' age range 35-50.
+  # (Propagation fires when a parent runs; add_step propagates from the resolved
+  # parent so the new step does not show the stale full domain.)
+  for (mode in c("data", "cache")) {
     app <- cb_matrix_driver(
       paste0("add-domain-", mode),
       list(run_button = "none", propagate = mode,
@@ -60,14 +62,37 @@ test_that("Add step: new step shows declared domain on add (narrows only after p
     cb_add_step(app)
 
     choices <- cb_discrete_choices(app, "2", "group")
-    expect_setequal(choices, c("A", "B", "C"))
+    expect_setequal(choices, c("B", "C"))
 
     bounds <- cb_range_bounds(app, "2", "age")
     expect_false(is.null(bounds))
-    expect_equal(bounds, c(18, 80))
+    expect_equal(bounds, c(35, 50))
 
     app$stop()
   }
+})
+
+test_that("Add step: filter mode keeps the full domain on add (no upstream-data narrowing)", {
+  skip_on_cran(); skip_on_ci(); skip_if_screenshot_only()
+
+  # "filter" mode narrows a filter only from its own upstream *value*, not from
+  # the parent's remaining data. The parent's gender restriction therefore does
+  # not shrink the new step's group domain, which stays {A,B,C} / {18,80}.
+  app <- cb_matrix_driver(
+    "add-domain-filter",
+    list(run_button = "none", propagate = "filter",
+         render_source = "domain", cache = TRUE, stats = "none")
+  )
+  on.exit(app$stop(), add = TRUE)
+
+  cb_add_step(app)
+
+  choices <- cb_discrete_choices(app, "2", "group")
+  expect_setequal(choices, c("A", "B", "C"))
+
+  bounds <- cb_range_bounds(app, "2", "age")
+  expect_false(is.null(bounds))
+  expect_equal(bounds, c(18, 80))
 })
 
 # ── Pending state on add ─────────────────────────────────────────────────────
