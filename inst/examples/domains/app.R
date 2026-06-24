@@ -185,14 +185,23 @@ server <- function(input, output, session) {
     sepal_domain <- if (isTRUE(input$cfg_sepal_domain_on)) input$cfg_sepal_domain else NULL
 
     # cache mainly affects stats; with it off, stats modes have no cached data.
-    coh <- build_cohort(
-      cache = isTRUE(input$cfg_cache),
-      propagate_domains = input$cfg_propagate,
-      species_domain = species_domain,
-      sepal_domain = sepal_domain,
-      available_filters = isTRUE(input$cfg_available_filters),
-      add_initial = isTRUE(input$cfg_add_initial)
+    # propagate_domains = "cache" also requires cache = TRUE, so surface that
+    # (and any other construction error) as a friendly notification.
+    coh <- tryCatch(
+      build_cohort(
+        cache = isTRUE(input$cfg_cache),
+        propagate_domains = input$cfg_propagate,
+        species_domain = species_domain,
+        sepal_domain = sepal_domain,
+        available_filters = isTRUE(input$cfg_available_filters),
+        add_initial = isTRUE(input$cfg_add_initial)
+      ),
+      error = function(e) {
+        showNotification(conditionMessage(e), type = "error", duration = 8)
+        NULL
+      }
     )
+    if (is.null(coh)) return(invisible(NULL))
 
     # render_source = "domain" needs every filter to have a domain. Validate up
     # front so a bad combination surfaces as a friendly notification instead of

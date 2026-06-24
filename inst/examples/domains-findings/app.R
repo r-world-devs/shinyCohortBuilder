@@ -126,10 +126,18 @@ server <- function(input, output, session) {
     n <- counter() + 1L
     counter(n)
     id <- paste0("coh", n)
-    coh <- build_cohort(
-      cache = isTRUE(input$cfg_cache),
-      propagate_domains = input$cfg_propagate
+    coh <- tryCatch(
+      build_cohort(
+        cache = isTRUE(input$cfg_cache),
+        propagate_domains = input$cfg_propagate
+      ),
+      error = function(e) {
+        # e.g. propagate_domains = "cache" requires cache = TRUE.
+        showNotification(conditionMessage(e), type = "error", duration = 8)
+        NULL
+      }
     )
+    if (is.null(coh)) return(invisible(NULL))
     if (identical(input$cfg_render, "domain")) {
       ok <- tryCatch({
         shinyCohortBuilder:::validate_domains_present(coh); TRUE

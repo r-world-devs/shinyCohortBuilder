@@ -134,10 +134,17 @@ post_rm_step_hook <- function(public, private, step_id) {
     "post_rm_step_action",
     list(id = step_id, ns_prefix = session$ns(""))
   )
-  session$sendCustomMessage(
-    "inform_data_updated",
-    list(steps = `%:::%`("cohortBuilder", "prev_step")(step_id), ns_prefix = session$ns(""))
-  )
+  # In run_button mode data is computed only on an explicit Run. Signalling a
+  # data update on step removal would push stale/uncomputed results to the
+  # returned-data reactive before the user runs the flow, so skip it. The UI
+  # cleanup above (removeUI / post_rm_step_action) still runs.
+  run_on_request <- !is_none(public$attributes$run_button)
+  if (!run_on_request) {
+    session$sendCustomMessage(
+      "inform_data_updated",
+      list(steps = `%:::%`("cohortBuilder", "prev_step")(step_id), ns_prefix = session$ns(""))
+    )
+  }
 }
 
 post_add_step_hook <- function(public, private, step_id) {
