@@ -359,6 +359,34 @@ test_that(".update_data_stats.default shows placeholder only when parent is trul
   expect_match(as.character(captured), "^<span")
 })
 
+test_that(".update_data_stats.tblist shows real stats when only filter stats are cached", {
+  # Regression (run_button-pending): rendering a filter computes its filter stats
+  # lazily, populating the cache slot's $filters but not its data stats. The
+  # data-stats panel must still recompute and show real numbers, not the
+  # "No data selected in previous step." placeholder. Before the cache split, the
+  # slot looked non-empty (it had $filters) so the data stats were never
+  # recomputed and the placeholder lingered.
+  coh <- build_domain_cohort(cache = FALSE, stats = c("pre", "post"), feedback = FALSE)
+  # Lazily populate ONLY the filter stats for step 1's pre snapshot.
+  invisible(coh$get_cache("1", "species", state = "pre", name = "n_data"))
+
+  session <- list(ns = function(x) x)
+  captured <- list()
+  testthat::with_mocked_bindings(
+    .update_data_stats.tblist(coh$get_source(), "1", coh, session),
+    removeUI = function(...) invisible(NULL),
+    insertUI = function(selector, ui, ...) {
+      captured[[length(captured) + 1L]] <<- ui
+      invisible(NULL)
+    },
+    .package = "shiny"
+  )
+  expect_length(captured, 1L)
+  html <- as.character(captured[[1]])
+  expect_no_match(html, "No data selected in previous step")
+  expect_match(html, "150")
+})
+
 test_that(".update_data_stats.tblist shows step 1 stats pre-run (no placeholder)", {
   # Step 1's "pre" snapshot is the source and is always available, so before any
   # run the panel shows real stats ("150 / 150 (100%)") rather than the
