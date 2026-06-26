@@ -148,6 +148,36 @@ test_that("get_n_matching_vals returns total when NA", {
   expect_equal(result, 3)
 })
 
+test_that("get_matching_vals trims whitespace around every value", {
+  # Regression: sub(" ", "", x) only stripped the FIRST space, so the 3rd value
+  # (" C") kept a leading space and failed to match.
+  result <- shinyCohortBuilder:::get_matching_vals("A, B, C", "A,B,C,D")
+  expect_equal(result, "A, B, C")
+})
+
+test_that("get_matching_vals intersects space-separated values against domain", {
+  result <- shinyCohortBuilder:::get_matching_vals("A, B, Z", "A,B,C")
+  expect_equal(result, "A,B")
+})
+
+test_that("get_n_matching_vals counts space-separated values correctly", {
+  result <- shinyCohortBuilder:::get_n_matching_vals("A, B, C", "A,B,C,D")
+  expect_equal(result, 3)
+})
+
+test_that("split_discrete_text_vals trims and drops empty pieces", {
+  expect_equal(
+    shinyCohortBuilder:::split_discrete_text_vals("a, b, c"),
+    c("a", "b", "c")
+  )
+  expect_equal(
+    shinyCohortBuilder:::split_discrete_text_vals("  a , , b "),
+    c("a", "b")
+  )
+  expect_equal(shinyCohortBuilder:::split_discrete_text_vals(NA), character(0))
+  expect_equal(shinyCohortBuilder:::split_discrete_text_vals(""), character(0))
+})
+
 test_that("extend_stats fills missing entries with NA", {
   result <- shinyCohortBuilder:::extend_stats(
     list("A" = 5),

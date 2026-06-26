@@ -1,3 +1,15 @@
+# Split a comma-separated discrete_text string into a vector of unique, trimmed
+# values. Mirrors cohortBuilder's split_discrete_text(): whitespace around every
+# value is stripped (not just the first space) so "a, b, c" yields all three
+# values, and empty pieces are dropped.
+split_discrete_text_vals <- function(x) {
+  if (is.null(x) || identical(x, NA) || identical(x, "")) {
+    return(character(0))
+  }
+  pieces <- trimws(strsplit(as.character(x), ",", fixed = TRUE)[[1]])
+  unique(pieces[nzchar(pieces)])
+}
+
 get_matching_vals <- function(selected, original, reset = FALSE) {
 
   if (reset || identical(selected, NA)) {
@@ -8,8 +20,8 @@ get_matching_vals <- function(selected, original, reset = FALSE) {
     return(selected)
   }
 
-  selected_vec <- unique(strsplit(sub(" ", "", selected, fixed = TRUE), ",", fixed = TRUE)[[1]])
-  original_vec <- unique(strsplit(sub(" ", "", original, fixed = TRUE), ",", fixed = TRUE)[[1]])
+  selected_vec <- split_discrete_text_vals(selected)
+  original_vec <- split_discrete_text_vals(original)
 
   if (!all(selected_vec %in% original_vec)) {
     return(paste(intersect(selected_vec, original_vec), collapse = ","))
@@ -20,11 +32,11 @@ get_matching_vals <- function(selected, original, reset = FALSE) {
 
 get_n_matching_vals <- function(selected, original) {
 
-  original_vec <- unique(strsplit(sub(" ", "", original, fixed = TRUE), ",", fixed = TRUE)[[1]])
+  original_vec <- split_discrete_text_vals(original)
   if (identical(selected, NA)) {
     return(length(original_vec))
   }
-  selected_vec <- unique(strsplit(sub(" ", "", selected, fixed = TRUE), ",", fixed = TRUE)[[1]])
+  selected_vec <- split_discrete_text_vals(selected)
 
   sum(selected_vec %in% original_vec)
 }
