@@ -282,17 +282,39 @@ test_that(".update_data_stats is a no-op when stats is NULL", {
   expect_null(cached)
 })
 
-test_that(".update_data_stats.default shows placeholder when parent cache is absent", {
-  # Regression: the default method used to read a flat `$n_rows` (which never
-  # exists, the step cache nests per-dataset) and then evaluate `if (!previous >
-  # 0)`. When the parent step was never run the cache is NULL, so `previous` was
-  # NULL and the comparison errored with "argument is of length zero", crashing
-  # the app (run_button mode / cache = FALSE / freshly added step). The method
-  # must instead read without forcing a recompute and fall back to the
-  # placeholder.
+# Build a 2-step cohort whose first step can filter every row out, so the second
+# step's parent (pre) snapshot is genuinely empty. This is the only situation
+# that should still show the "No data selected in previous step." placeholder.
+build_empty_parent_cohort <- function(cache = TRUE, value = character(0)) {
+  coh <- cohortBuilder::cohort(
+    cohortBuilder::set_source(cohortBuilder::tblist(iris = iris)),
+    cohortBuilder::step(cohortBuilder::filter(
+      "discrete", id = "species", dataset = "iris", variable = "Species",
+      value = value, active = TRUE
+    )),
+    cohortBuilder::step(cohortBuilder::filter(
+      "range", id = "sl", dataset = "iris", variable = "Sepal.Length",
+      domain = c(4, 8)
+    )),
+    cache = cache
+  )
+  coh$attributes$stats <- c("pre", "post")
+  coh$attributes$feedback <- FALSE
+  coh$attributes$render_source <- "auto"
+  coh
+}
+
+test_that(".update_data_stats.default never errors and falls back to the placeholder element", {
+  # The default method is a generic fallback. It reads a flat top-level
+  # `$n_rows`, which a tblist cache never has (n_rows is nested per dataset), so
+  # `previous` is NULL here. The method must (a) never error on the NULL /
+  # length-zero comparison (`if (!NULL > 0)` would crash with "argument is of
+  # length zero") and (b) fall back to the placeholder as a *tag element* rather
+  # than a bare string -- a bare string is inserted as a text node that the
+  # removeUI(" > *") cleanup cannot remove, leaving stale text behind on rerun.
+  # (The "real stats pre-run" guarantee is source-specific and is covered for
+  # tblist by the .update_data_stats.tblist tests below.)
   coh <- build_domain_cohort(cache = FALSE, stats = c("pre", "post"), feedback = FALSE)
-  # Not run: step "1" pre cache is absent.
-  expect_null(coh$get_cache("1", state = "pre", .recalc_when_missing = FALSE))
 
   session <- list(ns = function(x) x)
   captured <- NULL
@@ -307,27 +329,47 @@ test_that(".update_data_stats.default shows placeholder when parent cache is abs
       .package = "shiny"
     )
   )
-  # The placeholder must be a tag element (not a bare string): a bare string is
-  # inserted as a text node, which the removeUI(" > *") cleanup cannot remove,
-  # leaving stale text next to freshly computed stats after a run.
   expect_s3_class(captured, "shiny.tag")
   expect_match(as.character(captured), "No data selected in previous step\\.")
   expect_match(as.character(captured), "^<span")
 })
 
-test_that(".update_data_stats.tblist placeholder is an element removable on rerun", {
-  # Regression for the placeholder lingering next to stats: in run_button mode a
-  # freshly added step has no parent (pre) cache, so the placeholder is shown.
-  # After the run the pre cache exists and stats are shown. The removeUI(" > *")
-  # cleanup only matches element children, so the placeholder must be an element
-  # (not a bare text node) to be removed before the stats are inserted.
+test_that(".update_data_stats.default shows placeholder only when parent is truly empty", {
+  # The placeholder is reserved for its real meaning: the parent step filtered
+  # out every row. The placeholder must be a tag element (not a bare string): a
+  # bare string is inserted as a text node, which the removeUI(" > *") cleanup
+  # cannot remove, leaving stale text next to freshly computed stats after a run.
+  coh <- build_empty_parent_cohort(cache = FALSE, value = character(0))
+  coh$run_flow()
+  expect_identical(nrow(coh$get_data("1", state = "post")$iris), 0L)
+
+  session <- list(ns = function(x) x)
+  captured <- NULL
+  testthat::with_mocked_bindings(
+    .update_data_stats.default(coh$get_source(), "2", coh, session),
+    removeUI = function(...) invisible(NULL),
+    insertUI = function(selector, ui, ...) {
+      captured <<- ui
+      invisible(NULL)
+    },
+    .package = "shiny"
+  )
+  expect_s3_class(captured, "shiny.tag")
+  expect_match(as.character(captured), "No data selected in previous step\\.")
+  expect_match(as.character(captured), "^<span")
+})
+
+test_that(".update_data_stats.tblist shows step 1 stats pre-run (no placeholder)", {
+  # Step 1's "pre" snapshot is the source and is always available, so before any
+  # run the panel shows real stats ("150 / 150 (100%)") rather than the
+  # "no data" placeholder.
   coh <- build_domain_cohort(cache = TRUE, stats = c("pre", "post"), feedback = FALSE)
   session <- list(ns = function(x) x)
 
-  capture_stats <- function(cohort) {
+  capture_stats <- function(cohort, step_id) {
     captured <- list()
     testthat::with_mocked_bindings(
-      .update_data_stats.tblist(cohort$get_source(), "1", cohort, session),
+      .update_data_stats.tblist(cohort$get_source(), step_id, cohort, session),
       removeUI = function(...) invisible(NULL),
       insertUI = function(selector, ui, ...) {
         captured[[length(captured) + 1L]] <<- ui
@@ -338,20 +380,59 @@ test_that(".update_data_stats.tblist placeholder is an element removable on reru
     captured
   }
 
-  # Before running: pre cache absent -> placeholder, and it must be an element.
-  expect_null(coh$get_cache("1", state = "pre", .recalc_when_missing = FALSE))
-  before <- capture_stats(coh)
+  before <- capture_stats(coh, "1")
+  expect_length(before, 1L)
+  before_html <- as.character(before[[1]])
+  expect_no_match(before_html, "No data selected in previous step")
+  expect_match(before_html, "150")
+
+  # After running, step 1 still shows real stats (still 150 pre, i.e. the source).
+  coh$run_flow()
+  after <- capture_stats(coh, "1")
+  after_html <- as.character(after[[1]])
+  expect_no_match(after_html, "No data selected in previous step")
+  expect_match(after_html, "150")
+})
+
+test_that(".update_data_stats.tblist placeholder is an element removable on rerun", {
+  # Regression for the placeholder lingering next to stats: when the parent step
+  # filters out every row, the second step shows the placeholder. The
+  # removeUI(" > *") cleanup only matches element children, so the placeholder
+  # must be an element (not a bare text node) to be removed before later stats.
+  coh <- build_empty_parent_cohort(cache = TRUE, value = character(0))
+  session <- list(ns = function(x) x)
+
+  capture_stats <- function(cohort, step_id) {
+    captured <- list()
+    testthat::with_mocked_bindings(
+      .update_data_stats.tblist(cohort$get_source(), step_id, cohort, session),
+      removeUI = function(...) invisible(NULL),
+      insertUI = function(selector, ui, ...) {
+        captured[[length(captured) + 1L]] <<- ui
+        invisible(NULL)
+      },
+      .package = "shiny"
+    )
+    captured
+  }
+
+  # Parent (step 1) filters everything out -> step 2 shows the placeholder, which
+  # must be an element.
+  coh$run_flow()
+  expect_identical(nrow(coh$get_data("1", state = "post")$iris), 0L)
+  before <- capture_stats(coh, "2")
   expect_length(before, 1L)
   expect_s3_class(before[[1]], "shiny.tag")
   expect_match(as.character(before[[1]]), "No data selected in previous step\\.")
 
-  # After running: stats are shown and no placeholder text remains.
-  coh$run_flow()
-  after <- capture_stats(coh)
+  # When the parent keeps rows, step 2 shows stats and no placeholder remains.
+  coh2 <- build_empty_parent_cohort(cache = TRUE, value = "setosa")
+  coh2$run_flow()
+  after <- capture_stats(coh2, "2")
   expect_length(after, 1L)
   after_html <- as.character(after[[1]])
   expect_no_match(after_html, "No data selected in previous step")
-  expect_match(after_html, "150")
+  expect_match(after_html, "50")
 })
 
 # -- state round-trip preserves domain (R5c) ----------------------------------

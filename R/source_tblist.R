@@ -76,12 +76,16 @@ dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
 
   dataset_names |> purrr::walk(function(dataset) {
     selector <- paste0("#", ns(paste0(step_id, "-stats_", dataset)))
-    # Guard against a missing parent snapshot. Read the parent (pre) cache
-    # without forcing an on-demand recompute: if the parent step was never run
-    # its cache is absent, and recomputing here would error and crash the app
-    # (e.g. run_button mode / cache = FALSE / freshly added step). In that case,
-    # show the placeholder instead. Also handle NULL/zero `previous` safely.
-    pre_cache <- cohort$get_cache(step_id, state = "pre", .recalc_when_missing = FALSE)
+    # Read the parent (pre) snapshot stats, recomputing on demand when missing.
+    # Every step's "pre" data is its parent's "post" snapshot, which always
+    # exists: step 1's parent is the source, and steps 2+ are seeded from their
+    # parent at construction / add_step (see Cohort$init_source / add_step). So
+    # recomputing "pre" stats is safe in every mode (run_button, cache = FALSE,
+    # freshly added step) and lets step 1 show real stats before any run instead
+    # of the "no data" placeholder. The placeholder is then reserved for its true
+    # meaning: the parent step actually filtered out every row (previous == 0).
+    # NULL is still handled defensively.
+    pre_cache <- cohort$get_cache(step_id, state = "pre", .recalc_when_missing = TRUE)
     previous <- pre_cache[[dataset]]$n_rows
     if (is.null(previous) || !isTRUE(previous > 0)) {
       # Wrap in an element so the removeUI(" > *") cleanup below can remove it on
