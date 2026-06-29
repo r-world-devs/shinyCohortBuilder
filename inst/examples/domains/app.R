@@ -158,10 +158,17 @@ ui <- bslib::page_sidebar(
       width = 340,
       shiny::uiOutput("filter_panel")
     ),
-    bslib::card(
-      bslib::card_header("Filtered data"),
-      shiny::verbatimTextOutput("filtered_summary"),
-      shiny::tableOutput("filtered_table")
+    bslib::navset_card_tab(
+      title = "Cohort",
+      bslib::nav_panel(
+        "Filtered data",
+        shiny::verbatimTextOutput("filtered_summary"),
+        shiny::tableOutput("filtered_table")
+      ),
+      bslib::nav_panel(
+        "Cohort cache",
+        shiny::verbatimTextOutput("cohort_cache")
+      )
     )
   )
 )
@@ -289,6 +296,27 @@ server <- function(input, output, session) {
     data <- filtered_data()
     shiny::req(data$iris)
     utils::head(data$iris, 20)
+  })
+
+  # Print the cohort's internal cache so you can watch how stats are stored per
+  # step (cache id "0" is the source baseline; "1", "2", ... are the steps) and
+  # how propagate_domains / cache settings change what is computed.
+  #
+  # The cache is also populated lazily (stats computed during render, run-button
+  # pending state, on-demand get_cache reads) outside the cb_data_updated signal,
+  # so polling on a short timer keeps the view live and catches those updates.
+  output$cohort_cache <- shiny::renderPrint({
+    shiny::req(applied$id, applied$cohort)
+    # Re-render on the data-updated signal AND every second so lazily populated
+    # cache entries show up without needing another explicit trigger.
+    input[[paste0(applied$id, "-cb_data_updated")]]
+    shiny::invalidateLater(1000, session)
+    cache <- applied$cohort$.__enclos_env__$private$cache
+    if (length(cache) == 0) {
+      cat("Cache is empty.\n")
+      return(invisible(NULL))
+    }
+    utils::str(cache, max.level = 4)
   })
 }
 
