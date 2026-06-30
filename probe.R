@@ -5,7 +5,7 @@ suppressMessages({
 library(magrittr)
 iris2 <- iris
 iris2$Species <- as.character(iris2$Species)
-coh <- cohort(set_source(tblist(iris = iris2)), cache = TRUE, propagate_domains = "filter") %>%
+coh <- cohort(set_source(tblist(iris = iris2)), compute_stats = TRUE, propagate_domains = "filter") %>%
   add_filter(filter("discrete", id = "species", dataset = "iris", variable = "Species",
                     domain = c("setosa", "versicolor", "virginica")))
 

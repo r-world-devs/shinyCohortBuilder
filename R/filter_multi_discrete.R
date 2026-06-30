@@ -1,3 +1,13 @@
+#' Resolve a multi_discrete filter's per-group selected values
+#'
+#' Returns all choices per group on reset, drops `NA` group selections, and
+#' overlays the remaining selections onto the full set of choices.
+#'
+#' @param values Named list of per-group selected values.
+#' @param parent_filter_stats Named list of per-group available choices.
+#' @param reset When `TRUE`, select all choices in every group.
+#' @return A named list of per-group selected values.
+#' @noRd
 extract_selected_values <- function(values, parent_filter_stats, reset) {
 
   all_choices <- purrr::map(parent_filter_stats, names)
@@ -15,6 +25,13 @@ extract_selected_values <- function(values, parent_filter_stats, reset) {
   )[names(values)]
 }
 
+#' Build pre/post choice labels for a multi_discrete group
+#' @param name Vector of choice label texts.
+#' @param parent_stat Parent (pre) counts.
+#' @param current_stat Current (post) counts.
+#' @param stats Which stats to show (`"pre"`/`"post"`).
+#' @return A list of HTML choice labels.
+#' @noRd
 choice_names <- function(name, parent_stat, current_stat, stats) {
   purrr::pmap(
     list(
@@ -27,6 +44,15 @@ choice_names <- function(name, parent_stat, current_stat, stats) {
   )
 }
 
+#' Fill in groups missing from a multi_discrete stats list
+#'
+#' Adds empty entries for any parent group absent from `init`, then reorders to
+#' match the parent.
+#'
+#' @param init Named list of per-group stats (possibly incomplete).
+#' @param parent Named list of parent per-group stats.
+#' @return `init` extended and reordered to the parent's groups.
+#' @noRd
 complete_stats_list <- function(init, parent) {
   missing_stats <- setdiff(names(parent), names(init))
   for (missing_stat in missing_stats) {
@@ -35,6 +61,11 @@ complete_stats_list <- function(init, parent) {
   init[names(parent)]
 }
 
+#' Pair-wise apply names to a list of vectors
+#' @param list_vals List of vectors to name.
+#' @param list_names List of name vectors, aligned to `list_vals`.
+#' @return The list of vectors with names applied.
+#' @noRd
 attach_list_names <- function(list_vals, list_names) {
   purrr::map2(
     list_vals,
@@ -43,23 +74,37 @@ attach_list_names <- function(list_vals, list_names) {
   )
 }
 
+#' Build pickCheckbox input params for a multi_discrete filter
+#'
+#' Assembles per-group choices, pre/post labelled choice names and the resolved
+#' selection from cached stats; returns empty params when the parent step holds
+#' no data.
+#'
+#' @param filter A cohortBuilder filter object.
+#' @param input_id Base input id.
+#' @param cohort The cohort object.
+#' @param reset When `TRUE`, select all choices in every group.
+#' @param update When `TRUE`, build params for an update (vs initial render).
+#' @param ... Extra params forwarded to the input constructor.
+#' @return A named list of input constructor params.
+#' @noRd
 multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
   input_id <- suff(input_id, "val")
   step_id <- filter@step_id
   filter_id <- filter@id
   filter_params <- get_filter_params(filter)
 
-  max_groups <- length(cohort$get_cache("1", filter_id, state = "pre", name = "choices"))
+  max_groups <- length(cohort$get_stats("1", filter_id, state = "pre", name = "choices"))
 
-  if (!cohort$get_cache(step_id, filter_id, state = "pre", name = "n_data")) {
+  if (!cohort$get_stats(step_id, filter_id, state = "pre", name = "n_data")) {
     return(
       list(inputId = input_id, label = NULL, choices = NULL, choicesNames = NULL, selected = NULL, max_groups = max_groups)
     )
   }
 
-  parent_filter_stats <- cohort$get_cache(step_id, filter_id, state = "pre", name = "choices")
+  parent_filter_stats <- cohort$get_stats(step_id, filter_id, state = "pre", name = "choices")
   filter_stats <- complete_stats_list(
-    cohort$get_cache(step_id, filter_id, state = "post", name = "choices"),
+    cohort$get_stats(step_id, filter_id, state = "post", name = "choices"),
     parent_filter_stats
   ) |>
     purrr::map2(parent_filter_stats, extend_stats)
@@ -111,6 +156,10 @@ multi_discrete_input_params <- function(filter, input_id, cohort, reset = FALSE,
   return(params)
 }
 
+#' Flatten a grouped per-state count list into a long data frame
+#' @param grouped_list Named list of per-group named count vectors.
+#' @return A list of per-group data frames with `variable`, `state`, `value`.
+#' @noRd
 grouped_list_to_df <- function(grouped_list) {
   grouped_list |>
     purrr::keep(~length(.) > 0) |>
@@ -161,28 +210,28 @@ S7::method(.gui_filter, cohortBuilder::CbFilterMultiDiscrete) <- function(object
             }
             step_id <- filter@step_id
             filter_id <- filter@id
-            filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
+            filter_stats <- cohort$get_stats(step_id, filter_id, state = "pre")
             orig_values <- filter@values
             if (is.null(orig_values)) {
-              orig_values <- filter_cache$choices |>
+              orig_values <- filter_stats$choices |>
                 purrr::map(names)
             } else {
               orig_values <- orig_values |>
                 purrr::map(~as.character(unlist(.)))
             }
             filter_value <- purrr::map2(
-              stats::setNames(orig_values[names(filter_cache$choices)], names(filter_cache$choices)),
-              filter_cache$choices,
+              stats::setNames(orig_values[names(filter_stats$choices)], names(filter_stats$choices)),
+              filter_stats$choices,
               ~extract_selected_value(.x, .y, FALSE)
             )
-            plot_data <- filter_cache$choices |>
+            plot_data <- filter_stats$choices |>
               purrr::imap(function(x, y) {x[unlist(filter_value[y])]}) |>
               grouped_list_to_df() |>
               dplyr::bind_rows()
             n_missing <- data.frame(
-              variable = names(filter_cache$n_missing),
+              variable = names(filter_stats$n_missing),
               state = "(missing)",
-              value = unlist(filter_cache$n_missing)
+              value = unlist(filter_stats$n_missing)
             ) |>
               dplyr::filter(variable %in% plot_data$variable)
             if (identical(filter@keep_na, FALSE)) {

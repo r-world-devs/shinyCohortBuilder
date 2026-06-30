@@ -47,9 +47,11 @@ cb_server(
 Possible options are: "clone" - copy filters from last step,
 "configure" - opening modal and allow to chose filters from available filters.}
 
-\item{manage_step}{When `TRUE`, enables feature, that alows to modify the latest step filters (add/remove them).
+\item{manage_step}{When `TRUE`, enables feature, that allows to modify the latest step filters (add/remove them).
 Available list of filters used by the feature should be stored as `source$available_filters` object (can be
 defined with `available_filters` argument for \link{set_source}).}
+
+\item{assistant}{Set to TRUE to enable the LLM cohort assistant panel.}
 
 \item{cohort}{Cohort object storing filtering steps configuration.}
 
@@ -74,6 +76,9 @@ overridden per filter via `filter@extra$render_source`.}
 \item{enable_bookmarking}{Set to TRUE (default) if panel should be compatible with native shiny bookmarking.}
 
 \item{show_help}{Set to TRUE (default) to enable help buttons.}
+
+\item{chat}{A chat client object (e.g. from 'ellmer') passed to the assistant;
+`NULL` (default) disables the assistant server logic.}
 }
 \value{
 Nested list of `shiny.tag` objects - html structure of filtering panel module.

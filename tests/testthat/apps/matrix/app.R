@@ -2,15 +2,15 @@
 #
 # All configuration is read from environment variables so a single app
 # definition can cover the full cross-product of:
-#   steps / feedback / run_button / propagate_domains / render_source / cache
+#   steps / feedback / run_button / propagate_domains / render_source / compute_stats
 # without maintaining one app directory per combination. The test harness sets
 # these env vars (inherited by the spawned app process) before AppDriver$new().
 #
 # Recognised env vars (all optional, with defaults):
 #   SCB_RUN_BUTTON        "none" | "local" | "global"        (default "none")
-#   SCB_PROPAGATE         "none" | "filter" | "cache" | "data" (default "filter")
+#   SCB_PROPAGATE         "none" | "filter" | "stats" | "data" (default "filter")
 #   SCB_RENDER_SOURCE     "auto" | "domain"                  (default "auto")
-#   SCB_CACHE             "TRUE" | "FALSE"                   (default "TRUE")
+#   SCB_COMPUTE_STATS     "TRUE" | "FALSE"                   (default "TRUE")
 #   SCB_STATS             "pre+post" | "pre" | "post" | "none" (default "pre+post")
 #   SCB_FEEDBACK          "TRUE" | "FALSE"                   (default "FALSE")
 
@@ -33,7 +33,7 @@ env_lgl <- function(name, default) {
 run_button     <- env_chr("SCB_RUN_BUTTON", "none")
 propagate      <- env_chr("SCB_PROPAGATE", "filter")
 render_source  <- env_chr("SCB_RENDER_SOURCE", "auto")
-cache          <- env_lgl("SCB_CACHE", TRUE)
+compute_stats  <- env_lgl("SCB_COMPUTE_STATS", TRUE)
 feedback       <- env_lgl("SCB_FEEDBACK", FALSE)
 stats_raw      <- env_chr("SCB_STATS", "pre+post")
 stats <- switch(stats_raw,
@@ -47,7 +47,7 @@ stats <- switch(stats_raw,
 # Data with a clear upstream/downstream domain-narrowing story: group "A" only
 # ever occurs together with gender "M". Filtering gender to "F" in step 1
 # therefore removes every "A" row, so a copied downstream step (step 2) should
-# see its group domain narrowed to {B, C} when data/cache propagation is on, and
+# see its group domain narrowed to {B, C} when data/stats propagation is on, and
 # its age range narrowed to the F-rows' range.
 #
 #   gender F rows: groups B/C only, ages 35-50
@@ -79,7 +79,7 @@ coh <- cohort(
     variable = "group", value = NA,
     domain = c("A", "B", "C")
   ),
-  cache = cache,
+  compute_stats = compute_stats,
   propagate_domains = propagate
 )
 

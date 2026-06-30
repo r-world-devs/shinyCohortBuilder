@@ -84,10 +84,25 @@
   glue::glue("Shiny.setInputValue('{ns('action')}', {state_val}, {{priority: 'event'}})")
 }
 
+#' Build a combined `"<step>-<filter>"` id
+#' @param step_id,filter_id Step and filter ids.
+#' @return The hyphen-joined id string.
+#' @noRd
 sf_id <- function(step_id, filter_id) {
   paste(step_id, filter_id, sep = "-")
 }
 
+#' Show a debug notification describing an action (when `scb_verbose`)
+#'
+#' Surfaces the action name and its params as a colour-coded Shiny notification;
+#' a no-op unless the `scb_verbose` option is on.
+#'
+#' @param action Action name/label.
+#' @param params Named list of parameters to display.
+#' @param gui Whether the action originated from the GUI (changes the colour).
+#' @param session Shiny session (defaults to the current reactive domain).
+#' @return Invisibly `TRUE`; called for its notification side effect.
+#' @noRd
 input_state <- function(action, params, gui = TRUE, session = shiny::getDefaultReactiveDomain()) {
   if (!getOption("scb_verbose", default = FALSE)) {
     return(invisible(TRUE))
@@ -163,6 +178,16 @@ input_state <- function(action, params, gui = TRUE, session = shiny::getDefaultR
   session$userData$observers[[session$ns(paste0(id, "-observer"))]] <- observer
 }
 
+#' Remove a step's inputs, outputs and observers from the session
+#'
+#' Tears down all session state associated with a step id (input values, output
+#' bindings, saved observers and the rendered-filters registry) so a removed or
+#' rebuilt step does not leave stale reactives behind.
+#'
+#' @param id Step id whose session state should be cleared.
+#' @param .session Shiny session object.
+#' @return Invisibly `NULL`; called for its session-cleanup side effects.
+#' @noRd
 clear_step_data <- function(id, .session) {
   ns <- .session$ns
 
@@ -242,6 +267,14 @@ clear_step_data <- function(id, .session) {
   session$output[[name]] <- function() value
 }
 
+#' Toggle a CSS class on a filter's container (client-side)
+#' @param step_id,filter_id Ids identifying the filter.
+#' @param show Whether to add (`TRUE`) or remove (`FALSE`) the class.
+#' @param class CSS class to toggle.
+#' @param session Shiny session.
+#' @param child Optional child selector within the filter the class applies to.
+#' @return Invisibly `NULL`; sends the `update_filter_class` custom message.
+#' @noRd
 ui_update_filter_class <- function(step_id, filter_id, show, class, session, child = ".cb_filter_content") {
   session$sendCustomMessage(
     "update_filter_class",
@@ -253,6 +286,20 @@ ui_update_filter_class <- function(step_id, filter_id, show, class, session, chi
   )
 }
 
+#' Refresh a single filter's input and/or feedback plot
+#'
+#' Dispatches the requested UI updates for one filter: re-runs its input
+#' `update()` and, in stats mode, toggles the "no data" gate and re-renders the
+#' feedback plot. Which pieces run is driven by the `update` vector (`"input"`,
+#' `"plot"`, `"post_input"`, `"multi_input"`, `"force_input"`).
+#'
+#' @param cohort The cohort object.
+#' @param step_id,filter_id Ids identifying the filter.
+#' @param update Character vector of UI pieces to refresh.
+#' @param reset Whether the filter value should be reset to its default.
+#' @param session Shiny session.
+#' @return Invisibly `NULL`; called for its UI side effects.
+#' @noRd
 ui_update_filter <- function(cohort, step_id, filter_id, update, reset, session) {
   filter <- cohort$get_filter(step_id, filter_id)
   updated_input <- FALSE
@@ -282,10 +329,10 @@ ui_update_filter <- function(cohort, step_id, filter_id, update, reset, session)
   if ("plot" %in% update) {
     render <- resolve_render_mode(filter, cohort)
     # The "no data" gate and feedback plots only apply in stats mode. In domain
-    # mode there is no cache to read and no feedback plot to refresh.
+    # mode there is no stats to read and no feedback plot to refresh.
     if (render$mode == "stats") {
       show <- TRUE
-      if (!cohort$get_cache(step_id, filter_id, state = "pre", name = "n_data")) {
+      if (!cohort$get_stats(step_id, filter_id, state = "pre", name = "n_data")) {
         show <- FALSE
       }
       ui_update_filter_class(
@@ -314,6 +361,15 @@ ui_update_filter <- function(cohort, step_id, filter_id, update, reset, session)
   )
 }
 
+#' Apply [ui_update_filter()] to every active filter in a step
+#' @param cohort The cohort object.
+#' @param step_id Id of the step.
+#' @param reset Whether filter values should be reset.
+#' @param update Character vector of UI pieces to refresh.
+#' @param exclude Filter ids to skip.
+#' @param session Shiny session.
+#' @return Invisibly `NULL`; called for its UI side effects.
+#' @noRd
 ui_update_filters_loop <- function(cohort, step_id, reset, update, exclude = character(0), session) {
   filter_ids <- cohort$list_active_filters(step_id)
 
@@ -334,6 +390,12 @@ ui_update_filters_loop <- function(cohort, step_id, reset, update, exclude = cha
   }
 }
 
+#' Re-render a filter's feedback plot output
+#' @param step_id,filter_id Ids identifying the filter.
+#' @param cohort The cohort object.
+#' @param session Shiny session.
+#' @return Invisibly `NULL`; reassigns the feedback output.
+#' @noRd
 ui_update_plot <- function(step_id, filter_id, cohort, session) {
   ns <- session$ns
 
@@ -341,7 +403,7 @@ ui_update_plot <- function(step_id, filter_id, cohort, session) {
   input_state("update_plot", list(step_id = step_id, filter_id = filter_id))
 
   filter <- cohort$get_filter(step_id, filter_id)
-  no_data <- cohort$get_cache(step_id, filter_id, state = "pre", name = "n_data") == 0
+  no_data <- cohort$get_stats(step_id, filter_id, state = "pre", name = "n_data") == 0
   feedback <- filter@private$gui$feedback(filter, sf_id(step_id, filter_id), cohort, no_data)
   session$output[[feedback$plot_id]] <- feedback$render_fun
 }
@@ -351,6 +413,16 @@ overwrite_input_handler <- list(
   "sw.airdatepicker" = function() ...
 )
 
+#' Coerce a raw input value via its Shiny input handler
+#'
+#' Applies the registered (or overridden) Shiny input handler for a binding so a
+#' value arriving from the browser is converted to the R type the filter expects
+#' (with special handling for air datepicker datetime ranges).
+#'
+#' @param val Raw input value from the browser.
+#' @param binding Input binding name (selects the handler).
+#' @return The coerced value.
+#' @noRd
 input_val_handler <- function(val, binding) {
   handler <- NULL
   if (!length(binding)) {
@@ -379,6 +451,18 @@ input_val_handler <- function(val, binding) {
   val
 }
 
+#' Normalise a changed-input payload into `update_filter` arguments
+#'
+#' Coerces the raw input value (via [input_val_handler()]) and reshapes the
+#' browser payload into the named list of arguments expected by
+#' `cohort$update_filter()`.
+#'
+#' @param changed_input The raw changed-input list from the browser.
+#' @param step_id,filter_id Ids identifying the filter.
+#' @param cohort The cohort object.
+#' @param update_active Whether the change toggles the filter's active state.
+#' @return A named list of arguments for `cohort$update_filter()`.
+#' @noRd
 convert_input_value <- function(changed_input, step_id, filter_id, cohort, update_active) {
   # todo handle case when no value parameter defined (some filters can work like that)
 
@@ -393,6 +477,24 @@ convert_input_value <- function(changed_input, step_id, filter_id, cohort, updat
   return(changed_input)
 }
 
+# GUI action handlers
+#
+# Each `action_*` function below handles one GUI action routed from the single
+# `input$action` observer set up in `render_steps()` (see `.trigger_action()` /
+# `.trigger_action_js()`). They share the signature `(cohort, changed_input,
+# session)`, where `changed_input` is the action's `params` list, and act on the
+# cohort / session for their side effects (returning invisibly).
+
+#' Action: apply a changed filter input to the cohort
+#'
+#' Converts the browser payload and calls `cohort$update_filter()`; downstream UI
+#' refresh and cascading are handled by [post_update_filter_hook()].
+#'
+#' @param cohort The cohort object.
+#' @param changed_input The action params (changed-input payload).
+#' @param session Shiny session.
+#' @return Invisibly; called for its side effects.
+#' @noRd
 action_update_filter <- function(cohort, changed_input, session) {
 
   run_on_request <- !is_none(cohort$attributes$run_button)
@@ -417,6 +519,16 @@ action_update_filter <- function(cohort, changed_input, session) {
   )
 }
 
+#' Insert a filter's inner content if not already rendered
+#'
+#' Lazily renders the feedback/inputs content for a filter into its container,
+#' guarding against double-rendering via the session's rendered-filters registry.
+#'
+#' @param step_id,filter_id Ids identifying the filter.
+#' @param cohort The cohort object.
+#' @param session Shiny session.
+#' @return Invisibly `TRUE` if content was inserted, `FALSE` if already rendered.
+#' @noRd
 ui_insert_filter_content <- function(step_id, filter_id, cohort, session) {
   ns <- session$ns
   step_filter_id <- sf_id(step_id, filter_id)
@@ -438,6 +550,17 @@ ui_insert_filter_content <- function(step_id, filter_id, cohort, session) {
   return(invisible(TRUE))
 }
 
+#' Render and insert a whole filter into its step
+#'
+#' Attaches the GUI to the filter, renders it via [.render_filter()], inserts it
+#' at the source-defined position ([.filter_position()]), and re-validates the
+#' step's filter groups client-side.
+#'
+#' @param step_id,filter_id Ids identifying the filter.
+#' @param cohort The cohort object.
+#' @param session Shiny session.
+#' @return Invisibly `NULL`; called for its UI side effects.
+#' @noRd
 ui_insert_filter <- function(step_id, filter_id, cohort, session) {
 
   ns <- session$ns
@@ -466,6 +589,12 @@ ui_insert_filter <- function(step_id, filter_id, cohort, session) {
   )
 }
 
+#' Remove a filter's UI from its step
+#' @param step_id,filter_id Ids identifying the filter.
+#' @param cohort The cohort object.
+#' @param session Shiny session.
+#' @return Invisibly `NULL`; removes the filter UI and re-validates groups.
+#' @noRd
 ui_remove_filter <- function(step_id, filter_id, cohort, session) {
   ns <- session$ns
   step_filter_id <- sf_id(step_id, filter_id)
@@ -485,6 +614,10 @@ ui_remove_filter <- function(step_id, filter_id, cohort, session) {
   )
 }
 
+#' Action: remove the last filtering step
+#' @inheritParams action_update_filter
+#' @return Invisibly; called for its side effects.
+#' @noRd
 action_rm_step <- function(cohort, changed_input, session) {
   # todo make sure to diasble delete button when source is updated
   print_state("rm_step", changed_input)
@@ -492,6 +625,15 @@ action_rm_step <- function(cohort, changed_input, session) {
   cohort$remove_step(run_flow = TRUE)
 }
 
+#' Action: open the "manage last step filters" modal
+#'
+#' Shows a multi-select of the source's available filters (pre-selected with the
+#' last step's current filters). Falls back to [action_add_step()] when no
+#' available filters are configured.
+#'
+#' @inheritParams action_update_filter
+#' @return Invisibly; called for its side effects.
+#' @noRd
 action_manage_step_modal <- function(cohort, changed_input, session) {
   ns <- session$ns
 
@@ -556,6 +698,15 @@ action_manage_step_modal <- function(cohort, changed_input, session) {
   )
 }
 
+#' Action: apply the chosen filters to the last step
+#'
+#' Diffs the selected filters against the step's current filters, then adds /
+#' removes filters accordingly (pre-warming stats only when stats are enabled),
+#' and runs the step in immediate mode.
+#'
+#' @inheritParams action_update_filter
+#' @return Invisibly; called for its side effects.
+#' @noRd
 action_manage_step_configured <- function(cohort, changed_input, session) {
 
   run_on_request <- !is_none(cohort$attributes$run_button)
@@ -585,10 +736,10 @@ action_manage_step_configured <- function(cohort, changed_input, session) {
       step_id = step_id,
       run_flow = FALSE
     )
-    # Pre-warm the filter cache only when statistics are in use. With stats
+    # Pre-warm the filter stats only when statistics are in use. With stats
     # disabled the filter renders from its domain, so avoid a source scan.
     if (!is.null(cohort$attributes$stats)) {
-      cohort$update_cache(step_id, filter@id, state = "pre")
+      cohort$update_stats(step_id, filter@id, state = "pre")
     }
   }
 
@@ -605,6 +756,10 @@ action_manage_step_configured <- function(cohort, changed_input, session) {
   }
 }
 
+#' Action: run the filtering flow from a given step
+#' @inheritParams action_update_filter
+#' @return Invisibly; called for its side effects.
+#' @noRd
 action_run_step <- function(cohort, changed_input, session) {
   print_state("run_step", changed_input)
   input_state("run_step", changed_input)
@@ -612,6 +767,10 @@ action_run_step <- function(cohort, changed_input, session) {
   cohort$run_flow(min_step = changed_input$step_id)
 }
 
+#' Action: show the cohort state JSON in a modal
+#' @inheritParams action_update_filter
+#' @return Invisibly; called for its side effects.
+#' @noRd
 action_show_state <- function(cohort, changed_input, session) {
   ns <- session$ns
 
@@ -629,6 +788,11 @@ action_show_state <- function(cohort, changed_input, session) {
   ))
 }
 
+#' Read a state value from an uploaded file or pasted string
+#' @param filepath A Shiny `fileInput` value (or `NULL`); takes precedence.
+#' @param string A pasted JSON string (or `NULL`/`""`).
+#' @return The file contents as a single string, the pasted string, or `NULL`.
+#' @noRd
 file_string_value <- function(filepath, string) {
   if (!is.null(filepath)) {
     return(
@@ -640,6 +804,10 @@ file_string_value <- function(filepath, string) {
   }
 }
 
+#' Action: open the "provide state" modal (file upload or pasted JSON)
+#' @inheritParams action_update_filter
+#' @return Invisibly; called for its side effects.
+#' @noRd
 action_input_state <- function(cohort, changed_input, session) {
   ns <- session$ns
 
@@ -671,6 +839,14 @@ action_input_state <- function(cohort, changed_input, session) {
   ))
 }
 
+#' Action: restore the cohort from a provided state
+#'
+#' Restores from `changed_input$state` when present, otherwise from the modal's
+#' file/string inputs.
+#'
+#' @inheritParams action_update_filter
+#' @return Invisibly; called for its side effects.
+#' @noRd
 action_restore_state <- function(cohort, changed_input, session) {
   ns <- session$ns
 
@@ -689,6 +865,16 @@ action_restore_state <- function(cohort, changed_input, session) {
   cohort$restore(state)
 }
 
+#' Action: add a step by cloning the previous one
+#'
+#' Copies the last step (or seeds the first step from available filters).
+#' Triggers a flow run in immediate mode; in run-button mode the new step stays
+#' pending until the user runs it. UI insertion is handled by
+#' [post_add_step_hook()].
+#'
+#' @inheritParams action_update_filter
+#' @return Invisibly; called for its side effects.
+#' @noRd
 action_add_step <- function(cohort, changed_input, session) {
   ns <- session$ns
 
@@ -715,6 +901,14 @@ action_add_step <- function(cohort, changed_input, session) {
 
 }
 
+#' Action: add a step containing the user-selected filters
+#'
+#' Adds a step built from the filters chosen in the "configure new step" modal,
+#' falling back to [action_add_step()] when no available filters are configured.
+#'
+#' @inheritParams action_update_filter
+#' @return Invisibly; called for its side effects.
+#' @noRd
 action_add_step_configured <- function(cohort, changed_input, session) {
   ns <- session$ns
 
@@ -742,6 +936,14 @@ action_add_step_configured <- function(cohort, changed_input, session) {
   # gui actions are handled via post_add_step_hook hook
 }
 
+#' Action: open the "configure new step" filter-picker modal
+#'
+#' Shows a multi-select of available filters for building a new step; falls back
+#' to [action_add_step()] when none are configured.
+#'
+#' @inheritParams action_update_filter
+#' @return Invisibly; called for its side effects.
+#' @noRd
 action_show_step_filter_modal <- function(cohort, changed_input, session) {
   ns <- session$ns
 
@@ -800,6 +1002,12 @@ action_show_step_filter_modal <- function(cohort, changed_input, session) {
   )
 }
 
+#' Add/remove a step's "pending" styling client-side
+#' @param step_id Id of the step.
+#' @param action Either `"add"` or `"remove"`.
+#' @param session Shiny session.
+#' @return Invisibly `NULL`; sends the `update_class` custom message.
+#' @noRd
 ui_trigger_pending_state <- function(step_id, action, session) {
   session$sendCustomMessage(
     "update_class",
@@ -811,6 +1019,14 @@ ui_trigger_pending_state <- function(step_id, action, session) {
 }
 
 
+#' Preserve leading whitespace by converting it to `&nbsp;` entities
+#'
+#' Used when rendering highlighted reproducible code so indentation survives HTML
+#' whitespace collapsing.
+#'
+#' @param string A single line of (HTML) text.
+#' @return The line with leading spaces replaced by non-breaking spaces.
+#' @noRd
 add_trailing_space <- function(string) {
   n_spaces <- nchar(regmatches(string, regexpr("^\\s+", string)))
   if (!length(n_spaces)) {
@@ -819,6 +1035,13 @@ add_trailing_space <- function(string) {
   gsub("^\\s+", paste(rep("&nbsp", n_spaces), collapse = ""), string)
 }
 
+#' Action: show syntax-highlighted reproducible code in a modal
+#'
+#' Renders the cohort's generated code with a copy-to-clipboard button.
+#'
+#' @inheritParams action_update_filter
+#' @return Invisibly; called for its side effects.
+#' @noRd
 action_show_repro_code <- function(cohort, changed_input, session) {
   ns <- session$ns
 
@@ -1021,6 +1244,11 @@ action_show_repro_code <- function(cohort, changed_input, session) {
   UseMethod(".custom_attrition", source)
 }
 
+#' Thin wrapper over `shiny::tabsetPanel()`
+#' @param ... Tab panels.
+#' @param id,selected,type,header,footer Passed through to `shiny::tabsetPanel()`.
+#' @return A tabset `shiny.tag`.
+#' @noRd
 navs <- function(..., id = NULL, selected = NULL, type = c("tabs", "pills", "hidden"),
                  header = NULL,  footer = NULL) {
   shiny::tabsetPanel(
@@ -1028,6 +1256,15 @@ navs <- function(..., id = NULL, selected = NULL, type = c("tabs", "pills", "hid
   )
 }
 
+#' Action: show the attrition plot(s) in a modal
+#'
+#' Renders the step attrition plot (and a custom attrition tab when a
+#' `.custom_attrition` method exists for the source). Requires statistics; warns
+#' and aborts when `stats` is disabled.
+#'
+#' @inheritParams action_update_filter
+#' @return Invisibly; called for its side effects.
+#' @noRd
 action_show_attrition <- function(cohort, changed_input, session) {
   ns <- session$ns
 
@@ -1090,8 +1327,8 @@ no_ws <- c("before", "after", "outside", "after-begin", "before-end", "inside")
 #' By default, the output is placed within \link{.render_filters} method.
 #'
 #' @details
-#' When rendering the output, a good practice is to use cached data statistics available with
-#' `cohort$get_cache(step_id)`.
+#' When rendering the output, a good practice is to use the data statistics available with
+#' `cohort$get_stats(step_id)`.
 #' This way, you omit running additional computations which results with performance improvement.
 #'
 #' @param source Source object.
@@ -1154,7 +1391,7 @@ no_ws <- c("before", "after", "outside", "after-begin", "before-end", "inside")
   ns <- session$ns
   stats <- cohort$attributes$stats
   # Data statistics follow the `stats` setting. When stats are disabled the
-  # cache is not read, so this is a no-op (avoids forcing a source scan).
+  # stats are not read, so this is a no-op (avoids forcing a source scan).
   if (is.null(stats)) {
     return(invisible(NULL))
   }
@@ -1164,13 +1401,13 @@ no_ws <- c("before", "after", "outside", "after-begin", "before-end", "inside")
   # Every step's "pre" data is its parent's "post" snapshot, which always exists:
   # step 1's parent is the source, and steps 2+ are seeded from their parent at
   # construction / add_step (see Cohort$init_source / add_step). So recomputing
-  # "pre" stats is safe in every mode (run_button, cache = FALSE, freshly added
+  # "pre" stats is safe in every mode (run_button, compute_stats = FALSE, freshly added
   # step) and lets step 1 show real stats before any run instead of the
   # "no data" placeholder. The placeholder is then reserved for its true meaning:
   # the parent step actually filtered out every row (previous == 0). NULL is
   # still handled defensively so `if (!NULL > 0)` cannot error with
   # "argument is of length zero".
-  previous <- cohort$get_cache(step_id, state = "pre", .recalc_when_missing = TRUE)$n_rows
+  previous <- cohort$get_stats(step_id, state = "pre", .recalc_when_missing = TRUE)$n_rows
   if (is.null(previous) || !isTRUE(previous > 0)) {
     # Wrap in an element so the removeUI(" > *") cleanup can remove it on the
     # next update. A bare string is inserted as a text node, which the
@@ -1178,13 +1415,17 @@ no_ws <- c("before", "after", "outside", "after-begin", "before-end", "inside")
     # placeholder lingering next to freshly computed stats after a run).
     ui <- shiny::tags$span("No data selected in previous step.")
   } else {
-    current <- cohort$get_cache(step_id, state = "post")$n_rows
+    current <- cohort$get_stats(step_id, state = "post")$n_rows
     ui <- .pre_post_stats(current, previous, percent = TRUE, stats = stats)
   }
   shiny::removeUI(selector = paste0(selector, " > *"), multiple = TRUE, immediate = TRUE)
   shiny::insertUI(selector = selector, ui = ui, immediate = TRUE)
 }
 
+#' Action: refresh a step's data statistics display
+#' @inheritParams action_update_filter
+#' @return Invisibly; called for its side effects.
+#' @noRd
 action_update_data_stats <- function(cohort, changed_input, session) {
 
   print_state("update_data_stats", changed_input)
@@ -1192,6 +1433,11 @@ action_update_data_stats <- function(cohort, changed_input, session) {
   .update_data_stats(cohort$get_source(), changed_input$step_id, cohort, session)
 }
 
+#' Clear every filter in a step back to its default
+#' @param cohort The cohort object.
+#' @param step_id Id of the step to clear.
+#' @return Invisibly `NULL`; clears each filter for its side effect.
+#' @noRd
 reset_filters <- function(cohort, step_id) {
 
   filter_ids <- names(cohort$get_step(step_id)$filters)
@@ -1203,6 +1449,14 @@ reset_filters <- function(cohort, step_id) {
   }
 }
 
+#' Action: clear a step's filters and refresh its UI
+#'
+#' Optionally resets the step's filters, then re-runs the flow (immediate mode)
+#' or refreshes inputs/plots and data stats (run-button mode).
+#'
+#' @inheritParams action_update_filter
+#' @return Invisibly; called for its side effects.
+#' @noRd
 action_clear_step <- function(cohort, changed_input, session) {
   print_state("clear_step", changed_input)
   input_state("clear_step", changed_input)
@@ -1222,6 +1476,10 @@ action_clear_step <- function(cohort, changed_input, session) {
   }
 }
 
+#' Action: show a filter/field help description in a modal
+#' @inheritParams action_update_filter
+#' @return Invisibly; called for its side effects.
+#' @noRd
 action_show_help <- function(cohort, changed_input, session) {
   description <- do.call(cohort$show_help, changed_input)
   if(is.null(description)) return(invisible(FALSE))

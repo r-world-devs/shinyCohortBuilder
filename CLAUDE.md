@@ -32,7 +32,15 @@ JS source is in `srcjs/scb.js`, SCSS in `srcscss/scb.scss`. Built assets go to `
 
 ### Core Module: `cb_ui()` / `cb_server()`
 
-The package exposes a single Shiny module pair. `cb_ui(id)` renders the panel structure (accordion steps, toolbar buttons). `cb_server(id, cohort)` takes a cohortBuilder `cohort` R6 object and wires up all reactivity. The cohort object is created externally and passed in — the module doesn't own it.
+The package exposes a single Shiny module pair. `cb_ui(id)` renders the panel structure (accordion steps, toolbar buttons). `cb_server(id, cohort, ...)` takes a cohortBuilder `cohort` R6 object and wires up all reactivity. The cohort object is created externally and passed in — the module doesn't own it. Key `cb_server()` args: `run_button` (`"none"`/`"local"`/`"global"` deferred-run), `stats` (which data-stats to show, e.g. `c("pre", "post")`), `feedback` (show feedback plots), and `render_source` (`"auto"` vs `"domain"`, see Domain-aware Rendering below). Runtime config is stored on `cohort$attributes` via `restore_attribute()` so hooks and renderers can read it back.
+
+### Domain-aware Rendering (`render_source`)
+
+`render_source` controls where filter inputs derive their available choices/ranges from:
+- `"auto"` (default) — render from cached step statistics (requires `compute_stats`).
+- `"domain"` — render each input from its filter's declared `domain` (a cohortBuilder filter property), so the UI can render without scanning data.
+
+`render_source = "domain"` requires *every* filter in every step to declare a domain. `cb_server()` validates this eagerly at mount time via `validate_domains_present()` (R/control_utils.R), erroring with the list of filters missing a domain rather than failing later per-render. Any `propagate_domains` mode (including `"none"`) is allowed as long as domains are present — propagation is a cohortBuilder concern; this layer only needs a domain to render from. Filters get domains either explicitly (`filter("discrete", ..., domain = c(...))`) or via propagation / step copying. See `inst/examples/domains/app.R` for an interactive configurator covering `stats` / `feedback` / `propagate_domains` / `render_source` / `run_button` combinations.
 
 ### Filter Type System (R/filter_*.R)
 
@@ -92,7 +100,7 @@ Source types (default: `tblist`) define S3 methods for rendering: `.render_filte
 - `R/cb_layer.R` — Hook implementations connecting cohortBuilder lifecycle to Shiny, `.onLoad`/`.onUnload`
 - `R/feedback_html.R` — HTML feedback visualization helpers (`html_feedback_bar`, `html_feedback_hist`, etc.)
 - `R/source.R` — Base S3 method for `.filter_position()`
-- `R/control_utils.R` — Small utility helpers (`if_null_default`, `modify_list`, `suff`, etc.)
+- `R/control_utils.R` — Small utility helpers (`if_null_default`, `modify_list`, `suff`, etc.) and `validate_domains_present()` for `render_source = "domain"`
 - `R/app.R` — `demo_app()` and `gui()` convenience functions
 - `R/chat.R` — LLM assistant integration (`cb_chat_ui`/`cb_chat_server`) via `shinychat`
 - `R/ui_utils.R` — `button()`, `panel()`, `scb_labels`/`scb_icons` defaults, `cb_changed()`
@@ -118,4 +126,4 @@ The package uses global R options for UI customization:
 
 - `master` — main/release branch
 - `dev` — development integration branch
-- `v0.5.0` — current development branch for the upcoming v0.5.0 release
+- `feature/domains` — current development branch (domain-aware rendering, `render_source`, data-stats fixes)

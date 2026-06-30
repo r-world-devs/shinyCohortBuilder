@@ -1,3 +1,14 @@
+#' Clamp a selected numeric range to the parent's available range
+#'
+#' Replaces out-of-bounds or missing endpoints with the parent bounds, and falls
+#' back to the full parent range on reset or when the selection lies entirely
+#' outside it.
+#'
+#' @param range The selected `c(from, to)` range (or `NA`).
+#' @param parent_range The parent step's available `c(min, max)` range.
+#' @param reset When `TRUE`, ignore `range` and return `parent_range`.
+#' @return A clamped `c(from, to)` range.
+#' @noRd
 extract_selected_range <- function(range, parent_range, reset) {
   if (reset || identical(range, NA) || !any(dplyr::between(range, parent_range[1], parent_range[2]))) {
     return(parent_range)
@@ -12,6 +23,10 @@ extract_selected_range <- function(range, parent_range, reset) {
   return(range)
 }
 
+#' Derive the full `c(min, max)` range from a frequencies table
+#' @param freqs_table A frequencies table with `l_bound`/`u_bound` columns.
+#' @return A `c(min, max)` range, or `NULL` for an empty table.
+#' @noRd
 freq_range <- function(freqs_table) {
   if (nrow(freqs_table) == 0) {
     return(NULL)
@@ -19,6 +34,10 @@ freq_range <- function(freqs_table) {
   c(freqs_table$l_bound[1], rev(freqs_table$u_bound)[1])
 }
 
+#' Derive the slider step from a frequencies table's bin width
+#' @param freqs_table A frequencies table with an `l_bound` column.
+#' @return The bin width (defaults to `1` for 0/1-row tables).
+#' @noRd
 freq_step <- function(freqs_table) {
   if (nrow(freqs_table) == 0) {
     return(1)
@@ -29,6 +48,15 @@ freq_step <- function(freqs_table) {
   round(freqs_table$l_bound[2] - freqs_table$l_bound[1], 10)
 }
 
+#' Default (placeholder) input params for a range-family filter
+#'
+#' Used when there is nothing to render (no data / no domain), giving the input
+#' harmless placeholder bounds.
+#'
+#' @param id Input id.
+#' @param type Filter type (`"range"`, `"date_range"`, or other).
+#' @return A named list of input constructor params.
+#' @noRd
 range_input_defaults <- function(id, type = "range") {
   if (type == "range") {
     return(
@@ -57,6 +85,20 @@ range_input_defaults <- function(id, type = "range") {
   )
 }
 
+#' Build range-family input params from the filter's declared domain
+#'
+#' Computes bounds from the declared domain (no stats scan), clamps the
+#' selection, and adapts the params per filter type (range/date_range/
+#' datetime_range).
+#'
+#' @param filter A cohortBuilder filter object.
+#' @param input_id Base input id.
+#' @param cohort The cohort object.
+#' @param reset When `TRUE`, select the full domain range.
+#' @param update When `TRUE`, build params for an update (vs initial render).
+#' @param ... Extra params forwarded to the input constructor.
+#' @return A named list of input constructor params.
+#' @noRd
 range_domain_input_params <- function(filter, input_id, cohort, reset = FALSE,
                                       update = FALSE, ...) {
   domain <- cohortBuilder::filter_domain(filter)
@@ -102,6 +144,21 @@ range_domain_input_params <- function(filter, input_id, cohort, reset = FALSE,
   params
 }
 
+#' Resolve range-family input params for the active render mode
+#'
+#' Dispatches between domain-based bounds (domain mode or stats mode with
+#' `render_source = "domain"`) and stats-based bounds from the parent step's
+#' cached frequencies, adapting params per filter type. Returns placeholder
+#' params when nothing can be rendered.
+#'
+#' @param filter A cohortBuilder filter object.
+#' @param input_id Base input id.
+#' @param cohort The cohort object.
+#' @param reset When `TRUE`, select the full available range.
+#' @param update When `TRUE`, build params for an update (vs initial render).
+#' @param ... Extra params forwarded to the input constructor.
+#' @return A named list of input constructor params.
+#' @noRd
 range_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
   step_id <- filter@step_id
   filter_id <- filter@id
@@ -110,7 +167,7 @@ range_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
   domain <- cohortBuilder::filter_domain(filter)
 
   # Domain mode (or stats mode with render_source = "domain"): build bounds from
-  # the declared domain without reading the cache.
+  # the declared domain without reading the stats.
   use_domain <- render$mode == "domain" ||
     (identical(render$render_source, "domain") && !is.null(domain))
 
@@ -129,13 +186,13 @@ range_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
     )
   }
 
-  if (!cohort$get_cache(step_id, filter_id, state = "pre", name = "n_data")) {
+  if (!cohort$get_stats(step_id, filter_id, state = "pre", name = "n_data")) {
     return(
       range_input_defaults(input_id, filter@type)
     )
   }
 
-  parent_filter_stats <- cohort$get_cache(step_id, filter_id, state = "pre", name = "frequencies")
+  parent_filter_stats <- cohort$get_stats(step_id, filter_id, state = "pre", name = "frequencies")
   parent_range <- freq_range(parent_filter_stats)
 
   if (filter@type == "datetime_range") {
@@ -196,11 +253,25 @@ range_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
   return(params)
 }
 
+#' Append a `-`-delimited suffix to a params list's `inputId`
+#' @param params_list A params list carrying an `inputId`.
+#' @param suffix Suffix to append after a hyphen.
+#' @return `params_list` with the suffixed `inputId`.
+#' @noRd
 suff_id <- function(params_list, suffix) {
   params_list$inputId <- paste0(params_list$inputId, "-", suffix)
   return(params_list)
 }
 
+#' Is a given GUI input type enabled for a filter?
+#'
+#' A filter with no explicit `gui_input` enables all types; otherwise only the
+#' listed ones.
+#'
+#' @param filter A cohortBuilder filter object.
+#' @param type GUI input type to test (e.g. `"slider"`, `"numeric"`).
+#' @return `TRUE` when `type` is enabled for the filter.
+#' @noRd
 is_gui_type <- function(filter, type) {
   gui_input <- filter@extra$gui_input
   if (is.null(gui_input)) {
@@ -254,19 +325,19 @@ S7::method(.gui_filter, cohortBuilder::CbFilterRange) <- function(object, ...) {
             step_id <- filter@step_id
             filter_id <- filter@id
 
-            filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
+            filter_stats <- cohort$get_stats(step_id, filter_id, state = "pre")
             filter_range <- extract_selected_range(
               filter@range,
-              freq_range(filter_cache$frequencies),
+              freq_range(filter_stats$frequencies),
               FALSE
             )
 
-            plot_data <- filter_cache$frequencies |>
+            plot_data <- filter_stats$frequencies |>
               dplyr::mutate(
                 count = ifelse(l_bound >= filter_range[1] & l_bound <= filter_range[2], count, 0)
               )
-            n_missing <- filter_cache$n_missing
-            n_total <- filter_cache$n_data
+            n_missing <- filter_stats$n_missing
+            n_total <- filter_stats$n_data
             if (identical(filter@keep_na, FALSE)) {
               n_missing <- 0
             }

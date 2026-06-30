@@ -33,8 +33,8 @@ The function should assign rendering that displays data source statistics to the
 By default, the output is placed within \link{.render_filters} method.
 }
 \details{
-When rendering the output, a good practice is to use cached data statistics available with
-`cohort$get_cache(step_id)`.
+When rendering the output, a good practice is to use the data statistics available with
+`cohort$get_stats(step_id)`.
 This way, you omit running additional computations which results with performance improvement.
 }
 \examples{

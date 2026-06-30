@@ -1,7 +1,12 @@
-# Split a comma-separated discrete_text string into a vector of unique, trimmed
-# values. Mirrors cohortBuilder's split_discrete_text(): whitespace around every
-# value is stripped (not just the first space) so "a, b, c" yields all three
-# values, and empty pieces are dropped.
+#' Split a comma-separated discrete_text string into unique trimmed values
+#'
+#' Mirrors cohortBuilder's `split_discrete_text()`: whitespace around every value
+#' is stripped (not just the first space) so `"a, b, c"` yields all three
+#' values, and empty pieces are dropped.
+#'
+#' @param x A comma-separated string (or `NULL`/`NA`/`""`).
+#' @return A character vector of unique, non-empty values.
+#' @noRd
 split_discrete_text_vals <- function(x) {
   if (is.null(x) || identical(x, NA) || identical(x, "")) {
     return(character(0))
@@ -10,6 +15,16 @@ split_discrete_text_vals <- function(x) {
   unique(pieces[nzchar(pieces)])
 }
 
+#' Keep only selected discrete_text values present in the available set
+#'
+#' Returns all `original` values on reset/`NA`, passes `""` through, and
+#' otherwise drops selected values not present in `original`.
+#'
+#' @param selected Comma-separated selected values (or `NA`/`""`).
+#' @param original Comma-separated available values.
+#' @param reset When `TRUE`, return all `original` values.
+#' @return A comma-separated string of matching values.
+#' @noRd
 get_matching_vals <- function(selected, original, reset = FALSE) {
 
   if (reset || identical(selected, NA)) {
@@ -30,6 +45,11 @@ get_matching_vals <- function(selected, original, reset = FALSE) {
   return(selected)
 }
 
+#' Count selected discrete_text values present in the available set
+#' @param selected Comma-separated selected values (or `NA`).
+#' @param original Comma-separated available values.
+#' @return Number of selected values found in `original`.
+#' @noRd
 get_n_matching_vals <- function(selected, original) {
 
   original_vec <- split_discrete_text_vals(original)
@@ -41,18 +61,31 @@ get_n_matching_vals <- function(selected, original) {
   sum(selected_vec %in% original_vec)
 }
 
+#' Build text-area input params for a discrete_text filter
+#'
+#' Resolves the selected value against the parent's available choices, returning
+#' an empty value when the parent step holds no data.
+#'
+#' @param filter A cohortBuilder filter object.
+#' @param input_id Base input id.
+#' @param cohort The cohort object.
+#' @param reset When `TRUE`, select all available values.
+#' @param update When `TRUE`, build params for an update (vs initial render).
+#' @param ... Extra params forwarded to the input constructor.
+#' @return A named list of input constructor params.
+#' @noRd
 discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
   input_id <- suff(input_id, "val")
   step_id <- filter@step_id
   filter_id <- filter@id
 
-  if (!cohort$get_cache(step_id, filter_id, state = "pre", name = "n_data")) {
+  if (!cohort$get_stats(step_id, filter_id, state = "pre", name = "n_data")) {
     return(
       list(inputId = input_id, value = "", label = NULL)
     )
   }
 
-  parent_choices <- cohort$get_cache(step_id, filter_id, state = "pre", name = "choices")
+  parent_choices <- cohort$get_stats(step_id, filter_id, state = "pre", name = "choices")
   selected_value <- get_matching_vals(
     filter@value,
     parent_choices,
@@ -137,10 +170,10 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscreteText) <- function(object,
             step_id <- filter@step_id
             filter_id <- filter@id
 
-            filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
-            n_total <- filter_cache$n_data
+            filter_stats <- cohort$get_stats(step_id, filter_id, state = "pre")
+            n_total <- filter_stats$n_data
 
-            n_selected <- get_n_matching_vals(filter@value, filter_cache$choices)
+            n_selected <- get_n_matching_vals(filter@value, filter_stats$choices)
             plot_data <- c("selected" = n_selected, "not_selected" = n_total - n_selected)
 
             html_feedback_text_bar(plot_data)

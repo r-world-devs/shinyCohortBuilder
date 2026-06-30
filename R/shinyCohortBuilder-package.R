@@ -5,7 +5,7 @@
 #' @importFrom cohortBuilder get_filter_params
 
 globalVariables(c(
-  ":=", "!!", ".data",
+  ":=", "!!", ".data", ".bin",
   "action", "count", "dataset", "id",
   "l_bound", "level", "line_id", "n", "name", "params",
   "patient_id", "state", "value", "variable"
@@ -13,6 +13,13 @@ globalVariables(c(
 
 NULL
 
+#' Touch `htmltools` so it is treated as an imported dependency
+#'
+#' Never called; references `htmltools::tag` purely so `R CMD check` registers
+#' the import and does not flag the package as unused.
+#'
+#' @return Not meaningful; not intended to be called.
+#' @noRd
 force_import <- function() {
   htmltools::tag
 }
@@ -47,6 +54,11 @@ force_import <- function() {
 #' @name source-gui-layer
 NULL
 
+#' Access an internal (non-exported) object from another package
+#' @param pkg Package name (unquoted).
+#' @param name Object name (unquoted).
+#' @return The object from the package's namespace.
+#' @noRd
 `%:::%` <- function(pkg, name) {
   pkg <- as.character(substitute(pkg))
   name <- as.character(substitute(name))

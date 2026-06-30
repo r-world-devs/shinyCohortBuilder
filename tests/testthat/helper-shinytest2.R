@@ -36,14 +36,14 @@ cb_app_driver <- function(app_dir, name, ...,
 # into other tests.
 #
 # `config` is a named list with any of: run_button, propagate, render_source,
-# cache, stats, feedback. Missing entries fall back to the app's own defaults.
+# compute_stats, stats, feedback. Missing entries fall back to the app's own defaults.
 cb_matrix_driver <- function(name, config = list(), envir = parent.frame(),
                              ready_timeout = 30000) {
   env_map <- c(
     run_button    = "SCB_RUN_BUTTON",
     propagate     = "SCB_PROPAGATE",
     render_source = "SCB_RENDER_SOURCE",
-    cache         = "SCB_CACHE",
+    compute_stats = "SCB_COMPUTE_STATS",
     stats         = "SCB_STATS",
     feedback      = "SCB_FEEDBACK"
   )

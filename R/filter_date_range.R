@@ -30,14 +30,14 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDateRange) <- function(object, ..
             step_id <- filter@step_id
             filter_id <- filter@id
 
-            filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
+            filter_stats <- cohort$get_stats(step_id, filter_id, state = "pre")
             filter_range <- extract_selected_range(
               filter@range,
-              freq_range(filter_cache$frequencies),
+              freq_range(filter_stats$frequencies),
               FALSE
             )
 
-            plot_data <- filter_cache$frequencies |>
+            plot_data <- filter_stats$frequencies |>
               dplyr::mutate(
                 count = ifelse(l_bound >= filter_range[1] & l_bound <= filter_range[2], count, 0)
               )
@@ -50,8 +50,8 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDateRange) <- function(object, ..
                 dplyr::summarise(count = sum(count))
             }
 
-            n_missing <- filter_cache$n_missing
-            n_total <- filter_cache$n_data
+            n_missing <- filter_stats$n_missing
+            n_total <- filter_stats$n_data
             if (identical(filter@keep_na, FALSE)) {
               n_missing <- 0
             }

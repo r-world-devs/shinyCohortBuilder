@@ -36,7 +36,8 @@ species_filter <- filter(
 Such filter evaluated on Source (the operation happens within the Cohort) becomes an object of class equal to the filter type:
 
 ```{r}
-evaled_filter <- species_filter(iris_source)
+iris_cohort <- cohort(iris_source, species_filter) |> run()
+evaled_filter <- iris_cohort$get_filter("1", "species")
 class(evaled_filter)
 ```
 
@@ -156,7 +157,7 @@ While writing the function you should take into consideration the below assumpti
 For discrete filter (`checkboxGroupInput`) we achieve this with:
 
 ```{r, eval = FALSE}
-if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
+if (!cohort$get_stats(step_id, filter_id, state = "pre")$n_data) {
   return(
     list(inputId = input_id, choices = character(0), selected = character(0), label = NULL)
   )
@@ -197,17 +198,17 @@ Extracting all the possible options can be done with:
 
 ```{r, eval = FALSE}
 names(
-  cohort$get_cache(step_id, filter_id, state = "pre")$choices  
+  cohort$get_stats(step_id, filter_id, state = "pre")$choices  
 )
 ```
 
 3. Filter controller choices should be based on the previous step.
 
-This can be easily extracted using previous step cache:
+This can be easily extracted using previous step statistics:
 
 ```{r, eval = FALSE}
 names(
-  cohort$get_cache(step_id, filter_id, state = "pre")$choices  
+  cohort$get_stats(step_id, filter_id, state = "pre")$choices  
 )
 ```
 
@@ -296,10 +297,10 @@ Example of implementation (simplified version used for "discrete" filter):
             step_id <- filter$step_id
             filter_id <- filter$id
 
-            filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
-            filter_value <- extract_selected_value(filter$get_params()$value, filter_cache$choices, FALSE)
-            plot_data <- filter_cache$choices[filter_value]
-            n_missing <- filter_cache$n_missing
+            filter_stats <- cohort$get_stats(step_id, filter_id, state = "pre")
+            filter_value <- extract_selected_value(filter$get_params()$value, filter_stats$choices, FALSE)
+            plot_data <- filter_stats$choices[filter_value]
+            n_missing <- filter_stats$n_missing
             if (identical(filter$get_params()$keep_na, FALSE)) {
               n_missing <- 0
             }
@@ -319,7 +320,7 @@ Details:
 - `render_fun` should be wrapped within `if (!is.null(empty)) {}` if claim.
 - Inside the rendering function body, return an empty plot when `empty = TRUE`.
 - It's recommended to generate plot based on cached Cohort statistics.
-The filter cache can be accessed with: `cohort$get_cache(step_id, filter_id, state = "pre")`, where:
+The filter statistics can be accessed with: `cohort$get_stats(step_id, filter_id, state = "pre")`, where:
 
 ```{r, eval = FALSE}
 step_id <- filter$step_id
@@ -419,7 +420,7 @@ Again, all the possible options can be extracted with:
 
 ```{r, eval = FALSE}
 names(
-  cohort$get_cache(step_id, filter_id, state = "pre")$choices  
+  cohort$get_stats(step_id, filter_id, state = "pre")$choices  
 )
 ```
 

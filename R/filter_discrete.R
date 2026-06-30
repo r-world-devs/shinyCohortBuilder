@@ -1,3 +1,15 @@
+#' Fill a child stats list with the parent's missing categories
+#'
+#' Adds any categories present in `parent` but absent from `current` as `0`
+#' counts (or the parent's count for names listed in `inherit_parent`), then
+#' reorders to match the parent.
+#'
+#' @param current Named list/vector of current (post) counts.
+#' @param parent Named list/vector of parent (pre) counts.
+#' @param inherit_parent Names whose value should be copied from the parent
+#'   rather than zeroed.
+#' @return `current` extended and reordered to the parent's names.
+#' @noRd
 extend_stats <- function(current, parent, inherit_parent = character(0)) {
   missing_stats <- setdiff(names(parent), names(current))
   for (missing_stat in missing_stats) {
@@ -9,6 +21,16 @@ extend_stats <- function(current, parent, inherit_parent = character(0)) {
   current[names(parent)]
 }
 
+#' Resolve a discrete filter's selected value against available choices
+#'
+#' Returns all parent choices on reset or `NA`, passes `NULL` through, and
+#' otherwise intersects the selection with the available choices.
+#'
+#' @param value The selected value(s) (or `NA`/`NULL`).
+#' @param parent_filter_stats Named stats whose names are the available choices.
+#' @param reset When `TRUE`, select all choices.
+#' @return The resolved character vector of selected choices.
+#' @noRd
 extract_selected_value <- function(value, parent_filter_stats, reset) {
 
   if (reset || identical(value, NA)) {
@@ -23,6 +45,13 @@ extract_selected_value <- function(value, parent_filter_stats, reset) {
   return(value)
 }
 
+#' Build a discrete choice label with pre/post counts
+#' @param name Choice label text.
+#' @param parent_stat Parent (pre) count.
+#' @param current_stat Current (post) count.
+#' @param stats Which stats to show (`"pre"`/`"post"`).
+#' @return An HTML choice label.
+#' @noRd
 choice_name <- function(name, parent_stat, current_stat, stats) {
   .pre_post_stats(current_stat, parent_stat, name, brackets = TRUE, stats = stats)
 }
@@ -56,6 +85,10 @@ choice_name <- function(name, parent_stat, current_stat, stats) {
   )
 }
 
+#' Does the filter use the virtualSelect ("vs") GUI input?
+#' @param filter A cohortBuilder filter object.
+#' @return `TRUE` when `filter@extra$gui_input == "vs"`.
+#' @noRd
 is_vs <- function(filter) {
   !is.null(filter@extra$gui_input) && filter@extra$gui_input == "vs"
 }
@@ -110,15 +143,22 @@ is_vs <- function(filter) {
   )
 }
 
-# Build the keep-NA checkbox label. In stats mode it includes the missing-value
-# count from the cache; in domain mode (stats disabled) it uses a neutral label
-# without reading the cache.
+#' Build the keep-NA checkbox label
+#'
+#' In stats mode it includes the missing-value count from the stats; in domain
+#' mode (stats disabled) it uses a neutral label without reading the stats.
+#'
+#' @param filter A cohortBuilder filter object.
+#' @param cohort The cohort object.
+#' @param msg_fun Function mapping a missing-value count to a label.
+#' @return The checkbox label string.
+#' @noRd
 keep_na_message <- function(filter, cohort, msg_fun) {
   render <- resolve_render_mode(filter, cohort)
   if (render$mode == "domain") {
     return("Keep missing values")
   }
-  cohort$get_cache(filter@step_id, filter@id, state = "pre", name = "n_missing") |>
+  cohort$get_stats(filter@step_id, filter@id, state = "pre", name = "n_missing") |>
     msg_fun()
 }
 
@@ -138,6 +178,16 @@ keep_na_message <- function(filter, cohort, msg_fun) {
   )
 }
 
+#' Decide which categories should inherit the parent's counts
+#'
+#' Selected categories with no cached post stats should display the parent's
+#' counts rather than zero; returns the names eligible for that inheritance.
+#'
+#' @param filter_values The filter's selected value(s) (or `NA`/`NULL`).
+#' @param parent_options Names of the parent's available choices.
+#' @param is_cached Whether post stats are already cached.
+#' @return Character vector of category names to inherit, possibly empty.
+#' @noRd
 inherit_parent_stats <- function(filter_values, parent_options, is_cached) {
   if (is_cached || is.null(filter_values)) {
     return(character(0))
@@ -149,11 +199,17 @@ inherit_parent_stats <- function(filter_values, parent_options, is_cached) {
   }
 }
 
-# Align a discrete `choices` cache (a named list of counts) to the filter's
-# full domain, returning a named integer vector with absent values filled as 0.
-# Indexing the list with `[domain]` is unsafe: missing names yield `NULL`
-# elements (named `<NA>`) that `is.na()` does not flag, which leaks a literal
-# "NULL" into the rendered label.
+#' Align a discrete counts cache to the filter's full domain
+#'
+#' Returns a named integer vector over `domain` with absent values filled as 0.
+#' Indexing the list with `[domain]` is unsafe: missing names yield `NULL`
+#' elements (named `<NA>`) that `is.na()` does not flag, which leaks a literal
+#' "NULL" into the rendered label.
+#'
+#' @param counts Named list/vector of counts (the `choices` cache).
+#' @param domain Character vector of all domain values.
+#' @return A named integer vector over `domain`.
+#' @noRd
 .align_domain_counts <- function(counts, domain) {
   vapply(
     domain,
@@ -165,6 +221,22 @@ inherit_parent_stats <- function(filter_values, parent_options, is_cached) {
   )
 }
 
+#' Build discrete input params from the filter's declared domain
+#'
+#' Renders choices from the full domain (no stats scan). When `pre`/`post`
+#' counts are supplied (stats mode with `render_source = "domain"`), overlays
+#' pre/post labels aligned to the domain.
+#'
+#' @param filter A cohortBuilder filter object.
+#' @param input_id Base input id.
+#' @param cohort The cohort object.
+#' @param reset When `TRUE`, select the full domain.
+#' @param update When `TRUE`, build params for an update (vs initial render).
+#' @param pre,post Optional pre/post `choices` counts to overlay on labels.
+#' @param stats Which stats to show in labels.
+#' @param ... Extra params forwarded to the input constructor.
+#' @return A named list of input constructor params.
+#' @noRd
 discrete_domain_input_params <- function(filter, input_id, cohort, reset = FALSE,
                                          update = FALSE, pre = NULL, post = NULL,
                                          stats = NULL, ...) {
@@ -221,6 +293,20 @@ discrete_domain_input_params <- function(filter, input_id, cohort, reset = FALSE
   params
 }
 
+#' Resolve discrete input params for the active render mode
+#'
+#' Dispatches between domain mode, stats mode with `render_source = "domain"`,
+#' and plain stats mode (building pre/post labelled choices from cached stats),
+#' returning empty choices when there is nothing to render.
+#'
+#' @param filter A cohortBuilder filter object.
+#' @param input_id Base input id.
+#' @param cohort The cohort object.
+#' @param reset When `TRUE`, select all available choices.
+#' @param update When `TRUE`, build params for an update (vs initial render).
+#' @param ... Extra params forwarded to the input constructor.
+#' @return A named list of input constructor params.
+#' @noRd
 discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
   input_id <- suff(input_id, "val")
   step_id <- filter@step_id
@@ -230,7 +316,7 @@ discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, updat
   render <- resolve_render_mode(filter, cohort)
   domain <- cohortBuilder::filter_domain(filter)
 
-  # Domain mode: render from the declared domain without touching the cache.
+  # Domain mode: render from the declared domain without touching the stats.
   if (render$mode == "domain") {
     if (is.null(domain)) {
       warn_no_domain(filter_id)
@@ -252,8 +338,8 @@ discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, updat
       return(
         discrete_domain_input_params(
           filter, input_id, cohort, reset = reset, update = update,
-          pre = cohort$get_cache(step_id, filter_id, state = "pre", name = "choices"),
-          post = cohort$get_cache(step_id, filter_id, state = "post", name = "choices"),
+          pre = cohort$get_stats(step_id, filter_id, state = "pre", name = "choices"),
+          post = cohort$get_stats(step_id, filter_id, state = "post", name = "choices"),
           stats = if_null_default(filter_params$stats, cohort$attributes$stats),
           ...
         )
@@ -261,20 +347,20 @@ discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, updat
     }
   }
 
-  if (!cohort$get_cache(step_id, filter_id, state = "pre", name = "n_data")) {
+  if (!cohort$get_stats(step_id, filter_id, state = "pre", name = "n_data")) {
     return(
       list(inputId = input_id, choices = character(0), selected = character(0), label = NULL)
     )
   }
 
-  parent_filter_stats <- cohort$get_cache(step_id, filter_id, state = "pre", name = "choices")
+  parent_filter_stats <- cohort$get_stats(step_id, filter_id, state = "pre", name = "choices")
   filter_stats <- extend_stats(
-    cohort$get_cache(step_id, filter_id, state = "post", name = "choices"),
+    cohort$get_stats(step_id, filter_id, state = "post", name = "choices"),
     parent_filter_stats,
     inherit_parent = inherit_parent_stats(
       filter_params$value,
       names(parent_filter_stats),
-      !is.null(cohort$get_cache(step_id, filter_id, state = "post"))
+      !is.null(cohort$get_stats(step_id, filter_id, state = "post"))
     )
   )
   selected_value <- extract_selected_value(
@@ -318,6 +404,10 @@ discrete_input_params <- function(filter, input_id, cohort, reset = FALSE, updat
   return(params)
 }
 
+#' Format an integer with a thin-space thousands separator
+#' @param number Numeric value to format.
+#' @return A formatted number string.
+#' @noRd
 format_number <- function(number) {
   format(number, nsmall = 0, big.mark = " ")
 }
@@ -366,10 +456,10 @@ S7::method(.gui_filter, cohortBuilder::CbFilterDiscrete) <- function(object, ...
             step_id <- filter@step_id
             filter_id <- filter@id
 
-            filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
-            filter_value <- extract_selected_value(filter@value, filter_cache$choices, FALSE)
-            plot_data <- filter_cache$choices[filter_value]
-            n_missing <- filter_cache$n_missing
+            filter_stats <- cohort$get_stats(step_id, filter_id, state = "pre")
+            filter_value <- extract_selected_value(filter@value, filter_stats$choices, FALSE)
+            plot_data <- filter_stats$choices[filter_value]
+            n_missing <- filter_stats$n_missing
             if (identical(filter@keep_na, FALSE)) {
               n_missing <- 0
             }

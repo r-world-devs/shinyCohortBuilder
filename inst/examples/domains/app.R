@@ -15,7 +15,7 @@
 #   domains of downstream steps:
 #     "none"   - domains never narrow (user-declared domains are still honoured).
 #     "filter" - narrowed from each filter's own post-filter values.
-#     "cache"  - narrowed from the cached statistics of the previous step.
+#     "stats"  - narrowed from the stored statistics of the previous step.
 #     "data"   - narrowed from the actual data remaining after the previous step.
 #   render_source (a shinyCohortBuilder concern) decides whether the UI renders
 #   from those domains ("domain") or from cached statistics ("auto").
@@ -61,7 +61,7 @@ build_filters <- function(species_domain = c("setosa", "versicolor", "virginica"
 #     filters (so the user can add them via the "manage step" UI).
 #   * `add_initial` adds the filters as active step filters on initial build.
 # With both FALSE the cohort starts empty and offers nothing to add.
-build_cohort <- function(cache = TRUE, propagate_domains = "filter",
+build_cohort <- function(compute_stats = TRUE, propagate_domains = "filter",
                          species_domain = c("setosa", "versicolor", "virginica"),
                          sepal_domain = c(4, 8),
                          available_filters = TRUE,
@@ -74,7 +74,7 @@ build_cohort <- function(cache = TRUE, propagate_domains = "filter",
   }
   coh <- cohort(
     source = source,
-    cache = cache,
+    compute_stats = compute_stats,
     propagate_domains = propagate_domains
   )
   if (add_initial) {
@@ -107,10 +107,10 @@ config_sidebar <- function() {
       selected = "pre+post"
     ),
     shiny::checkboxInput("cfg_feedback", "feedback", value = TRUE),
-    shiny::checkboxInput("cfg_cache", "cache", value = TRUE),
+    shiny::checkboxInput("cfg_compute_stats", "compute_stats", value = TRUE),
     shiny::selectInput(
       "cfg_propagate", "propagate_domains",
-      choices = c("none", "filter", "cache", "data"),
+      choices = c("none", "filter", "stats", "data"),
       selected = "filter"
     ),
     shiny::selectInput(
@@ -166,8 +166,8 @@ ui <- bslib::page_sidebar(
         shiny::tableOutput("filtered_table")
       ),
       bslib::nav_panel(
-        "Cohort cache",
-        shiny::verbatimTextOutput("cohort_cache")
+        "Cohort stats",
+        shiny::verbatimTextOutput("cohort_stats")
       )
     )
   )
@@ -191,12 +191,12 @@ server <- function(input, output, session) {
     if (length(species_domain) == 0) species_domain <- NULL
     sepal_domain <- if (isTRUE(input$cfg_sepal_domain_on)) input$cfg_sepal_domain else NULL
 
-    # cache mainly affects stats; with it off, stats modes have no cached data.
-    # propagate_domains = "cache" also requires cache = TRUE, so surface that
+    # compute_stats mainly affects stats; with it off, stats modes have no data.
+    # propagate_domains = "stats" also requires compute_stats = TRUE, so surface that
     # (and any other construction error) as a friendly notification.
     coh <- tryCatch(
       build_cohort(
-        cache = isTRUE(input$cfg_cache),
+        compute_stats = isTRUE(input$cfg_compute_stats),
         propagate_domains = input$cfg_propagate,
         species_domain = species_domain,
         sepal_domain = sepal_domain,
@@ -298,25 +298,25 @@ server <- function(input, output, session) {
     utils::head(data$iris, 20)
   })
 
-  # Print the cohort's internal cache so you can watch how stats are stored per
-  # step (cache id "0" is the source baseline; "1", "2", ... are the steps) and
-  # how propagate_domains / cache settings change what is computed.
+  # Print the cohort's internal stats store so you can watch how stats are stored
+  # per step (stats id "0" is the source baseline; "1", "2", ... are the steps) and
+  # how propagate_domains / compute_stats settings change what is computed.
   #
-  # The cache is also populated lazily (stats computed during render, run-button
-  # pending state, on-demand get_cache reads) outside the cb_data_updated signal,
+  # The stats store is also populated lazily (stats computed during render, run-button
+  # pending state, on-demand get_stats reads) outside the cb_data_updated signal,
   # so polling on a short timer keeps the view live and catches those updates.
-  output$cohort_cache <- shiny::renderPrint({
+  output$cohort_stats <- shiny::renderPrint({
     shiny::req(applied$id, applied$cohort)
     # Re-render on the data-updated signal AND every second so lazily populated
-    # cache entries show up without needing another explicit trigger.
+    # stats entries show up without needing another explicit trigger.
     input[[paste0(applied$id, "-cb_data_updated")]]
     shiny::invalidateLater(1000, session)
-    cache <- applied$cohort$.__enclos_env__$private$cache
-    if (length(cache) == 0) {
-      cat("Cache is empty.\n")
+    stats <- applied$cohort$.__enclos_env__$private$stats
+    if (length(stats) == 0) {
+      cat("Stats are empty.\n")
       return(invisible(NULL))
     }
-    utils::str(cache, max.level = 4)
+    utils::str(stats, max.level = 4)
   })
 }
 

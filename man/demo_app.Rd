@@ -36,7 +36,7 @@ Three options are available "none" - no button, "local" - button displayed at ea
 
 \item{state}{Set to TRUE (default) to enable get/set state panel.}
 
-\item{bootstrap}{Boostrap version to be used for filtering panel.
+\item{bootstrap}{Bootstrap version to be used for filtering panel.
 See \link[bslib]{bs_theme} version argument.}
 
 \item{enable_bookmarking}{Set to TRUE (default) if panel should be compatible with native shiny bookmarking.}
@@ -58,14 +58,6 @@ Currently unused.}
 
 \item{run_app}{If 'TRUE' the application will run using \link[shiny]{runApp},
 otherwise \link[shiny]{shinyApp} object is returned.}
-
-\item{render_source}{Controls how filter inputs (choices/ranges) are sourced when a
-filter declares a `domain`. Possible options are: "auto" (default) - use cached
-statistics in stats mode, and the filter's domain when stats are disabled
-(`stats = NULL` and `feedback = FALSE`); "domain" - in stats mode, build choices and
-range bounds from the full domain vocabulary and overlay counts from statistics where
-available. A filter without a domain always falls back to statistics. The value can be
-overridden per filter via `filter@extra$render_source`.}
 }
 \value{
 In case of `run_app=TRUE` no return value, used for side effect which is running a Shiny application.

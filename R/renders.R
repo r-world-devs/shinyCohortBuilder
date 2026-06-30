@@ -1,3 +1,14 @@
+#' Wire up a filter's server logic and feedback output
+#'
+#' Runs the filter GUI's `server()` expression (observers etc.) and, when a
+#' feedback spec is supplied, registers its render function on the session output.
+#'
+#' @param filter_id,step_id Ids identifying the filter within its step.
+#' @param cohort The cohort object.
+#' @param session Shiny session.
+#' @param feedback Optional feedback spec (`plot_id`, `render_fun`); `NULL` skips output wiring.
+#' @return Invisibly `NULL`; called for its side effects.
+#' @noRd
 call_filter <- function(filter_id, step_id, cohort, session, feedback) {
   ns <- session$ns
   filter <- cohort$get_filter(step_id, filter_id)
@@ -75,6 +86,19 @@ call_filter <- function(filter_id, step_id, cohort, session, feedback) {
   shiny::div(class = "cb_input", `data-param` = data_param, `data-exec_state` = "init", ui, priority = priority, ...)
 }
 
+#' Build the inner UI (feedback + inputs) for a single filter
+#'
+#' Resolves the filter's render mode, optionally builds its feedback plot, wires
+#' its server logic via [call_filter()], and returns the feedback / inputs tag
+#' list. In stats mode an empty previous step adds the "no data" placeholder
+#' class; domain mode skips the stats read entirely.
+#'
+#' @param step_filter_id Combined `"<step>-<filter>"` id.
+#' @param filter The cohortBuilder filter object.
+#' @param cohort The cohort object.
+#' @param ns Module namespace function.
+#' @return A `shiny.tagList` with the filter's feedback and input containers.
+#' @noRd
 render_filter_content <- function(step_filter_id, filter, cohort, ns) {
   cohort$attributes$session$userData$rendered_filters <- c(
     cohort$attributes$session$userData$rendered_filters,
@@ -89,9 +113,9 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
   no_data_class <- ""
   empty <- FALSE
   # The "no data in previous step" gate only applies in stats mode. In domain
-  # mode there is no empirical row count, so skip the cache read entirely.
+  # mode there is no empirical row count, so skip the stats read entirely.
   if (render$mode == "stats" &&
-      !cohort$get_cache(step_id, filter_id, state = "pre", name = "n_data")) {
+      !cohort$get_stats(step_id, filter_id, state = "pre", name = "n_data")) {
     no_data_class <- "cb_no_data"
     empty <- TRUE
   }
@@ -210,6 +234,19 @@ render_filter_content <- function(step_filter_id, filter, cohort, ns) {
   )
 }
 
+#' Render a step as an accordion item with its toolbar and filters
+#'
+#' Attaches the GUI to the step's filters, inserts the accordion item (delete /
+#' clear / show-edit / run buttons plus the rendered filters), and refreshes the
+#' step's pending state and data statistics.
+#'
+#' @param cohort The cohort object.
+#' @param step_id Id of the step to render.
+#' @param active Whether the step should be the open/active accordion item.
+#' @param allow_rm Whether the delete-step button is enabled.
+#' @param input,output,session The hosting module's reactive objects.
+#' @return Invisibly `NULL`; called for its UI side effects.
+#' @noRd
 render_step <- function(cohort, step_id, active, allow_rm, input, output, session) {
   ns <- session$ns
   run_button <- cohort$attributes$run_button
@@ -281,6 +318,12 @@ render_step <- function(cohort, step_id, active, allow_rm, input, output, sessio
   .update_data_stats(cohort$get_source(), step_id, cohort, session)
 }
 
+#' Toggle a step's pending (needs-run) styling (run-button modes only)
+#' @param session Shiny session.
+#' @param cohort The cohort object.
+#' @param step_id Id of the step.
+#' @return Invisibly `NULL`; called for its UI side effect.
+#' @noRd
 ui_update_pending_state <- function(session, cohort, step_id) {
   if (!is_none(cohort$attributes$run_button)) {
     action <- if (cohort$is_pending(step_id)) "add" else "remove"
@@ -288,19 +331,36 @@ ui_update_pending_state <- function(session, cohort, step_id) {
   }
 }
 
+#' `cat()` its arguments followed by a trailing newline
+#' @param ... Values passed to `cat()`.
+#' @return Invisibly `NULL`.
+#' @noRd
 cat_nl <- function(...) {
   cat(...)
   cat(sep = "\n")
 }
 
+#' `cat_nl()` in a warning (orange) ANSI colour
+#' @param ... Values to print.
+#' @return Invisibly `NULL`.
+#' @noRd
 warning_nl <- function(...) {
   cat_nl("\033[38;5;203m", ..., "\033[39m")
 }
 
+#' `cat_nl()` in an error (red) ANSI colour
+#' @param ... Values to print.
+#' @return Invisibly `NULL`.
+#' @noRd
 error_nl <- function(...) {
   cat_nl("\033[31m", ..., "\033[39m")
 }
 
+#' Print an action and its params to the console when `cb_verbose` is on
+#' @param action Action id/name.
+#' @param params Named list of action parameters.
+#' @return Invisibly `TRUE`; called for its console side effect.
+#' @noRd
 print_state <- function(action, params) {
   if (!getOption("cb_verbose", default = FALSE)) {
     return(invisible(TRUE))
@@ -310,6 +370,10 @@ print_state <- function(action, params) {
     purrr::iwalk(~ cat_nl(paste0("  => ", .y, ": "), paste(.x, collapse = ", ")))
 }
 
+#' Render the "active step" indicator
+#' @param cohort The cohort object.
+#' @return A `shiny.tag` showing the last (active) step id.
+#' @noRd
 render_current_step <- function(cohort) {
   shiny::div(
     class = "cb_active_step",
@@ -318,6 +382,14 @@ render_current_step <- function(cohort) {
   )
 }
 
+#' Insert the global "Run All Steps" button into the panel
+#'
+#' Adds a panel-level run button whose enabled/up-to-date state is driven
+#' client-side by the panel's idle status (used in `run_button = "global"` mode).
+#'
+#' @param session Shiny session.
+#' @return Invisibly `NULL`; called for its UI side effect.
+#' @noRd
 insert_global_run_button <- function(session) {
   ns <- session$ns
 
@@ -345,15 +417,24 @@ insert_global_run_button <- function(session) {
   )
 }
 
-# Decide whether a step should be run during a render loop (R9).
-#
-# - Initial render (init = TRUE):
-#   - non-run_button: run only pending steps (others are already computed).
-#   - run_button: never run at init (steps render from their snapshot / source).
-# - Restore (init = FALSE):
-#   - non-run_button: always run.
-#   - run_button: run only steps that are not pending, so a state saved with
-#     pending steps restores them as pending (greyed), not run.
+#' Decide whether a step should be run during a render loop
+#'
+#' \itemize{
+#'   \item Initial render (`init = TRUE`): non-run-button cohorts run only
+#'     pending steps (others are already computed); run-button cohorts never run
+#'     at init (steps render from their snapshot / source).
+#'   \item Restore / rebuild (`init = FALSE`): non-run-button cohorts always run;
+#'     run-button cohorts run only non-pending steps, so a state saved with
+#'     pending steps restores them as pending (greyed), not run. Step 1 is an
+#'     exception as its input is the always-available source.
+#' }
+#'
+#' @param cohort The cohort object.
+#' @param step_id Id of the step under consideration.
+#' @param init Whether this is the initial render (vs a restore/rebuild).
+#' @param run_on_request Whether the cohort runs only on explicit request (run-button mode).
+#' @return `TRUE` if the step should be run now, otherwise `FALSE`.
+#' @noRd
 should_run_step_on_render <- function(cohort, step_id, init, run_on_request) {
   if (init) {
     if (run_on_request) {
@@ -373,6 +454,20 @@ should_run_step_on_render <- function(cohort, step_id, init, run_on_request) {
   TRUE
 }
 
+#' Render all cohort steps and register the action dispatcher
+#'
+#' Enables the panel, renders each step (running it first when
+#' [should_run_step_on_render()] says so), inserts the global run button when in
+#' `"global"` mode, and on initial render sets up the single `input$action`
+#' observer that routes GUI actions to their `action_*` handlers (with
+#' error-recovery that can restore the previous state).
+#'
+#' @param cohort The cohort object.
+#' @param session Shiny session.
+#' @param init `TRUE` for the initial render (also wires the action observer);
+#'   `FALSE` for restore / source-rebuild re-renders.
+#' @return Invisibly `NULL`; called for its UI and observer side effects.
+#' @noRd
 render_steps <- function(cohort, session, init = TRUE) {
 
   ns <- session$ns
@@ -458,6 +553,17 @@ render_steps <- function(cohort, session, init = TRUE) {
   }
 }
 
+#' Conditionally render a value, optionally wrapped in a `<span>`
+#'
+#' Helper for assembling statistics markup: returns `value` (optionally wrapped
+#' in a whitespace-free span) when `condition` holds, otherwise `empty`.
+#'
+#' @param condition Whether to render `value` (vs `empty`).
+#' @param value Value/markup to render when `condition` is `TRUE`.
+#' @param span Whether to wrap the rendered value in a `shiny::tags$span`.
+#' @param empty Value returned when `condition` is `FALSE` (default `NULL`).
+#' @return `value` (possibly span-wrapped) or `empty`.
+#' @noRd
 empty_if_false <- function(condition, value, span = TRUE, empty = NULL) {
   if (!condition) {
     value <- empty
@@ -525,13 +631,32 @@ empty_if_false <- function(condition, value, span = TRUE, empty = NULL) {
   )
 }
 
+#' Compute `current / previous` as a rounded percentage
+#' @param current Current value (numerator); `NULL`/`NA` yields `"??"`.
+#' @param previous Previous value (denominator).
+#' @return An integer percentage, or `"??"` when `current` is missing.
+#' @noRd
 calc_percent <- function(current, previous) {
-  if (is.null(current) || is.na(current)) {
+  if (is.null(current)) {
     return("??")
   }
-  round(100 * current / previous, 0)
+  result <- round(100 * current / previous, 0)
+  # Vectorised: replace NA elements (e.g. uncomputed post stats) with "??".
+  result[is.na(current)] <- "??"
+  result
 }
 
+#' Set a cohort attribute only if not already set
+#'
+#' Used by [cb_server()] to seed runtime config (session, run_button, stats,
+#' feedback, render_source, ...) onto `cohort$attributes` without clobbering a
+#' value the caller already provided.
+#'
+#' @param cohort The cohort object.
+#' @param attribute Attribute name.
+#' @param value Value to store when the attribute is currently `NULL`.
+#' @return Invisibly `NULL`; mutates `cohort$attributes` in place.
+#' @noRd
 restore_attribute <- function(cohort, attribute, value) {
   if (is.null(cohort$attributes[[attribute]])) {
     cohort$attributes[attribute] <- list(value)
@@ -567,14 +692,16 @@ restore_attribute <- function(cohort, attribute, value) {
 #' @examples
 #' library(cohortBuilder)
 #' librarian_source <- set_source(as.tblist(librarian))
-#' copies_filter <- filter(
-#'   "range", id = "copies", name = "Copies", dataset = "books",
-#'   variable = "copies", range = c(5, 12)
-#' )
-#' copies_filter_evaled <- copies_filter(librarian_source)
-#' copies_filter_evaled$gui <- .gui_filter(copies_filter_evaled)
+#' coh <- cohort(
+#'   librarian_source,
+#'   filter(
+#'     "range", id = "copies", name = "Copies", dataset = "books",
+#'     variable = "copies", range = c(5, 12)
+#'   )
+#' ) |> run()
+#' copies_filter <- coh$get_filter("1", "copies")
 #'
-#' str(copies_filter_evaled$gui)
+#' str(.gui_filter(copies_filter))
 #'
 #' @seealso \link{source-gui-layer}
 #' @export
@@ -729,7 +856,7 @@ restore_attribute <- function(cohort, attribute, value) {
 #' @inheritParams demo_app
 #' @param id Id of the module used to render the panel.
 #' @param ... Extra attributes passed to the panel div container.
-#' @param manage_step When `TRUE`, enables feature, that alows to modify the latest step filters (add/remove them).
+#' @param manage_step When `TRUE`, enables feature, that allows to modify the latest step filters (add/remove them).
 #'   Available list of filters used by the feature should be stored as `source$available_filters` object (can be
 #'   defined with `available_filters` argument for \link{set_source}).
 #' @return Nested list of `shiny.tag` objects - html structure of filtering panel module.
@@ -948,6 +1075,16 @@ cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition =
   )
 }
 
+#' Wire up Shiny bookmarking for the cohort state
+#'
+#' Excludes the panel's own inputs from the bookmark, stores the cohort state
+#' (and cohortBuilder version) in the bookmark on save, and restores the cohort
+#' from a bookmarked state on load.
+#'
+#' @param cohort The cohort object (its `attributes$session` must be set).
+#' @param enable_bookmarking Shiny bookmark store mode; `"disable"` is a no-op.
+#' @return Invisibly `NULL`; called for its bookmarking side effects.
+#' @noRd
 bookmark_restore <- function(cohort, enable_bookmarking) {
   session <- cohort$attributes$session
 
@@ -985,6 +1122,16 @@ bookmark_restore <- function(cohort, enable_bookmarking) {
 #' @rdname cb_ui
 #' @inheritParams demo_app
 #' @param cohort Cohort object storing filtering steps configuration.
+#' @param render_source Controls how filter inputs (choices/ranges) are sourced when a
+#'   filter declares a `domain`. Possible options are: "auto" (default) - use cached
+#'   statistics in stats mode, and the filter's domain when stats are disabled
+#'   (`stats = NULL` and `feedback = FALSE`); "domain" - in stats mode, build choices and
+#'   range bounds from the full domain vocabulary and overlay counts from statistics where
+#'   available. A filter without a domain always falls back to statistics. The value can be
+#'   overridden per filter via `filter@extra$render_source`.
+#' @param assistant Set to TRUE to enable the LLM cohort assistant panel.
+#' @param chat A chat client object (e.g. from 'ellmer') passed to the assistant;
+#'   `NULL` (default) disables the assistant server logic.
 #' @return `shiny::moduleServer` output providing server logic for filtering panel module.
 #' @export
 cb_server <- function(id, cohort, run_button = "none", stats = c("pre", "post"), feedback = FALSE,

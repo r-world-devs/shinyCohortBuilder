@@ -8,7 +8,7 @@ library(shinytest2)
 # restricting step 1 to "F" removes all "A" rows, so the downstream step 2 must
 # react. What exactly changes depends on the configuration:
 #
-#   * propagate = "cache" | "data": step 2's group domain narrows to {B, C} and
+#   * propagate = "stats" | "data": step 2's group domain narrows to {B, C} and
 #     its age range narrows to the F-rows' range (35-50) when render_source =
 #     "domain".
 #   * propagate = "none" | "filter": step 2's group domain is unchanged from the
@@ -39,7 +39,7 @@ test_that("Update non-last step: data-mode narrows downstream group + age (domai
   app <- setup_two_step(
     "upd-data-domain",
     list(run_button = "none", propagate = "data",
-         render_source = "domain", cache = TRUE, stats = "none")
+         render_source = "domain", compute_stats = TRUE, stats = "none")
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -57,13 +57,13 @@ test_that("Update non-last step: data-mode narrows downstream group + age (domai
   expect_equal(cb_range_bounds(app, "2", "age"), c(35, 50))
 })
 
-test_that("Update non-last step: cache-mode narrows downstream group (domain)", {
+test_that("Update non-last step: stats-mode narrows downstream group (domain)", {
   skip_on_cran(); skip_on_ci(); skip_if_screenshot_only()
 
   app <- setup_two_step(
     "upd-cache-domain",
-    list(run_button = "none", propagate = "cache",
-         render_source = "domain", cache = TRUE, stats = "none")
+    list(run_button = "none", propagate = "stats",
+         render_source = "domain", compute_stats = TRUE, stats = "none")
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -78,7 +78,7 @@ test_that("Update non-last step: none-mode leaves downstream domain unchanged", 
   app <- setup_two_step(
     "upd-none-domain",
     list(run_button = "none", propagate = "none",
-         render_source = "domain", cache = TRUE, stats = "none")
+         render_source = "domain", compute_stats = TRUE, stats = "none")
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -94,7 +94,7 @@ test_that("Update non-last step: filter-mode does not narrow from upstream data"
   app <- setup_two_step(
     "upd-filter-domain",
     list(run_button = "none", propagate = "filter",
-         render_source = "domain", cache = TRUE, stats = "none")
+         render_source = "domain", compute_stats = TRUE, stats = "none")
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -104,13 +104,13 @@ test_that("Update non-last step: filter-mode does not narrow from upstream data"
   expect_setequal(cb_discrete_choices(app, "2", "group"), c("A", "B", "C"))
 })
 
-test_that("Update non-last step: cache=FALSE data-mode still narrows downstream", {
+test_that("Update non-last step: compute_stats=FALSE data-mode still narrows downstream", {
   skip_on_cran(); skip_on_ci(); skip_if_screenshot_only()
 
   app <- setup_two_step(
     "upd-nocache-data-domain",
     list(run_button = "none", propagate = "data",
-         render_source = "domain", cache = FALSE, stats = "none")
+         render_source = "domain", compute_stats = FALSE, stats = "none")
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -126,7 +126,7 @@ test_that("Update non-last step: no run button -> nothing pending after update",
   app <- setup_two_step(
     "upd-none-pending",
     list(run_button = "none", propagate = "data",
-         render_source = "auto", cache = TRUE, stats = "pre+post")
+         render_source = "auto", compute_stats = TRUE, stats = "pre+post")
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -141,7 +141,7 @@ test_that("Update non-last step: global run button -> updated step pending until
   app <- setup_two_step(
     "upd-global-pending",
     list(run_button = "global", propagate = "data",
-         render_source = "auto", cache = TRUE, stats = "pre+post")
+         render_source = "auto", compute_stats = TRUE, stats = "pre+post")
   )
   on.exit(app$stop(), add = TRUE)
   # Clear the initial pending state from setup (run everything first).
@@ -163,7 +163,7 @@ test_that("Update non-last step: local run button -> updated step pending until 
   app <- setup_two_step(
     "upd-local-pending",
     list(run_button = "local", propagate = "data",
-         render_source = "auto", cache = TRUE, stats = "pre+post")
+         render_source = "auto", compute_stats = TRUE, stats = "pre+post")
   )
   on.exit(app$stop(), add = TRUE)
   cb_run_step(app, "1")
@@ -185,7 +185,7 @@ test_that("Update non-last step: stats recompute downstream (pre+post)", {
   app <- setup_two_step(
     "upd-stats-recompute",
     list(run_button = "none", propagate = "data",
-         render_source = "auto", cache = TRUE, stats = "pre+post")
+         render_source = "auto", compute_stats = TRUE, stats = "pre+post")
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -207,7 +207,7 @@ test_that("Update non-last step: stats=NULL keeps no stats after update", {
   app <- setup_two_step(
     "upd-stats-none",
     list(run_button = "none", propagate = "data",
-         render_source = "domain", cache = FALSE, stats = "none")
+         render_source = "domain", compute_stats = FALSE, stats = "none")
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -226,7 +226,7 @@ test_that("Update non-last step: feedback plots present downstream after update"
   app <- setup_two_step(
     "upd-feedback-on",
     list(run_button = "none", propagate = "data",
-         render_source = "auto", cache = TRUE, stats = "pre+post",
+         render_source = "auto", compute_stats = TRUE, stats = "pre+post",
          feedback = TRUE)
   )
   on.exit(app$stop(), add = TRUE)
@@ -245,7 +245,7 @@ test_that("Update non-last step: feedback=FALSE shows no plots after update", {
   app <- setup_two_step(
     "upd-feedback-off",
     list(run_button = "none", propagate = "data",
-         render_source = "auto", cache = TRUE, stats = "pre+post",
+         render_source = "auto", compute_stats = TRUE, stats = "pre+post",
          feedback = FALSE)
   )
   on.exit(app$stop(), add = TRUE)
@@ -262,7 +262,7 @@ test_that("Update non-last step: global run defers downstream narrowing until ru
   app <- setup_two_step(
     "upd-global-defer-narrow",
     list(run_button = "global", propagate = "data",
-         render_source = "domain", cache = TRUE, stats = "none")
+         render_source = "domain", compute_stats = TRUE, stats = "none")
   )
   on.exit(app$stop(), add = TRUE)
   cb_run_all(app)

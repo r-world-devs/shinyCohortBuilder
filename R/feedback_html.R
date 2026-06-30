@@ -147,7 +147,7 @@ html_feedback_multi_bar <- function(plot_data, n_missing) {
   states <- unique(plot_data$state)
   palette <- getOption("scb_chart_palette", scb_chart_palette)$discrete
   n_colors <- length(palette)
-  state_colors <- setNames(
+  state_colors <- stats::setNames(
     palette[rep_len(seq_len(n_colors), length(states))],
     states
   )

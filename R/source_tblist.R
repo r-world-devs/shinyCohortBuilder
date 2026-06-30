@@ -1,7 +1,20 @@
+#' Get the dataset a filter belongs to
+#' @param filter A cohortBuilder filter object.
+#' @return The filter's `@dataset` name.
+#' @noRd
 get_filter_dataset <- function(filter) {
   filter@dataset
 }
 
+#' Group filters by their source dataset
+#'
+#' Splits a list of filters into a named list keyed by dataset, preserving the
+#' dataset ordering from the source connection.
+#'
+#' @param source A `tblist` source (provides `$dtconn` dataset names).
+#' @param filters List of filter objects to group.
+#' @return A named list of filter lists, one per dataset.
+#' @noRd
 group_filters <- function(source, filters) {
   datasets <- names(source$dtconn)
   data_filters <- purrr::map_chr(filters, get_filter_dataset)
@@ -16,6 +29,16 @@ group_filters <- function(source, filters) {
   stats::setNames(ordered_filters, datasets)
 }
 
+#' Render a dataset's help tooltip icon
+#'
+#' Returns the clickable help icon for a dataset group, or `NULL` when help is
+#' disabled or the dataset has no description.
+#'
+#' @param cohort The cohort (its `attributes$show_help` gates display).
+#' @param dataset_name Name of the dataset.
+#' @param ns Module namespace function.
+#' @return An `<a>` `shiny.tag`, or `NULL`.
+#' @noRd
 dataset_help_icon <- function(cohort, dataset_name, ns) {
   if (!isTRUE(cohort$attributes$show_help)) return(NULL)
   if (is.null(cohort$show_help(field = dataset_name))) return(NULL)
@@ -30,6 +53,18 @@ dataset_help_icon <- function(cohort, dataset_name, ns) {
   )
 }
 
+#' Render the filters group for a single dataset
+#'
+#' Builds the container holding a dataset's name, help icon, stats placeholder
+#' and rendered filter inputs.
+#'
+#' @param filters List of the dataset's filters.
+#' @param dataset_name Name of the dataset.
+#' @param step_id Id of the step being rendered.
+#' @param cohort The cohort object.
+#' @param ns Module namespace function.
+#' @return A `<div>` `shiny.tag` for the dataset group.
+#' @noRd
 dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
   stats_id <- ns(paste0(step_id, "-stats_", dataset_name))
   no_filters_class <- ""
@@ -63,7 +98,7 @@ dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
 .update_data_stats.tblist <- function(source, step_id, cohort, session, ...) {
   stats <- cohort$attributes$stats
   # Data statistics follow the `stats` setting. When stats are disabled the
-  # cache is not read, so this is a no-op (avoids forcing a source scan).
+  # stats are not read, so this is a no-op (avoids forcing a source scan).
   if (is.null(stats)) {
     return(invisible(NULL))
   }
@@ -80,13 +115,13 @@ dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
     # Every step's "pre" data is its parent's "post" snapshot, which always
     # exists: step 1's parent is the source, and steps 2+ are seeded from their
     # parent at construction / add_step (see Cohort$init_source / add_step). So
-    # recomputing "pre" stats is safe in every mode (run_button, cache = FALSE,
+    # recomputing "pre" stats is safe in every mode (run_button, compute_stats = FALSE,
     # freshly added step) and lets step 1 show real stats before any run instead
     # of the "no data" placeholder. The placeholder is then reserved for its true
     # meaning: the parent step actually filtered out every row (previous == 0).
     # NULL is still handled defensively.
-    pre_cache <- cohort$get_cache(step_id, state = "pre", .recalc_when_missing = TRUE)
-    previous <- pre_cache[[dataset]]$n_rows
+    pre_stats <- cohort$get_stats(step_id, state = "pre", .recalc_when_missing = TRUE)
+    previous <- pre_stats[[dataset]]$n_rows
     if (is.null(previous) || !isTRUE(previous > 0)) {
       # Wrap in an element so the removeUI(" > *") cleanup below can remove it on
       # the next update. A bare string is inserted as a text node, which the
@@ -94,7 +129,7 @@ dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
       # placeholder lingering next to freshly computed stats after a run).
       ui <- shiny::tags$span("No data selected in previous step.")
     } else {
-      current <- cohort$get_cache(step_id, state = "post")[[dataset]]$n_rows
+      current <- cohort$get_stats(step_id, state = "post")[[dataset]]$n_rows
       ui <- .pre_post_stats(current, previous, percent = TRUE, stats = stats)
     }
     shiny::removeUI(selector = paste0(selector, " > *"), multiple = TRUE, immediate = TRUE)

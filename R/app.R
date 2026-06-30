@@ -10,15 +10,8 @@
 #'   Three options are available "none" - no button, "local" - button displayed at each step panel,
 #'   "global" - button visible in top filtering panel.
 #' @param feedback Set to TRUE (default) if feedback plots should be displayed at each filter.
-#' @param render_source Controls how filter inputs (choices/ranges) are sourced when a
-#'   filter declares a `domain`. Possible options are: "auto" (default) - use cached
-#'   statistics in stats mode, and the filter's domain when stats are disabled
-#'   (`stats = NULL` and `feedback = FALSE`); "domain" - in stats mode, build choices and
-#'   range bounds from the full domain vocabulary and overlay counts from statistics where
-#'   available. A filter without a domain always falls back to statistics. The value can be
-#'   overridden per filter via `filter@extra$render_source`.
 #' @param state Set to TRUE (default) to enable get/set state panel.
-#' @param bootstrap Boostrap version to be used for filtering panel.
+#' @param bootstrap Bootstrap version to be used for filtering panel.
 #'   See \link[bslib]{bs_theme} version argument.
 #' @param enable_bookmarking Set to TRUE (default) if panel should be compatible with native shiny bookmarking.
 #' @param code Set to TRUE (default) to enable reproducible code panel.

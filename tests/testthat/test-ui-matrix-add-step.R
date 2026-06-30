@@ -3,7 +3,7 @@ library(shinytest2)
 # UI matrix tests — ACTION: adding a new step (clone of the last step).
 #
 # These exercise the cross-product of run_button x propagate_domains x
-# render_source x cache and check, on the freshly added step:
+# render_source x compute_stats and check, on the freshly added step:
 #   * choices / ranges (domain narrowing)
 #   * pending state
 #   * statistics shown
@@ -12,7 +12,7 @@ library(shinytest2)
 # The single parametrized app (apps/matrix) is configured per test via env vars
 # (see cb_matrix_driver). Data: group "A" occurs only with gender "M", so once
 # step 1 restricts gender to "F" the downstream group domain narrows to {B, C}
-# (under data/cache propagation) and the age range narrows to the F-rows' range.
+# (under data/stats propagation) and the age range narrows to the F-rows' range.
 
 # ── New step inherits filters and choices ────────────────────────────────────
 
@@ -22,7 +22,7 @@ test_that("Add step: new step clones parent filters and choices (auto render)", 
   app <- cb_matrix_driver(
     "add-clone-auto",
     list(run_button = "none", propagate = "filter",
-         render_source = "auto", cache = TRUE, stats = "pre+post")
+         render_source = "auto", compute_stats = TRUE, stats = "pre+post")
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -43,20 +43,20 @@ test_that("Add step: new step clones parent filters and choices (auto render)", 
 
 # ── Domain on add: new step shows the cloned/declared domain ─────────────────
 
-test_that("Add step: data/cache narrow the new step from a resolved parent", {
+test_that("Add step: data/stats narrow the new step from a resolved parent", {
   skip_on_cran(); skip_on_ci(); skip_if_screenshot_only()
 
   # The matrix app's step 1 already restricts gender to "F" (removing every "A"
   # row) and is run on startup, so it is resolved (not pending) when we add a
-  # step. Under data/cache propagation, the new step must open already narrowed
+  # step. Under data/stats propagation, the new step must open already narrowed
   # to the parent's remaining data: group {B,C} and the F-rows' age range 35-50.
   # (Propagation fires when a parent runs; add_step propagates from the resolved
   # parent so the new step does not show the stale full domain.)
-  for (mode in c("data", "cache")) {
+  for (mode in c("data", "stats")) {
     app <- cb_matrix_driver(
       paste0("add-domain-", mode),
       list(run_button = "none", propagate = mode,
-           render_source = "domain", cache = TRUE, stats = "none")
+           render_source = "domain", compute_stats = TRUE, stats = "none")
     )
 
     cb_add_step(app)
@@ -81,7 +81,7 @@ test_that("Add step: filter mode keeps the full domain on add (no upstream-data 
   app <- cb_matrix_driver(
     "add-domain-filter",
     list(run_button = "none", propagate = "filter",
-         render_source = "domain", cache = TRUE, stats = "none")
+         render_source = "domain", compute_stats = TRUE, stats = "none")
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -103,7 +103,7 @@ test_that("Add step: no run button -> new step is not pending", {
   app <- cb_matrix_driver(
     "add-none-pending",
     list(run_button = "none", propagate = "filter",
-         render_source = "auto", cache = TRUE, stats = "pre+post")
+         render_source = "auto", compute_stats = TRUE, stats = "pre+post")
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -117,7 +117,7 @@ test_that("Add step: global run button -> new step is pending until run", {
   app <- cb_matrix_driver(
     "add-global-pending",
     list(run_button = "global", propagate = "filter",
-         render_source = "auto", cache = TRUE, stats = "pre+post")
+         render_source = "auto", compute_stats = TRUE, stats = "pre+post")
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -135,7 +135,7 @@ test_that("Add step: local run button -> new step is pending until run", {
   app <- cb_matrix_driver(
     "add-local-pending",
     list(run_button = "local", propagate = "filter",
-         render_source = "auto", cache = TRUE, stats = "pre+post")
+         render_source = "auto", compute_stats = TRUE, stats = "pre+post")
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -154,7 +154,7 @@ test_that("Add step: stats=pre+post renders pre/post stats on new step", {
   app <- cb_matrix_driver(
     "add-stats-prepost",
     list(run_button = "none", propagate = "filter",
-         render_source = "auto", cache = TRUE, stats = "pre+post")
+         render_source = "auto", compute_stats = TRUE, stats = "pre+post")
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -172,7 +172,7 @@ test_that("Add step: stats=NULL renders no stats on new step", {
   app <- cb_matrix_driver(
     "add-stats-none",
     list(run_button = "none", propagate = "filter",
-         render_source = "domain", cache = FALSE, stats = "none")
+         render_source = "domain", compute_stats = FALSE, stats = "none")
   )
   on.exit(app$stop(), add = TRUE)
 
@@ -192,7 +192,7 @@ test_that("Add step: feedback=TRUE shows feedback plots on new step", {
   app <- cb_matrix_driver(
     "add-feedback-on",
     list(run_button = "none", propagate = "filter",
-         render_source = "auto", cache = TRUE, stats = "pre+post",
+         render_source = "auto", compute_stats = TRUE, stats = "pre+post",
          feedback = TRUE)
   )
   on.exit(app$stop(), add = TRUE)
@@ -210,7 +210,7 @@ test_that("Add step: feedback=FALSE shows no feedback plots on new step", {
   app <- cb_matrix_driver(
     "add-feedback-off",
     list(run_button = "none", propagate = "filter",
-         render_source = "auto", cache = TRUE, stats = "pre+post",
+         render_source = "auto", compute_stats = TRUE, stats = "pre+post",
          feedback = FALSE)
   )
   on.exit(app$stop(), add = TRUE)
@@ -219,17 +219,17 @@ test_that("Add step: feedback=FALSE shows no feedback plots on new step", {
   expect_false(cb_has_feedback(app, "2", "gender"))
 })
 
-# ── cache = FALSE still renders a usable new step ───────────────────────────
+# ── compute_stats = FALSE still renders a usable new step ───────────────────────────
 
-test_that("Add step: cache=FALSE + domain render produces a usable new step", {
+test_that("Add step: compute_stats=FALSE + domain render produces a usable new step", {
   skip_on_cran(); skip_on_ci(); skip_if_screenshot_only()
 
-  # With cache = FALSE the source is not scanned. Domain rendering must still
+  # With compute_stats = FALSE the source is not scanned. Domain rendering must still
   # produce a complete, selectable new step from the declared domains.
   app <- cb_matrix_driver(
     "add-nocache-domain",
     list(run_button = "none", propagate = "filter",
-         render_source = "domain", cache = FALSE, stats = "none")
+         render_source = "domain", compute_stats = FALSE, stats = "none")
   )
   on.exit(app$stop(), add = TRUE)
 

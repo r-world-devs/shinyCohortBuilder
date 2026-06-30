@@ -7,7 +7,7 @@
 # Layout:
 #   * Left  : the cohortBuilder filtering panel (the thing under test).
 #   * Right : a CONFIG box (choose propagate_domains / render_source / run_button
-#             / cache, then click "Apply" to rebuild the panel) and a live
+#             / compute_stats, then click "Apply" to rebuild the panel) and a live
 #             INSPECTOR that polls the cohort object twice a second and prints,
 #             for every step:
 #               - is_pending  (TRUE while a step is awaiting a run)
@@ -47,7 +47,7 @@ patients <- data.frame(
 # NARROW it back to {F} to watch downstream propagation re-run. Starting from a
 # concrete value (rather than NULL) keeps the discrete filter's update semantics
 # straightforward.
-build_cohort <- function(cache, propagate_domains) {
+build_cohort <- function(compute_stats, propagate_domains) {
   cohort(
     set_source(tblist(patients = patients)),
     filter(
@@ -62,7 +62,7 @@ build_cohort <- function(cache, propagate_domains) {
       "discrete", id = "group", name = "Group", dataset = "patients",
       variable = "group", value = NA, domain = c("A", "B", "C")
     ),
-    cache = cache,
+    compute_stats = compute_stats,
     propagate_domains = propagate_domains
   )
 }
@@ -96,12 +96,12 @@ ui <- bslib::page_sidebar(
   sidebar = bslib::sidebar(
     title = "Config & inspector", position = "right", width = 380, open = TRUE,
     selectInput("cfg_propagate", "propagate_domains",
-                c("none", "filter", "cache", "data"), selected = "data"),
+                c("none", "filter", "stats", "data"), selected = "data"),
     selectInput("cfg_render", "render_source",
                 c("auto", "domain"), selected = "domain"),
     selectInput("cfg_run_button", "run_button",
                 c("none", "local", "global"), selected = "none"),
-    checkboxInput("cfg_cache", "cache", value = TRUE),
+    checkboxInput("cfg_compute_stats", "compute_stats", value = TRUE),
     actionButton("cfg_apply", "Apply (rebuild panel)",
                  class = "btn-primary", width = "100%"),
     tags$hr(),
@@ -128,11 +128,11 @@ server <- function(input, output, session) {
     id <- paste0("coh", n)
     coh <- tryCatch(
       build_cohort(
-        cache = isTRUE(input$cfg_cache),
+        compute_stats = isTRUE(input$cfg_compute_stats),
         propagate_domains = input$cfg_propagate
       ),
       error = function(e) {
-        # e.g. propagate_domains = "cache" requires cache = TRUE.
+        # e.g. propagate_domains = "stats" requires compute_stats = TRUE.
         showNotification(conditionMessage(e), type = "error", duration = 8)
         NULL
       }
