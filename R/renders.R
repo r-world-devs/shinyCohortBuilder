@@ -974,6 +974,25 @@ cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition =
   no_assistant_class <- if (assistant) "" else "cb_no_assistant"
   assistant_modal_id <- ns("cohort-assistant")
 
+  # shinyGizmo's modalDialogUI(easyClose = TRUE) sets data-backdrop="false"
+  # (no backdrop at all), so clicking outside never closes the modal. Build the
+  # modal, then force a dismissable backdrop back on so a background click closes it.
+  assistant_modal <- shinyGizmo::modalDialogUI(
+    modalId = assistant_modal_id,
+    button = NULL,
+    cb_chat_ui(ns("chat")),
+    easyClose = TRUE,
+    footer = shiny::modalButton("Close")
+  )
+  for (i in seq_along(assistant_modal)) {
+    el <- assistant_modal[[i]]
+    if (inherits(el, "shiny.tag") && identical(el$attribs$id, assistant_modal_id)) {
+      el$attribs$`data-backdrop` <- "true"
+      el$attribs$`data-bs-backdrop` <- "true"
+      assistant_modal[[i]] <- el
+    }
+  }
+
   new_step <- rlang::arg_match(new_step)
   add_step_action <- switch(new_step,
     "clone" = "add_step",
@@ -1059,13 +1078,7 @@ cb_ui <- function(id, ..., state = FALSE, steps = TRUE, code = TRUE, attrition =
           !!!bs_data_attr("toggle", "modal"),
           !!!bs_data_attr("target", glue::glue("#{assistant_modal_id}"))
         ),
-        shinyGizmo::modalDialogUI(
-          modalId = assistant_modal_id,
-          button = NULL,
-          cb_chat_ui(ns("chat")),
-          easyClose = TRUE,
-          footer = shiny::modalButton("Close")
-        )
+        assistant_modal
       ),
       shinyGizmo::accordion(
         id = ns("cb_steps"),
