@@ -1,0 +1,228 @@
+# Star Wars AI assistant example
+#
+# A cohortBuilder + shinyCohortBuilder app over four related Star Wars tables
+# (people, planets, species, films) with an LLM assistant mounted in a right
+# sidebar. The assistant inspects and applies filters through cohortBuilder's
+# registered tools; the filter panel, the assistant, and the data tables all
+# operate on the same cohort.
+#
+# The assistant reads all config from environment variables:
+#   ANTHROPIC_BASE_URL, ANTHROPIC_AUTH_TOKEN, ANTHROPIC_CUSTOM_HEADERS,
+#   ANTHROPIC_MODEL (optional), STARWARS_APP_PORT (optional, default 3838)
+#
+# Run:
+#   Rscript app.R
+#   # or shiny::runApp("inst/examples/starwars-assistant")
+
+# The packages target R >= 4.4 where `%||%` is in base. On older R, inject it
+# into their (locked) namespaces so package internals resolve the operator.
+if (getRversion() < "4.4.0") {
+  for (pkg in c("cohortBuilder", "shinyCohortBuilder")) {
+    requireNamespace(pkg, quietly = TRUE)
+    ns <- asNamespace(pkg)
+    if (!exists("%||%", envir = ns, inherits = FALSE)) {
+      rlang::env_unlock(ns)
+      assign("%||%", rlang::`%||%`, envir = ns)
+      lockEnvironment(ns, bindings = FALSE)
+    }
+  }
+}
+
+library(cohortBuilder)
+library(shinyCohortBuilder)
+library(shiny)
+options(shiny.fullstacktrace = TRUE, shiny.trace = FALSE, warn = 1)
+
+# ANTHROPIC_CUSTOM_HEADERS holds one "Key: value" pair; split on the first colon.
+parse_custom_headers <- function(x) {
+  if (!nzchar(x)) return(character(0))
+  idx <- regexpr(":", x, fixed = TRUE)
+  if (idx < 1) return(character(0))
+  stats::setNames(trimws(substr(x, idx + 1, nchar(x))),
+                  trimws(substr(x, 1, idx - 1)))
+}
+
+build_chat <- function() {
+  base_url <- Sys.getenv("ANTHROPIC_BASE_URL")
+  token    <- Sys.getenv("ANTHROPIC_AUTH_TOKEN")
+  if (!nzchar(base_url) || !nzchar(token)) {
+    stop("ANTHROPIC_BASE_URL and ANTHROPIC_AUTH_TOKEN must be set.", call. = FALSE)
+  }
+  ellmer::chat_anthropic(
+    # ellmer appends "/messages"; Anthropic endpoints expect the "/v1" prefix.
+    base_url = paste0(sub("/+$", "", base_url), "/v1"),
+    credentials = function() token,
+    api_headers = c(
+      Authorization = paste("Bearer", token),
+      parse_custom_headers(Sys.getenv("ANTHROPIC_CUSTOM_HEADERS"))
+    ),
+    model = Sys.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-5-20250929"),
+    system_prompt = paste(
+      "You are a data cohort assistant for a Star Wars dataset with four related",
+      "tables: people, planets, species and films. Use the provided tools to",
+      "inspect available filters and to add/apply/toggle/clear filters on the",
+      "user's behalf. Always call cb_get_filters_meta to discover exact filter",
+      "ids and domains before applying values, and cb_describe_state to check",
+      "current filters. Be concise."
+    )
+  )
+}
+
+# Named list of four related tibbles (people, planets, species, films).
+starwars <- readRDS("starwars.rds")
+
+starwars_binding_keys <- bind_keys(
+  bind_key(update = data_key("people", "homeworld_id"), data_key("planets", "id")),
+  bind_key(update = data_key("planets", "id"),          data_key("people", "homeworld_id")),
+  bind_key(update = data_key("people", "species_id"),   data_key("species", "id")),
+  bind_key(update = data_key("species", "id"),          data_key("people", "species_id")),
+  bind_key(update = data_key("species", "homeworld_id"),data_key("planets", "id")),
+  bind_key(update = data_key("planets", "id"),          data_key("species", "homeworld_id"))
+)
+
+# Descriptions are what the LLM reads via shape() / cb_get_filters_meta.
+starwars_description <- list(
+  people = list(
+    dataset_   = describe("Star Wars characters with physical attributes, species and home planet."),
+    name       = describe("Character full name"),
+    height     = describe("Character height in centimetres"),
+    mass       = describe("Character body mass in kilograms"),
+    hair_color = describe("Character hair colour"),
+    skin_color = describe("Character skin colour"),
+    eye_color  = describe("Character eye colour"),
+    birth_year = describe("In-universe birth year, e.g. '19BBY'"),
+    gender     = describe("Character gender (male, female, hermaphrodite, none)")
+  ),
+  planets = list(
+    dataset_        = describe("Planets appearing in the saga."),
+    name            = describe("Planet name"),
+    rotation_period = describe("Day length in hours"),
+    orbital_period  = describe("Year length in days"),
+    diameter        = describe("Diameter in kilometres"),
+    gravity         = describe("Surface gravity relative to standard"),
+    population      = describe("Number of sentient inhabitants"),
+    climate         = describe("Prevailing climate(s)"),
+    terrain         = describe("Dominant terrain type(s)"),
+    surface_water   = describe("Percentage of surface covered by water")
+  ),
+  species = list(
+    dataset_         = describe("Sentient and non-sentient species."),
+    name             = describe("Species name"),
+    classification   = describe("Biological classification (mammal, reptile, artificial, ...)"),
+    designation      = describe("Designation, e.g. sentient"),
+    average_height   = describe("Average adult height in centimetres"),
+    average_lifespan = describe("Average lifespan in years"),
+    language         = describe("Primary language")
+  ),
+  films = list(
+    dataset_     = describe("The Star Wars feature films."),
+    title        = describe("Film title"),
+    episode_id   = describe("Episode number (1-6)"),
+    director     = describe("Film director"),
+    producer     = describe("Film producer(s)"),
+    release_date = describe("Theatrical release date")
+  )
+)
+
+starwars_source <- set_source(
+  tblist(
+    people  = starwars$people,
+    planets = starwars$planets,
+    species = starwars$species,
+    films   = starwars$films
+  ),
+  binding_keys = starwars_binding_keys,
+  description  = starwars_description,
+  compute_meta_stats = FALSE
+) |>
+  autofilter(attach_as = "meta")
+
+# Predefined active filters; run() applies them so the app opens pre-filtered.
+starwars_cohort <- cohort(
+  starwars_source,
+  filter("discrete", id = "people-gender", dataset = "people",
+         variable = "gender", value = "male"),
+  filter("range", id = "people-height", dataset = "people",
+         variable = "height", range = c(150, 220)),
+  filter("discrete", id = "species-classification", dataset = "species",
+         variable = "classification", value = "mammal")
+) |>
+  run()
+
+table_panel <- function(title, count_id, table_id) {
+  bslib::nav_panel(
+    title,
+    shiny::h5(shiny::textOutput(count_id, inline = TRUE)),
+    shiny::div(style = "overflow:auto; max-height:75vh;",
+               shiny::tableOutput(table_id))
+  )
+}
+
+# Used bare (no Shiny namespace) so cb_chat_server can read
+# input[["<chat_id>_user_input"]].
+chat_id <- "cohort_chat"
+
+ui <- bslib::page_sidebar(
+  title = "Star Wars \u2014 cohortBuilder + AI assistant",
+  # assistant = FALSE: the chat lives in the right sidebar, not the filter panel.
+  sidebar = bslib::sidebar(
+    width = 420,
+    cb_ui("starwars", assistant = FALSE, new_step = "configure")
+  ),
+  bslib::layout_sidebar(
+    sidebar = bslib::sidebar(
+      position = "right",
+      width = 400,
+      open = TRUE,
+      title = "AI assistant",
+      cb_chat_ui(chat_id)
+    ),
+    bslib::navset_card_tab(
+      table_panel("people",  "n_people",  "tbl_people"),
+      table_panel("planets", "n_planets", "tbl_planets"),
+      table_panel("species", "n_species", "tbl_species"),
+      table_panel("films",   "n_films",   "tbl_films")
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  chat <- build_chat()
+  chat |> cb_register_tools(starwars_cohort)
+
+  cb_server("starwars", starwars_cohort, stats = c("pre", "post"), feedback = FALSE)
+  cb_chat_server(chat_id, chat, input, output, session)
+
+  # The module emits "{id}-cb_data_updated"; ignoreNULL/ignoreInit = FALSE so
+  # tables also render on first load (reflecting the predefined filters).
+  post_data <- shiny::eventReactive(
+    input[["starwars-cb_data_updated"]],
+    {
+      tryCatch(
+        starwars_cohort$get_data(step_id = starwars_cohort$last_step_id(),
+                                 state = "post"),
+        error = function(e) starwars_cohort$get_source()$dtconn
+      )
+    },
+    ignoreNULL = FALSE, ignoreInit = FALSE
+  )
+
+  render_for <- function(name) shiny::renderTable(utils::head(post_data()[[name]], 200))
+  count_for  <- function(name) shiny::renderText(sprintf("%d rows", nrow(post_data()[[name]])))
+
+  output$tbl_people  <- render_for("people")
+  output$tbl_planets <- render_for("planets")
+  output$tbl_species <- render_for("species")
+  output$tbl_films   <- render_for("films")
+  output$n_people  <- count_for("people")
+  output$n_planets <- count_for("planets")
+  output$n_species <- count_for("species")
+  output$n_films   <- count_for("films")
+}
+
+shiny::runApp(
+  shinyApp(ui, server),
+  host = "0.0.0.0",
+  port = as.integer(Sys.getenv("STARWARS_APP_PORT", "3838")),
+  launch.browser = FALSE
+)
