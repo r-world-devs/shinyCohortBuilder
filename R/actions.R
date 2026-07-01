@@ -665,6 +665,7 @@ action_manage_step_modal <- function(cohort, changed_input, session) {
         html = TRUE,
         search =  TRUE,
         selectAllOnlyVisible = TRUE,
+        hasOptionDescription = TRUE,
         zIndex = 9999
       ),
       shiny::tags$script(
@@ -969,6 +970,7 @@ action_show_step_filter_modal <- function(cohort, changed_input, session) {
         html = TRUE,
         search =  TRUE,
         selectAllOnlyVisible = TRUE,
+        hasOptionDescription = TRUE,
         zIndex = 9999
       ),
       shiny::tags$script(

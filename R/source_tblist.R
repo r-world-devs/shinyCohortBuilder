@@ -154,30 +154,75 @@ dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
   )
 }
 
+#' Extract plain description text from a `describe()` object or string
+#'
+#' Mirrors cohortBuilder's internal `description_text()`: pulls `$text` from a
+#' `describe()` list, accepts a bare non-empty string, and returns `NA` for
+#' anything empty/missing.
+#'
+#' @param x A `describe()` object, character string, or `NULL`.
+#' @return A single description string, or `NA_character_`.
+#' @noRd
+.description_text <- function(x) {
+  if (is.list(x)) x <- x$text
+  if (is.null(x) || !is.character(x) || !nzchar(x)) return(NA_character_)
+  x
+}
+
+#' Build the virtual-select choice description for an available filter
+#'
+#' Combines the filter-level description (from the filter's own `@description`)
+#' with the per-variable descriptions taken from `shape()`. The filter-level
+#' text (when present) comes first, followed by the variable descriptions:
+#' single-variable filters show the bare variable description, while
+#' multi-variable filters prefix each with its variable name. Empty parts are
+#' dropped, so a filter with only variable descriptions (the autofilter case)
+#' shows just those.
+#'
+#' @param filter An S7 filter object.
+#' @param shape_entry The filter's entry from `shape()$filters` (provides
+#'   `variables`), or `NULL`.
+#' @return A single description string, or `NA_character_` when nothing usable.
+#' @noRd
+.choice_description <- function(filter, shape_entry) {
+  filter_part <- .description_text(filter@description)
+
+  variables <- shape_entry$variables %||% list()
+  multi <- length(variables) > 1
+  var_parts <- purrr::map_chr(variables, function(v) {
+    desc <- .description_text(v$description)
+    if (is.na(desc)) return(NA_character_)
+    if (multi) paste0(v$name, ": ", desc) else desc
+  })
+  var_part <- var_parts[!is.na(var_parts)]
+  var_part <- if (length(var_part)) paste(var_part, collapse = "; ") else NA_character_
+
+  parts <- c(filter_part, var_part)
+  parts <- parts[!is.na(parts)]
+  if (!length(parts)) return(NA_character_)
+  paste(parts, collapse = " \u2014 ")
+}
+
 #' @rdname available-filters-choices
 #' @export
 .available_filters_choices.tblist <- function(source, cohort, ...) {
 
   available_filters <- cohort$attributes$available_filters
 
+  # Pull per-filter (and per-variable) descriptions from `shape()`. Domains are
+  # not needed here (we only render name + description), so skip computing them.
+  filters_shape <- cohortBuilder::shape(source, domains = FALSE)$filters
+
   choices <- purrr::map(available_filters, function(x) {
     tibble::tibble(
-      name = as.character(
-        shiny::div(
-          `data-tooltip-z-index` = 9999,
-          `data-tooltip` = x@description,
-          `data-tooltip-position` = "top right",
-          `data-tooltip-allow-html` = "true",
-          x@name
-        )
-      ),
+      name = x@name,
       id = x@id,
-      dataset = x@dataset
+      dataset = x@dataset,
+      description = .choice_description(x, filters_shape[[x@id]])
     )
   }) |> dplyr::bind_rows()
-  choices$name <- gsub("\"", "'", choices$name) # prevents invalid interpolation for setting labels
 
-  shinyWidgets::prepare_choices(choices, name, id, dataset)
+  shinyWidgets::prepare_choices(choices, name, id, dataset, description = description)
 }
 
 #' @rdname filter-position
