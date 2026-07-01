@@ -83,5 +83,5 @@ shiny::runApp(
   ),
   host = "0.0.0.0",
   port = 8888,
-  launch.browser = FALSE
+  launch.browser = TRUE
 )
