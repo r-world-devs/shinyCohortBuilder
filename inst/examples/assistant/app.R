@@ -4,12 +4,13 @@ pkgload::load_all("../cohortBuilder")
 
 dt_source <- set_source(
   tblist(
-    iris = iris,
+    iris = iris |> dplyr::mutate(spec_id = paste("spec", 1:dplyr::n())),
     mtcars = mtcars
   ),
   description = list(
     iris = list(
       dataset_ = describe("dataset related to iris plants"),
+      spec_id = describe("unique row id"),
       Sepal.Length = describe("filter for the sepal length measurement"),
       Petal.Length = describe("filter for the petal length measurement"),
       Sepal.Width = describe("filter for the sepal width measurement"),
@@ -58,14 +59,17 @@ shiny::runApp(list(
   ui = bslib::page_sidebar(
     title = "AI Assistant",
     sidebar = bslib::sidebar(
-      shinyCohortBuilder::cb_ui(id = "data", assistant = TRUE)
+      shinyCohortBuilder::cb_ui(id = "data", assistant = TRUE, new_step = "configure")
     ),
     bslib::card(
       shiny::verbatimTextOutput("data_obj")
     )
   ),
   server = function(input, output, session) {
-    shinyCohortBuilder::cb_server(id = "data", coh, run_button = "global", feedback = TRUE, chat = chat)
+    shinyCohortBuilder::cb_server(
+      id = "data", coh, run_button = "none",
+      feedback = TRUE, chat = chat
+    )
 
     returned_data <- shiny::eventReactive(input[["data-cb_data_updated"]], {
       coh$get_data(step_id = coh$last_step_id(), state = "post")

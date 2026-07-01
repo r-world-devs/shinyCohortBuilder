@@ -214,13 +214,13 @@ S7::method(.gui_filter, cohortBuilder::CbFilterQuery) <- function(object, ...) {
           size = "l",
           footer = shiny::tagList(
             .cb_input(
-              shinyGizmo::valueButton(
+              rlang::inject(shinyGizmo::valueButton(
                 inputId = input_id,
                 label = "Accept",
                 selector = paste0("#", input_params$inputId),
                 !!!bs_data_attr("dismiss", "modal"),
                 onclick = move_dialog_back_js
-              ),
+              )),
               filter@private$input_param,
               style = "display: inline-block;"
             ),
