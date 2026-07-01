@@ -21,7 +21,7 @@ filter types.
 
 ## Requirements
 
-Requires `cohortBuilder` and `shinyCohortBuilder` (feature/domains branch)
+Requires `cohortBuilder` (>=1.0.0) and `shinyCohortBuilder` (>=1.0.0)
 installed. On R < 4.4 the app injects the base `%||%` operator into the package
 namespaces, since both packages target R >= 4.4.
 
