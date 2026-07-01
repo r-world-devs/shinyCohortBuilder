@@ -58,8 +58,8 @@ Examples:
   step <- cohort$get_step(step_id)
   shiny::tagList(
     shiny::htmlOutput(ns(paste0(step_id, "-stats")), class = "scb_data_stats"),
-    step$filters %>%
-      purrr::map(~ .render_filter(.x, step_id, cohort, ns = ns)) %>%
+    step$filters |>
+      purrr::map(~ .render_filter(.x, step_id, cohort, ns = ns)) |>
       shiny::div(class = "cb_filters", `data-step_id` = step_id)
   )
 }
@@ -71,8 +71,8 @@ Examples:
 .render_filters.tblist <- function(source, cohort, step_id, ns, ...) {
   step <- cohort$get_step(step_id)
 
-  group_filters(cohort$get_source(), step$filters) %>%
-    purrr::imap(~ dataset_filters(.x, .y, step_id, cohort, ns = ns)) %>%
+  group_filters(cohort$get_source(), step$filters) |>
+    purrr::imap(~ dataset_filters(.x, .y, step_id, cohort, ns = ns)) |>
     shiny::div(class = "cb_filters", `data-step_id` = step_id)
 }
 ```
@@ -86,8 +86,8 @@ and attach a separate statistics placeholder for each dataset (dataset_filters).
 render_filters.db <- function(source, cohort, step_id, ns) {
   step <- cohort$get_step(step_id)
 
-  group_filters_db(cohort$get_source(), step$filters) %>%
-    purrr::imap(~ dataset_filters_db(.x, .y, step_id, cohort, ns = ns)) %>%
+  group_filters_db(cohort$get_source(), step$filters) |>
+    purrr::imap(~ dataset_filters_db(.x, .y, step_id, cohort, ns = ns)) |>
     div(class = "cb_filters", `data-step_id` = step_id)
 }
 ```
@@ -142,7 +142,7 @@ Examples:
   data_filters <- purrr::map_chr(step$filters, get_filter_dataset)
   dataset_names <- intersect(dataset_names, data_filters)
 
-  dataset_names %>% purrr::walk(
+  dataset_names |> purrr::walk(
     ~ .sendOutput(
       paste0(step_id, "-stats_", .x),
       shiny::renderUI({
@@ -166,7 +166,7 @@ update_data_stats.db <- function(source, step_id, cohort, session) {
   stats <- cohort$attributes$stats
 
   dataset_names <- source$attributes$tables
-  dataset_names %>% purrr::walk(
+  dataset_names |> purrr::walk(
     ~ shinyCohortBuilder::sendOutput(
       paste0(step_id, "-stats_", .x),
       shiny::renderUI({
@@ -204,16 +204,16 @@ Examples:
 ```{r, eval = FALSE}
 autofilter.tblist <- function(source, attach_as = c("step", "meta"), ...) {
   attach_as <- rlang::arg_match(attach_as)
-  step_rule <- source$dtconn %>%
-    purrr::imap(~filter_rules(.x, .y)) %>%
-    unlist(recursive = FALSE) %>%
-    purrr::map(~do.call(cohortBuilder::filter, .)) %>%
+  step_rule <- source$dtconn |>
+    purrr::imap(~filter_rules(.x, .y)) |>
+    unlist(recursive = FALSE) |>
+    purrr::map(~do.call(cohortBuilder::filter, .)) |>
     unname()
 
   if (identical(attach_as, "meta")) {
     source$available_filters <- step_rule
   } else {
-    source %>%
+    source |>
       cohortBuilder::add_step(do.call(cohortBuilder::step, step_rule))
   }
 
@@ -257,7 +257,7 @@ Examples:
       id = x$id,
       dataset = x$get_params("dataset")
     )
-  }) %>% dplyr::bind_rows()
+  }) |> dplyr::bind_rows()
 
   shinyWidgets::prepare_choices(choices, name, id, dataset)
 }

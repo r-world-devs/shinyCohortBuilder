@@ -351,7 +351,7 @@ So we define there an observer, that listens to plot click action and triggers a
             run_flow = FALSE
           ))
         }
-      }, ignoreInit = TRUE) %>% .save_observer(input_id, session)
+      }, ignoreInit = TRUE) |> .save_observer(input_id, session)
     },
     # other methods
   )

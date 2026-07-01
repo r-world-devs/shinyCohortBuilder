@@ -52,7 +52,7 @@ query_filter <- cohortBuilder::filter(
 )
 
 pin_controlbar <- function(controlbar, ...) {
-  controlbar[[2]] <- controlbar[[2]] %>%
+  controlbar[[2]] <- controlbar[[2]] |>
     shiny::tagAppendAttributes(`data-pin` = "pin")
   return(controlbar)
 }
@@ -65,7 +65,7 @@ shiny::runApp(list(
       shinyCohortBuilder::cb_ui(id = "fk"),
       collapsed = FALSE,
       skin = "light"
-    ) %>% pin_controlbar(),
+    ) |> pin_controlbar(),
     dashboardSidebar(),
     dashboardBody(
       # Boxes need to be put in a row (or column)

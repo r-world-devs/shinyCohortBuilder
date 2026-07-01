@@ -6,7 +6,7 @@ coh <- cohort(
   source = set_source(
     tblist(iris = iris, mtcars = mtcars)
   )
-) %>%
+) |>
   add_filter(
     filter(
       "query", id = "iris_query", dataset = "iris", variables = c("Petal.Length", "Species"),

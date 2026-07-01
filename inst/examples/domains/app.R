@@ -78,8 +78,8 @@ build_cohort <- function(compute_stats = TRUE, propagate_domains = "filter",
     propagate_domains = propagate_domains
   )
   if (add_initial) {
-    coh <- coh %>%
-      add_filter(filters[[1]]) %>%
+    coh <- coh |>
+      add_filter(filters[[1]]) |>
       add_filter(filters[[2]])
   }
   coh

@@ -37,7 +37,7 @@ Imports:
     shiny (>= 1.7.0),
     shinyWidgets (>= 0.7.0),
     dplyr,
-    cohortBuilder (>= 0.4.0),
+    cohortBuilder (>= 1.0.0),
     S7,
     tryCatchLog,
     highr,
