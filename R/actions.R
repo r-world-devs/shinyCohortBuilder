@@ -640,7 +640,7 @@ action_manage_step_modal <- function(cohort, changed_input, session) {
   print_state("manage_step_modal", changed_input)
   input_state("manage_step_modal", changed_input)
 
-  available_filters <- cohort$attributes$available_filters
+  available_filters <- cohort$get_source()$available_filters
 
   if (length(available_filters) == 0) {
     warning_nl("`available_filters` was not defined, configure step will not be working. Cloning last step.")
@@ -721,7 +721,7 @@ action_manage_step_configured <- function(cohort, changed_input, session) {
   to_rm_ids <- setdiff(current_ids, chosen_ids)
   to_add_ids <- setdiff(chosen_ids, current_ids)
 
-  available_filters <- cohort$attributes$available_filters
+  available_filters <- cohort$get_source()$available_filters
   available_filter_ids <- purrr::map_chr(available_filters, ~.x@id)
   available_filters <- stats::setNames(available_filters, available_filter_ids)
 
@@ -881,7 +881,7 @@ action_add_step <- function(cohort, changed_input, session) {
 
   print_state("add_step", changed_input)
   input_state("add_step", changed_input)
-  available_filters <- cohort$attributes$available_filters
+  available_filters <- cohort$get_source()$available_filters
 
   # In run_button mode the new step renders from the parent's copied snapshot
   # (seeded by add_step) and stays pending until the user runs the flow, so we
@@ -917,7 +917,7 @@ action_add_step_configured <- function(cohort, changed_input, session) {
   input_state("action_add_step_configured", changed_input)
 
   chosed_filters <- session$input[["configure_step"]]
-  available_filters <- cohort$attributes$available_filters
+  available_filters <- cohort$get_source()$available_filters
 
   if (length(available_filters) == 0) {
     warning_nl("`available_filters` was not defined, configure step will not be working. Cloning last step.")
@@ -951,7 +951,7 @@ action_show_step_filter_modal <- function(cohort, changed_input, session) {
   print_state("add_step_modal", changed_input)
   input_state("add_step_modal", changed_input)
 
-  available_filters <- cohort$attributes$available_filters
+  available_filters <- cohort$get_source()$available_filters
 
   if (length(available_filters) == 0) {
     warning_nl("`available_filters` was not defined, configure step will not be working. Cloning last step.")

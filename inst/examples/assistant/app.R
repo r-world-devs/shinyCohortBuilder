@@ -55,28 +55,33 @@ chat |> cb_register_tools(coh)
 library(shiny)
 pkgload::load_all()
 
-shiny::runApp(list(
-  ui = bslib::page_sidebar(
-    title = "AI Assistant",
-    sidebar = bslib::sidebar(
-      shinyCohortBuilder::cb_ui(id = "data", assistant = TRUE, new_step = "configure")
+shiny::runApp(
+  list(
+    ui = bslib::page_sidebar(
+      title = "AI Assistant",
+      sidebar = bslib::sidebar(
+        shinyCohortBuilder::cb_ui(id = "data", assistant = TRUE, new_step = "configure")
+      ),
+      bslib::card(
+        shiny::verbatimTextOutput("data_obj")
+      )
     ),
-    bslib::card(
-      shiny::verbatimTextOutput("data_obj")
-    )
+    server = function(input, output, session) {
+      shinyCohortBuilder::cb_server(
+        id = "data", coh, run_button = "none",
+        feedback = TRUE, chat = chat
+      )
+
+      returned_data <- shiny::eventReactive(input[["data-cb_data_updated"]], {
+        coh$get_data(step_id = coh$last_step_id(), state = "post")
+      }, ignoreInit = FALSE, ignoreNULL = FALSE)
+
+      output$data_obj <- shiny::renderPrint({
+        print(returned_data())
+      })
+    }
   ),
-  server = function(input, output, session) {
-    shinyCohortBuilder::cb_server(
-      id = "data", coh, run_button = "none",
-      feedback = TRUE, chat = chat
-    )
-
-    returned_data <- shiny::eventReactive(input[["data-cb_data_updated"]], {
-      coh$get_data(step_id = coh$last_step_id(), state = "post")
-    }, ignoreInit = FALSE, ignoreNULL = FALSE)
-
-    output$data_obj <- shiny::renderPrint({
-      print(returned_data())
-    })
-  }
-))
+  host = "0.0.0.0",
+  port = 8888,
+  launch.browser = FALSE
+)

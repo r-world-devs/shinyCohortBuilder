@@ -124,9 +124,7 @@ test_that(".available_filters_choices.tblist returns prepared choices", {
   )
   coh <- cohortBuilder::cohort(source) |> cohortBuilder::run()
 
-  # In the S7 rewrite, available_filters are S7 filter objects directly
-  coh$attributes$available_filters <- source$available_filters
-
+  # available_filters are read from the source, so no cohort-side seeding needed.
   choices <- .available_filters_choices(coh$get_source(), coh)
   expect_true(length(choices) > 0)
 })

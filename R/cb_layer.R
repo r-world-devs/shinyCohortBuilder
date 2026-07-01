@@ -325,21 +325,6 @@ enable_panel <- function(cohort, session) {
   }
 }
 
-#' Hook: cache the source's available filters on the cohort attributes
-#' @param public,private The cohort's R6 public/private environments.
-#' @param ... Unused extra hook arguments.
-#' @return Invisibly `NULL`; called for its side effect.
-#' @noRd
-post_cohort_hook <- function(public, private, ...) {
-  source <- public$get_source()
-  if (!is.null(source)) {
-    available_filters <- source$available_filters
-    if (!is.null(available_filters)) {
-      public$attributes$available_filters <- available_filters
-    }
-  }
-}
-
 #' Hook: attach the GUI to all filters after the source initialises
 #' @param public,private The cohort's R6 public/private environments.
 #' @param ... Unused extra hook arguments.
@@ -465,8 +450,6 @@ post_rm_filter_hook <- function(public, private, step_id, filter_id) {
   cohortBuilder::add_hook("post_restore_hook", post_restore_hook)
   cohortBuilder::add_hook("post_add_step_hook", post_add_step_hook)
   cohortBuilder::add_hook("post_update_filter_hook", post_update_filter_hook)
-  cohortBuilder::add_hook("post_cohort_hook", post_cohort_hook)
-  cohortBuilder::add_hook("post_update_source_hook", post_cohort_hook)
   cohortBuilder::add_hook("post_init_source_hook", post_init_source_hook)
   cohortBuilder::add_hook("post_set_pending_hook", post_set_pending_hook)
   cohortBuilder::add_hook("post_add_filter_hook", post_add_filter_hook)
@@ -487,8 +470,6 @@ post_rm_filter_hook <- function(public, private, step_id, filter_id) {
   options("post_restore_hook" = NULL)
   options("post_add_step_hook" = NULL)
   options("post_update_filter_hook" = NULL)
-  options("post_cohort_hook" = NULL)
-  options("post_update_source_hook" = NULL)
   options("post_init_source_hook" = NULL)
   options("post_set_pending_hook" = NULL)
   options("post_add_filter_hook" = NULL)

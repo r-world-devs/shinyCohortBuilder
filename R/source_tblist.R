@@ -207,7 +207,7 @@ dataset_filters <- function(filters, dataset_name, step_id, cohort, ns) {
 #' @export
 .available_filters_choices.tblist <- function(source, cohort, ...) {
 
-  available_filters <- cohort$attributes$available_filters
+  available_filters <- source$available_filters
 
   # Pull per-filter (and per-variable) descriptions from `shape()`. Domains are
   # not needed here (we only render name + description), so skip computing them.
