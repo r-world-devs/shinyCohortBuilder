@@ -49,7 +49,7 @@ Possible options are: "clone" - copy filters from last step,
 
 \item{manage_step}{When `TRUE`, enables feature, that allows to modify the latest step filters (add/remove them).
 Available list of filters used by the feature should be stored as `source$available_filters` object (can be
-defined with `available_filters` argument for \link{set_source}).}
+defined with `available_filters` argument for \link[cohortBuilder]{set_source}).}
 
 \item{assistant}{Set to TRUE to enable the LLM cohort assistant panel.}
 

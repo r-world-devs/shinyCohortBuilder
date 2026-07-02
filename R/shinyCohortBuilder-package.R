@@ -6,7 +6,7 @@
 
 globalVariables(c(
   ":=", "!!", ".data", ".bin",
-  "action", "count", "dataset", "id",
+  "action", "count", "dataset", "description", "id",
   "l_bound", "level", "line_id", "n", "name", "params",
   "patient_id", "state", "value", "variable"
 ))

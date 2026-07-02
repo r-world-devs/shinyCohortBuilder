@@ -879,7 +879,7 @@ restore_attribute <- function(cohort, attribute, value) {
 #' @param ... Extra attributes passed to the panel div container.
 #' @param manage_step When `TRUE`, enables feature, that allows to modify the latest step filters (add/remove them).
 #'   Available list of filters used by the feature should be stored as `source$available_filters` object (can be
-#'   defined with `available_filters` argument for \link{set_source}).
+#'   defined with `available_filters` argument for \link[cohortBuilder]{set_source}).
 #' @return Nested list of `shiny.tag` objects - html structure of filtering panel module.
 #'
 #' @examples

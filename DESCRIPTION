@@ -51,7 +51,6 @@ Suggests:
     shinychat,
     magrittr,
     pkgload,
-    packer,
     sass,
     knitr,
     rmarkdown,
