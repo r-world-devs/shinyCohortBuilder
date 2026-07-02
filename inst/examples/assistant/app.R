@@ -7,29 +7,31 @@ dt_source <- set_source(
     iris = iris |> dplyr::mutate(spec_id = paste("spec", 1:dplyr::n())),
     mtcars = mtcars
   ),
+  # `label` sets a short, human-readable filter name (shown in the filter
+  # picker), while the description text carries the longer explanation.
   description = list(
     iris = list(
       dataset_ = describe("dataset related to iris plants"),
-      spec_id = describe("unique row id"),
-      Sepal.Length = describe("filter for the sepal length measurement"),
-      Petal.Length = describe("filter for the petal length measurement"),
-      Sepal.Width = describe("filter for the sepal width measurement"),
-      Petal.Width = describe("filter for the petal width measurement"),
-      Species = describe("filter for the species of iris")
+      spec_id = describe("unique row id", label = "Specimen ID"),
+      Sepal.Length = describe("the sepal length measurement", label = "Sepal length"),
+      Petal.Length = describe("the petal length measurement", label = "Petal length"),
+      Sepal.Width = describe("the sepal width measurement", label = "Sepal width"),
+      Petal.Width = describe("the petal width measurement", label = "Petal width"),
+      Species = describe("the species of iris", label = "Species")
     ),
     mtcars = list(
       dataset_ = describe("dataset related to car specifications"),
-      mpg = describe("Miles/(US) gallon"),
-      cyl = describe("Number of cylinders"),
-      disp = describe("Displacement (cu.in.)"),
-      hp = describe("Gross horsepower"),
-      drat = describe("Rear axle ratio"),
-      wt = describe("Weight (1000 lbs)"),
-      qsec = describe("1/4 mile time"),
-      vs = describe("Engine (0 = V-shaped, 1 = straight)"),
-      am = describe("Transmission (0 = automatic, 1 = manual)"),
-      gear = describe("Number of forward gears"),
-      carb = describe("Number of carburetors")
+      mpg = describe("Miles/(US) gallon", label = "Mileage"),
+      cyl = describe("Number of cylinders", label = "Cylinders"),
+      disp = describe("Displacement (cu.in.)", label = "Displacement"),
+      hp = describe("Gross horsepower", label = "Horsepower"),
+      drat = describe("Rear axle ratio", label = "Rear axle ratio"),
+      wt = describe("Weight (1000 lbs)", label = "Weight"),
+      qsec = describe("1/4 mile time", label = "Quarter-mile time"),
+      vs = describe("Engine (0 = V-shaped, 1 = straight)", label = "Engine shape"),
+      am = describe("Transmission (0 = automatic, 1 = manual)", label = "Transmission"),
+      gear = describe("Number of forward gears", label = "Gears"),
+      carb = describe("Number of carburetors", label = "Carburetors")
     )
   )
 ) |> autofilter(attach_as = "meta")

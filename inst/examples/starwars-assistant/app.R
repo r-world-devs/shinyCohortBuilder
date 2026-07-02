@@ -90,46 +90,48 @@ starwars_binding_keys <- bind_keys(
 )
 
 # Descriptions are what the LLM reads via shape() / cb_get_filters_meta.
+# `label` sets the short, human-readable filter name shown in the filter panel,
+# while the description text carries the longer explanation.
 starwars_description <- list(
   people = list(
     dataset_   = describe("Star Wars characters with physical attributes, species and home planet."),
-    name       = describe("Character full name"),
-    height     = describe("Character height in centimetres"),
-    mass       = describe("Character body mass in kilograms"),
-    hair_color = describe("Character hair colour"),
-    skin_color = describe("Character skin colour"),
-    eye_color  = describe("Character eye colour"),
-    birth_year = describe("In-universe birth year, e.g. '19BBY'"),
-    gender     = describe("Character gender (male, female, hermaphrodite, none)")
+    name       = describe("Character full name", label = "Name"),
+    height     = describe("Character height in centimetres", label = "Height"),
+    mass       = describe("Character body mass in kilograms", label = "Mass"),
+    hair_color = describe("Character hair colour", label = "Hair colour"),
+    skin_color = describe("Character skin colour", label = "Skin colour"),
+    eye_color  = describe("Character eye colour", label = "Eye colour"),
+    birth_year = describe("In-universe birth year, e.g. '19BBY'", label = "Birth year"),
+    gender     = describe("Character gender (male, female, hermaphrodite, none)", label = "Gender")
   ),
   planets = list(
     dataset_        = describe("Planets appearing in the saga."),
-    name            = describe("Planet name"),
-    rotation_period = describe("Day length in hours"),
-    orbital_period  = describe("Year length in days"),
-    diameter        = describe("Diameter in kilometres"),
-    gravity         = describe("Surface gravity relative to standard"),
-    population      = describe("Number of sentient inhabitants"),
-    climate         = describe("Prevailing climate(s)"),
-    terrain         = describe("Dominant terrain type(s)"),
-    surface_water   = describe("Percentage of surface covered by water")
+    name            = describe("Planet name", label = "Name"),
+    rotation_period = describe("Day length in hours", label = "Rotation period"),
+    orbital_period  = describe("Year length in days", label = "Orbital period"),
+    diameter        = describe("Diameter in kilometres", label = "Diameter"),
+    gravity         = describe("Surface gravity relative to standard", label = "Gravity"),
+    population      = describe("Number of sentient inhabitants", label = "Population"),
+    climate         = describe("Prevailing climate(s)", label = "Climate"),
+    terrain         = describe("Dominant terrain type(s)", label = "Terrain"),
+    surface_water   = describe("Percentage of surface covered by water", label = "Surface water")
   ),
   species = list(
     dataset_         = describe("Sentient and non-sentient species."),
-    name             = describe("Species name"),
-    classification   = describe("Biological classification (mammal, reptile, artificial, ...)"),
-    designation      = describe("Designation, e.g. sentient"),
-    average_height   = describe("Average adult height in centimetres"),
-    average_lifespan = describe("Average lifespan in years"),
-    language         = describe("Primary language")
+    name             = describe("Species name", label = "Name"),
+    classification   = describe("Biological classification (mammal, reptile, artificial, ...)", label = "Classification"),
+    designation      = describe("Designation, e.g. sentient", label = "Designation"),
+    average_height   = describe("Average adult height in centimetres", label = "Average height"),
+    average_lifespan = describe("Average lifespan in years", label = "Average lifespan"),
+    language         = describe("Primary language", label = "Language")
   ),
   films = list(
     dataset_     = describe("The Star Wars feature films."),
-    title        = describe("Film title"),
-    episode_id   = describe("Episode number (1-6)"),
-    director     = describe("Film director"),
-    producer     = describe("Film producer(s)"),
-    release_date = describe("Theatrical release date")
+    title        = describe("Film title", label = "Title"),
+    episode_id   = describe("Episode number (1-6)", label = "Episode"),
+    director     = describe("Film director", label = "Director"),
+    producer     = describe("Film producer(s)", label = "Producer"),
+    release_date = describe("Theatrical release date", label = "Release date")
   )
 )
 
