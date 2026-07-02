@@ -40,6 +40,8 @@ coh <- cohort(source = dt_source)
 
 # -- Register tools with chat -------------------------------------------------
 
+options("cb_tool_verbose" = TRUE)
+
 chat <- ellmer::chat_azure_openai(
   endpoint = Sys.getenv("CHAT_ENDPOINT"),
   model = "gpt-4o",
