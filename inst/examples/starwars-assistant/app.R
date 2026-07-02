@@ -203,7 +203,7 @@ ui <- bslib::page_sidebar(
   # assistant = FALSE: the chat lives in the right sidebar, not the filter panel.
   sidebar = bslib::sidebar(
     width = 420,
-    cb_ui("starwars", assistant = FALSE, new_step = "configure")
+    cb_ui("starwars", assistant = FALSE, new_step = "configure", attrition = FALSE, state = TRUE)
   ),
   bslib::layout_sidebar(
     sidebar = bslib::sidebar(
