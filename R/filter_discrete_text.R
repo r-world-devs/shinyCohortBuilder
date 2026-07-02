@@ -1,52 +1,30 @@
-plot_feedback_text_bar <- function(plot_data) {
-
-  feedback_data <- data.frame(
-    level = factor(names(plot_data)),
-    n = unlist(plot_data)
-  )
-  n_selected <- feedback_data$n[1]
-  n_total <- sum(feedback_data$n)
-
-  if (NROW(feedback_data) == 0) {
-    gg_object <- ggplot2::ggplot()
-  } else {
-
-    chart_palette <- getOption("scb_chart_palette", scb_chart_palette)
-    color_palette <- c(chart_palette$no_data, chart_palette$discrete[1])
-
-    gg_object <- feedback_data %>%
-      ggplot2::ggplot(ggplot2::aes(x = "I", y = n, fill = level)) +
-      ggplot2::geom_col(position = ggplot2::position_stack(reverse = FALSE)) +
-      ggplot2::coord_flip() +
-      ggplot2::scale_x_discrete(expand = c(0, 0)) +
-      ggplot2::scale_y_continuous(expand = c(0, 0)) +
-      ggplot2::theme(
-        axis.title = ggplot2::element_blank(),
-        axis.text  = ggplot2::element_blank(),
-        axis.ticks.length = ggplot2::unit(0, "pt"),
-        panel.background = ggplot2::element_blank(),
-        panel.grid.major = ggplot2::element_blank(),
-        panel.grid.minor = ggplot2::element_blank(),
-        plot.background  = ggplot2::element_blank(),
-        legend.position = "none",
-        plot.margin = ggplot2::unit(c(1, 0, 0, 0),"mm"),
-        panel.border = ggplot2::element_rect(colour = "grey50", fill = NA, linewidth = 1),
-        panel.spacing = ggplot2::unit(c(0, 0, 0, 0), "mm"),
-        plot.subtitle = ggplot2::element_text(color = "dimgray", size = 10, face = "plain")) +
-      ggplot2::labs(
-        x = NULL, y = NULL,
-        subtitle = glue::glue(
-          "Unique values: {format_number(n_selected)}",
-          " / {format_number(n_total)} ",
-          "({round(100 * n_selected / n_total, 1)}%)"
-        )
-      ) +
-      ggplot2::scale_fill_manual(name = NULL, values = color_palette)
+#' Split a comma-separated discrete_text string into unique trimmed values
+#'
+#' Mirrors cohortBuilder's `split_discrete_text()`: whitespace around every value
+#' is stripped (not just the first space) so `"a, b, c"` yields all three
+#' values, and empty pieces are dropped.
+#'
+#' @param x A comma-separated string (or `NULL`/`NA`/`""`).
+#' @return A character vector of unique, non-empty values.
+#' @noRd
+split_discrete_text_vals <- function(x) {
+  if (is.null(x) || identical(x, NA) || identical(x, "")) {
+    return(character(0))
   }
-
-  return(gg_object)
+  pieces <- trimws(strsplit(as.character(x), ",", fixed = TRUE)[[1]])
+  unique(pieces[nzchar(pieces)])
 }
 
+#' Keep only selected discrete_text values present in the available set
+#'
+#' Returns all `original` values on reset/`NA`, passes `""` through, and
+#' otherwise drops selected values not present in `original`.
+#'
+#' @param selected Comma-separated selected values (or `NA`/`""`).
+#' @param original Comma-separated available values.
+#' @param reset When `TRUE`, return all `original` values.
+#' @return A comma-separated string of matching values.
+#' @noRd
 get_matching_vals <- function(selected, original, reset = FALSE) {
 
   if (reset || identical(selected, NA)) {
@@ -57,8 +35,8 @@ get_matching_vals <- function(selected, original, reset = FALSE) {
     return(selected)
   }
 
-  selected_vec <- unique(strsplit(sub(" ", "", selected, fixed = TRUE), ",", fixed = TRUE)[[1]])
-  original_vec <- unique(strsplit(sub(" ", "", original, fixed = TRUE), ",", fixed = TRUE)[[1]])
+  selected_vec <- split_discrete_text_vals(selected)
+  original_vec <- split_discrete_text_vals(original)
 
   if (!all(selected_vec %in% original_vec)) {
     return(paste(intersect(selected_vec, original_vec), collapse = ","))
@@ -67,31 +45,49 @@ get_matching_vals <- function(selected, original, reset = FALSE) {
   return(selected)
 }
 
+#' Count selected discrete_text values present in the available set
+#' @param selected Comma-separated selected values (or `NA`).
+#' @param original Comma-separated available values.
+#' @return Number of selected values found in `original`.
+#' @noRd
 get_n_matching_vals <- function(selected, original) {
 
-  original_vec <- unique(strsplit(sub(" ", "", original, fixed = TRUE), ",", fixed = TRUE)[[1]])
+  original_vec <- split_discrete_text_vals(original)
   if (identical(selected, NA)) {
     return(length(original_vec))
   }
-  selected_vec <- unique(strsplit(sub(" ", "", selected, fixed = TRUE), ",", fixed = TRUE)[[1]])
+  selected_vec <- split_discrete_text_vals(selected)
 
   sum(selected_vec %in% original_vec)
 }
 
+#' Build text-area input params for a discrete_text filter
+#'
+#' Resolves the selected value against the parent's available choices, returning
+#' an empty value when the parent step holds no data.
+#'
+#' @param filter A cohortBuilder filter object.
+#' @param input_id Base input id.
+#' @param cohort The cohort object.
+#' @param reset When `TRUE`, select all available values.
+#' @param update When `TRUE`, build params for an update (vs initial render).
+#' @param ... Extra params forwarded to the input constructor.
+#' @return A named list of input constructor params.
+#' @noRd
 discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
+  input_id <- suff(input_id, "val")
+  step_id <- filter@step_id
+  filter_id <- filter@id
 
-  step_id <- filter$step_id
-  filter_id <- filter$id
-
-  if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
+  if (!cohort$get_stats(step_id, filter_id, state = "pre", name = "n_data")) {
     return(
       list(inputId = input_id, value = "", label = NULL)
     )
   }
 
-  parent_choices <- cohort$get_cache(step_id, filter_id, state = "pre")$choices
+  parent_choices <- cohort$get_stats(step_id, filter_id, state = "pre", name = "choices")
   selected_value <- get_matching_vals(
-    filter$get_params("value"),
+    filter@value,
     parent_choices,
     reset
   )
@@ -112,11 +108,9 @@ discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, 
 }
 
 
-#' @rdname gui-filter-layer
-#' @export
-.gui_filter.discrete_text <- function(filter, ...) {
+S7::method(.gui_filter, cohortBuilder::CbFilterDiscreteText) <- function(object, ...) {
   list(
-    input = function(input_id, cohort) {
+    input = function(filter, input_id, cohort) {
       input_params <- modify_list(
         list(
           all = NULL, readonly = FALSE, width = "100%",
@@ -139,17 +133,17 @@ discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, 
           size = "l",
           footer = shiny::tagList(
             .cb_input(
-              shinyGizmo::valueButton(
+              rlang::inject(shinyGizmo::valueButton(
                 inputId = input_id,
                 label = "Accept",
                 selector = paste0("[data-id=\"", input_params$inputId, "\""),
-                `data-dismiss` = "modal", `data-bs-dismiss` = "modal",
+                !!!bs_data_attr("dismiss", "modal"),
                 onclick = move_dialog_back_js, try_binding = FALSE
-              ),
-              filter$input_param,
+              )),
+              filter@private$input_param,
               style = "display: inline-block;"
             ),
-            shiny::modalButton("Dismiss") %>%
+            shiny::modalButton("Dismiss") |>
               htmltools::tagAppendAttributes(
                 onclick = move_dialog_back_js
               )
@@ -158,38 +152,37 @@ discrete_text_input_params <- function(filter, input_id, cohort, reset = FALSE, 
             getOption("scb_icons", scb_labels)$filter_discrete_text_bttn_label,
             icon = getOption("scb_icons", scb_icons)$filter_discrete_text_bttn_icon,
             class = "btn-sm scb-input-button",
-            `data-toggle` = "modal", `data-target` = paste0("#", modal_dialog_id),
-            `data-bs-toggle` = "modal", `data-bs-target` = paste0("#", modal_dialog_id),
+            !!!bs_data_attr("toggle", "modal"), !!!bs_data_attr("target", paste0("#", modal_dialog_id)),
             onclick = move_dialog_to_body_js
           )
         )
       )
     },
-    feedback = function(input_id, cohort, empty = FALSE) {
+    feedback = function(filter, input_id, cohort, empty = FALSE) {
       list(
-        plot_id = shiny::NS(input_id, "feedback_plot") ,
-        output_fun = shiny::plotOutput,
+        plot_id = shiny::NS(input_id, "feedback_plot"),
+        output_fun = shiny::uiOutput,
         render_fun = if (!is.null(empty)) {
-          shiny::renderPlot(height = 40, {
-            if(empty) {
-              return(ggplot2::ggplot())
+          shiny::renderUI({
+            if (empty) {
+              return(shiny::div(class = "cb_fb_bar"))
             }
-            step_id <- filter$step_id
-            filter_id <- filter$id
+            step_id <- filter@step_id
+            filter_id <- filter@id
 
-            filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
-            n_total <- filter_cache$n_data
+            filter_stats <- cohort$get_stats(step_id, filter_id, state = "pre")
+            n_total <- filter_stats$n_data
 
-            n_selected <- get_n_matching_vals(filter$get_params("value"), filter_cache$choices)
-            plot_data <- c("selected" = n_selected, "not_seleced" = n_total - n_selected)
+            n_selected <- get_n_matching_vals(filter@value, filter_stats$choices)
+            plot_data <- c("selected" = n_selected, "not_selected" = n_total - n_selected)
 
-            plot_feedback_text_bar(plot_data)
+            html_feedback_text_bar(plot_data)
           })
         }
       )
     },
-    server = function(input_id, input, output, session, cohort) {},
-    update = function(session, input_id, cohort, reset = FALSE, ...) {
+    server = function(filter, input_id, input, output, session, cohort) {},
+    update = function(filter, session, input_id, cohort, reset = FALSE, ...) {
       input_fun <- shinyGizmo::updateTextArea
       update_params <- discrete_text_input_params(filter, input_id, cohort, reset, TRUE, ...)
       parent <- update_params$all

@@ -11,7 +11,7 @@
 #'   "global" - button visible in top filtering panel.
 #' @param feedback Set to TRUE (default) if feedback plots should be displayed at each filter.
 #' @param state Set to TRUE (default) to enable get/set state panel.
-#' @param bootstrap Boostrap version to be used for filtering panel.
+#' @param bootstrap Bootstrap version to be used for filtering panel.
 #'   See \link[bslib]{bs_theme} version argument.
 #' @param enable_bookmarking Set to TRUE (default) if panel should be compatible with native shiny bookmarking.
 #' @param code Set to TRUE (default) to enable reproducible code panel.
@@ -96,8 +96,8 @@ demo_app <- function(
           "Atezo", "Chemo", "Nebul", "Atezo", "Chemo", "Nebul", "Atezo", "Chemo", "Atezo", "Atezo", "Atezo", "Nebul",
           "Nebul", "Atezo", "Chemo", "Atezo", "Atezo", "Nebul", "Atezo", "Chemo", "Nebul", "Atezo", "Atezo"
         )
-      ) %>%
-        dplyr::mutate(id = paste(patient_id, line_id, sep = "_")) %>%
+      ) |>
+        dplyr::mutate(id = paste(patient_id, line_id, sep = "_")) |>
         dplyr::relocate(id, .before = "patient_id")
     )
   )
@@ -164,7 +164,7 @@ demo_app <- function(
           cohortBuilder::bind_key(
             update = cohortBuilder::data_key("therapy", "patient_id"),
             cohortBuilder::data_key("patients", "id"),
-            post = FALSE
+            post = TRUE
           ),
           cohortBuilder::bind_key(
             update = cohortBuilder::data_key("patients", "id"),
@@ -252,7 +252,7 @@ demo_app <- function(
               datasets_value = datasets[[input$dataset]]
             )
           )
-        ) %>%
+        ) |>
           cohortBuilder::add_step(
             cohortBuilder::step(
               group_filter,
@@ -297,7 +297,7 @@ demo_app <- function(
 #'   mtcars_cohort <- cohort(
 #'     mtcars_source,
 #'     filter("discrete", id = "am", dataset = "mtcars", variable = "am", value = 1)
-#'   ) %>% run()
+#'   ) |> run()
 #'   gui(mtcars_cohort)
 #' }
 #'
@@ -317,7 +317,7 @@ gui <- function(
   }
   new_step <- rlang::arg_match(new_step)
   require_meta_filters <- identical(new_step, "configure") || manage_step
-  if (require_meta_filters && length(cohort$get_source()$get("available_filters")) == 0) {
+  if (require_meta_filters && length(cohort$get_source()$available_filters) == 0) {
     stop("The `available_filters` in the cohort source wasn't defined.")
   }
 

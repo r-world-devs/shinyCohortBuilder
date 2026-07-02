@@ -197,7 +197,7 @@ The method applied on Source, will scan all the columns included in Source and a
 The filters will be stored within a Source, so it's enough to pass such object to Cohort:
 
 ```{r}
-iris_source <- set_source(tblist(iris = iris)) %>% 
+iris_source <- set_source(tblist(iris = iris)) |> 
   autofilter()
 iris_cohort <- cohort(iris_source)
 

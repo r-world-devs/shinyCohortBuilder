@@ -1,8 +1,6 @@
-#' @rdname gui-filter-layer
-#' @export
-.gui_filter.date_range <- function(filter, ...) {
+S7::method(.gui_filter, cohortBuilder::CbFilterDateRange) <- function(object, ...) {
   list(
-    input = function(input_id, cohort) {
+    input = function(filter, input_id, cohort) {
       shiny::tagList(
         .cb_input(
           do.call(
@@ -12,7 +10,7 @@
               range_input_params(filter, input_id, cohort, ...)
             )
           ),
-          filter$input_param
+          filter@private$input_param
         ),
         .cb_input(
           .keep_na_input(input_id, filter, cohort),
@@ -20,54 +18,51 @@
         )
       )
     },
-    feedback = function(input_id, cohort, empty = FALSE) {
+    feedback = function(filter, input_id, cohort, empty = FALSE) {
       list(
-        plot_id = shiny::NS(input_id, "feedback_plot") ,
-        output_fun = shiny::plotOutput,
+        plot_id = shiny::NS(input_id, "feedback_plot"),
+        output_fun = shiny::uiOutput,
         render_fun = if (!is.null(empty)) {
-          shiny::renderPlot(bg = "transparent", height = 60, {
-            if(empty) { # when no data in parent step
-              return(
-                empty_plot()
-              )
+          shiny::renderUI({
+            if (empty) {
+              return(shiny::div(class = "cb_fb_bar"))
             }
-            step_id <- filter$step_id
-            filter_id <- filter$id
+            step_id <- filter@step_id
+            filter_id <- filter@id
 
-            filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
+            filter_stats <- cohort$get_stats(step_id, filter_id, state = "pre")
             filter_range <- extract_selected_range(
-              filter$get_params("range"),
-              freq_range(filter_cache$frequencies),
+              filter@range,
+              freq_range(filter_stats$frequencies),
               FALSE
             )
 
-            plot_data <- filter_cache$frequencies %>%
-              dplyr::mutate(# we take l_bound to limit upper cause last break have l_bound == u_bound
+            plot_data <- filter_stats$frequencies |>
+              dplyr::mutate(
                 count = ifelse(l_bound >= filter_range[1] & l_bound <= filter_range[2], count, 0)
               )
 
-            if (!is.null(filter$get_params("n_bins"))) {
-              intervals <- seq.Date(plot_data$l_bound[1], rev(plot_data$u_bound)[1], length.out = filter$get_params("n_bins"))
-              plot_data <- plot_data %>%
-                dplyr::mutate(level = findInterval(l_bound, intervals)) %>%
-                dplyr::group_by(level) %>%
+            if (!is.null(filter@extra$n_bins)) {
+              intervals <- seq.Date(plot_data$l_bound[1], rev(plot_data$u_bound)[1], length.out = filter@extra$n_bins)
+              plot_data <- plot_data |>
+                dplyr::mutate(level = findInterval(l_bound, intervals)) |>
+                dplyr::group_by(level) |>
                 dplyr::summarise(count = sum(count))
             }
 
-            # todo possibly add modifier to lower number of bars
-            n_missing <- filter_cache$n_missing
-            n_total <- filter_cache$n_data
-            if (identical(filter$get_params("keep_na"), FALSE)) {
+            n_missing <- filter_stats$n_missing
+            n_total <- filter_stats$n_data
+            if (identical(filter@keep_na, FALSE)) {
               n_missing <- 0
             }
 
-            plot_feedback_hist(plot_data, n_missing, n_total)
+            html_feedback_hist(plot_data, n_missing, n_total)
           })
         }
       )
     },
-    server = function(input_id, input, output, session, cohort) {},
-    update = function(session, input_id, cohort, reset = FALSE, ...) {
+    server = function(filter, input_id, input, output, session, cohort) {},
+    update = function(filter, session, input_id, cohort, reset = FALSE, ...) {
       do.call(
         shiny::updateDateRangeInput,
         append(

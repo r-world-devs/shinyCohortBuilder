@@ -1,3 +1,14 @@
+#' Clamp a selected numeric range to the parent's available range
+#'
+#' Replaces out-of-bounds or missing endpoints with the parent bounds, and falls
+#' back to the full parent range on reset or when the selection lies entirely
+#' outside it.
+#'
+#' @param range The selected `c(from, to)` range (or `NA`).
+#' @param parent_range The parent step's available `c(min, max)` range.
+#' @param reset When `TRUE`, ignore `range` and return `parent_range`.
+#' @return A clamped `c(from, to)` range.
+#' @noRd
 extract_selected_range <- function(range, parent_range, reset) {
   if (reset || identical(range, NA) || !any(dplyr::between(range, parent_range[1], parent_range[2]))) {
     return(parent_range)
@@ -12,6 +23,10 @@ extract_selected_range <- function(range, parent_range, reset) {
   return(range)
 }
 
+#' Derive the full `c(min, max)` range from a frequencies table
+#' @param freqs_table A frequencies table with `l_bound`/`u_bound` columns.
+#' @return A `c(min, max)` range, or `NULL` for an empty table.
+#' @noRd
 freq_range <- function(freqs_table) {
   if (nrow(freqs_table) == 0) {
     return(NULL)
@@ -19,6 +34,10 @@ freq_range <- function(freqs_table) {
   c(freqs_table$l_bound[1], rev(freqs_table$u_bound)[1])
 }
 
+#' Derive the slider step from a frequencies table's bin width
+#' @param freqs_table A frequencies table with an `l_bound` column.
+#' @return The bin width (defaults to `1` for 0/1-row tables).
+#' @noRd
 freq_step <- function(freqs_table) {
   if (nrow(freqs_table) == 0) {
     return(1)
@@ -29,6 +48,15 @@ freq_step <- function(freqs_table) {
   round(freqs_table$l_bound[2] - freqs_table$l_bound[1], 10)
 }
 
+#' Default (placeholder) input params for a range-family filter
+#'
+#' Used when there is nothing to render (no data / no domain), giving the input
+#' harmless placeholder bounds.
+#'
+#' @param id Input id.
+#' @param type Filter type (`"range"`, `"date_range"`, or other).
+#' @return A named list of input constructor params.
+#' @noRd
 range_input_defaults <- function(id, type = "range") {
   if (type == "range") {
     return(
@@ -57,31 +85,128 @@ range_input_defaults <- function(id, type = "range") {
   )
 }
 
-range_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
-  step_id <- filter$step_id
-  filter_id <- filter$id
+#' Build range-family input params from the filter's declared domain
+#'
+#' Computes bounds from the declared domain (no stats scan), clamps the
+#' selection, and adapts the params per filter type (range/date_range/
+#' datetime_range).
+#'
+#' @param filter A cohortBuilder filter object.
+#' @param input_id Base input id.
+#' @param cohort The cohort object.
+#' @param reset When `TRUE`, select the full domain range.
+#' @param update When `TRUE`, build params for an update (vs initial render).
+#' @param ... Extra params forwarded to the input constructor.
+#' @return A named list of input constructor params.
+#' @noRd
+range_domain_input_params <- function(filter, input_id, cohort, reset = FALSE,
+                                      update = FALSE, ...) {
+  domain <- cohortBuilder::filter_domain(filter)
+  domain_range <- c(domain[1], domain[2])
 
-  if (!cohort$get_cache(step_id, filter_id, state = "pre")$n_data) {
+  if (filter@type == "datetime_range") {
+    selected_range <- extract_selected_datetime_range(filter@range, domain_range, reset)
+  } else {
+    selected_range <- extract_selected_range(filter@range, domain_range, reset)
+  }
+
+  params <- list(
+    inputId = input_id,
+    min = domain_range[1],
+    max = domain_range[2],
+    value = selected_range,
+    label = if (update) character(0) else NULL,
+    width = "100%",
+    ...
+  )
+
+  if (filter@type == "range") {
+    params$step <- if (!is.null(filter@extra$step)) filter@extra$step else NULL
+  }
+  if (filter@type == "date_range") {
+    params$start <- params$value[1]
+    params$end <- params$value[2]
+    params$value <- NULL
+  }
+  if (filter@type == "datetime_range") {
+    params$step <- if (!is.null(filter@extra$step)) filter@extra$step else NULL
+    params$min <- as.POSIXct(params$min, origin = "1970-01-01 UTC")
+    params$max <- as.POSIXct(params$max, origin = "1970-01-01 UTC")
+    params$value <- c(
+      as.POSIXct(params$value[1], origin = "1970-01-01 UTC"),
+      as.POSIXct(params$value[2], origin = "1970-01-01 UTC")
+    )
+  }
+  if (update) {
+    params$width <- NULL
+  }
+
+  params
+}
+
+#' Resolve range-family input params for the active render mode
+#'
+#' Dispatches between domain-based bounds (domain mode or stats mode with
+#' `render_source = "domain"`) and stats-based bounds from the parent step's
+#' cached frequencies, adapting params per filter type. Returns placeholder
+#' params when nothing can be rendered.
+#'
+#' @param filter A cohortBuilder filter object.
+#' @param input_id Base input id.
+#' @param cohort The cohort object.
+#' @param reset When `TRUE`, select the full available range.
+#' @param update When `TRUE`, build params for an update (vs initial render).
+#' @param ... Extra params forwarded to the input constructor.
+#' @return A named list of input constructor params.
+#' @noRd
+range_input_params <- function(filter, input_id, cohort, reset = FALSE, update = FALSE, ...) {
+  step_id <- filter@step_id
+  filter_id <- filter@id
+
+  render <- resolve_render_mode(filter, cohort)
+  domain <- cohortBuilder::filter_domain(filter)
+
+  # Domain mode (or stats mode with render_source = "domain"): build bounds from
+  # the declared domain without reading the stats.
+  use_domain <- render$mode == "domain" ||
+    (identical(render$render_source, "domain") && !is.null(domain))
+
+  if (render$mode == "domain" && is.null(domain)) {
+    warn_no_domain(filter_id)
+    return(range_input_defaults(input_id, filter@type))
+  }
+  if (identical(render$render_source, "domain") && is.null(domain) &&
+      render$mode == "stats") {
+    inform_domain_fallback(filter_id)
+  }
+
+  if (use_domain) {
     return(
-      range_input_defaults(input_id, filter$type)
+      range_domain_input_params(filter, input_id, cohort, reset = reset, update = update, ...)
     )
   }
 
-  parent_filter_stats <- cohort$get_cache(step_id, filter_id, state = "pre")$frequencies
+  if (!cohort$get_stats(step_id, filter_id, state = "pre", name = "n_data")) {
+    return(
+      range_input_defaults(input_id, filter@type)
+    )
+  }
+
+  parent_filter_stats <- cohort$get_stats(step_id, filter_id, state = "pre", name = "frequencies")
   parent_range <- freq_range(parent_filter_stats)
 
-  if (inherits(filter, "datetime_range")) {
+  if (filter@type == "datetime_range") {
     selected_range <- extract_selected_datetime_range(
-      filter$get_params("range"),
+      filter@range,
       parent_range, reset
     )
   } else {
     selected_range <- extract_selected_range(
-      filter$get_params("range"),
+      filter@range,
       parent_range, reset
     )
   }
-  
+
 
   params <- list(
     inputId = input_id,
@@ -94,22 +219,22 @@ range_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
   )
 
   # Below should be deprecated now soon
-  if (inherits(filter, "range")) {
-    if (!is.null(filter$get_params("step"))) {
-      params$step <- filter$get_params("step")
+  if (filter@type == "range") {
+    if (!is.null(filter@extra$step)) {
+      params$step <- filter@extra$step
     } else {
       params$step <- freq_step(parent_filter_stats)
     }
   }
-  if (inherits(filter, "date_range")) {
+  if (filter@type == "date_range") {
     params$start <- params$value[1]
     params$end <- params$value[2]
     params$value <- NULL
   }
-  
-  if (inherits(filter, "datetime_range")) {
-    if (!is.null(filter$get_params("step"))) {
-      params$step <- filter$get_params("step")
+
+  if (filter@type == "datetime_range") {
+    if (!is.null(filter@extra$step)) {
+      params$step <- filter@extra$step
     } else {
       params$step <- freq_step(parent_filter_stats)
     }
@@ -124,63 +249,40 @@ range_input_params <- function(filter, input_id, cohort, reset = FALSE, update =
   if (update) {
     params$width <- NULL
   }
-  
+
   return(params)
 }
 
-plot_feedback_hist <- function(plot_data, n_missing, n_total) {
-
-  choosen_color <- getOption("scb_chart_palette", scb_chart_palette)$discrete[1]
-
-  gg_object <- plot_data %>%
-    ggplot2::ggplot(ggplot2::aes(x = level, y = count)) +
-    ggplot2::geom_bar(
-      fill = choosen_color,
-      colour = choosen_color,
-      alpha  = 0.5,
-      na.rm  = TRUE,
-      stat = "identity"
-    ) +
-    ggplot2::theme_void() +
-    ggplot2::theme(
-      panel.grid.minor = ggplot2::element_blank(),
-      panel.grid.major = ggplot2::element_blank(),
-      panel.background =
-        ggplot2::element_rect(fill = "transparent", colour = NA),
-      plot.background  =
-        ggplot2::element_rect(fill = "transparent", colour = NA),
-      plot.subtitle =
-        ggplot2::element_text(
-          color = "dimgray", size = 10, face = "plain")) +
-    ggplot2::scale_y_continuous(expand = c(0, 0)) +
-    ggplot2::labs(
-      x = NULL, y = NULL,
-      subtitle = glue::glue(
-        "missing: {format_number(n_missing)}",
-        " / {format_number(n_total)} ",
-        "({round(n_missing / n_total, 1)}%)"))
-
-  gg_object
-}
-
+#' Append a `-`-delimited suffix to a params list's `inputId`
+#' @param params_list A params list carrying an `inputId`.
+#' @param suffix Suffix to append after a hyphen.
+#' @return `params_list` with the suffixed `inputId`.
+#' @noRd
 suff_id <- function(params_list, suffix) {
   params_list$inputId <- paste0(params_list$inputId, "-", suffix)
   return(params_list)
 }
 
+#' Is a given GUI input type enabled for a filter?
+#'
+#' A filter with no explicit `gui_input` enables all types; otherwise only the
+#' listed ones.
+#'
+#' @param filter A cohortBuilder filter object.
+#' @param type GUI input type to test (e.g. `"slider"`, `"numeric"`).
+#' @return `TRUE` when `type` is enabled for the filter.
+#' @noRd
 is_gui_type <- function(filter, type) {
-  gui_input <- filter$get_params("gui_input")
+  gui_input <- filter@extra$gui_input
   if (is.null(gui_input)) {
     return(TRUE)
   }
-  type %in% filter$get_params("gui_input")
+  type %in% filter@extra$gui_input
 }
 
-#' @rdname gui-filter-layer
-#' @export
-.gui_filter.range <- function(filter, ...) {
+S7::method(.gui_filter, cohortBuilder::CbFilterRange) <- function(object, ...) {
   list(
-    input = function(input_id, cohort) {
+    input = function(filter, input_id, cohort) {
       input_params <- range_input_params(filter, input_id, cohort, ...)
 
       shiny::tagList(
@@ -193,7 +295,7 @@ is_gui_type <- function(filter, type) {
                 suff_id(input_params, "slider")
               )
             ),
-            filter$input_param
+            filter@private$input_param
           )
         },
         if (is_gui_type(filter, "numeric")) {
@@ -202,7 +304,7 @@ is_gui_type <- function(filter, type) {
               shinyWidgets::numericRangeInput,
               suff_id(input_params, "numrange")
             ),
-            filter$input_param
+            filter@private$input_param
           )
         },
         .cb_input(
@@ -211,44 +313,42 @@ is_gui_type <- function(filter, type) {
         )
       )
     },
-    feedback = function(input_id, cohort, empty = FALSE) {
+    feedback = function(filter, input_id, cohort, empty = FALSE) {
       list(
-        plot_id = shiny::NS(input_id, "feedback_plot") ,
-        output_fun = shiny::plotOutput,
+        plot_id = shiny::NS(input_id, "feedback_plot"),
+        output_fun = shiny::uiOutput,
         render_fun = if (!is.null(empty)) {
-          shiny::renderPlot(bg = "transparent", height = 60, {
-            if(empty) { # when no data in parent step
-              return(
-                ggplot2::ggplot()
-              )
+          shiny::renderUI({
+            if (empty) {
+              return(shiny::div(class = "cb_fb_bar"))
             }
-            step_id <- filter$step_id
-            filter_id <- filter$id
+            step_id <- filter@step_id
+            filter_id <- filter@id
 
-            filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
+            filter_stats <- cohort$get_stats(step_id, filter_id, state = "pre")
             filter_range <- extract_selected_range(
-              filter$get_params("range"),
-              freq_range(filter_cache$frequencies),
+              filter@range,
+              freq_range(filter_stats$frequencies),
               FALSE
             )
 
-            plot_data <- filter_cache$frequencies %>%
-              dplyr::mutate(# we take l_bound to limit upper cause last break have l_bound == u_bound
+            plot_data <- filter_stats$frequencies |>
+              dplyr::mutate(
                 count = ifelse(l_bound >= filter_range[1] & l_bound <= filter_range[2], count, 0)
               )
-            n_missing <- filter_cache$n_missing
-            n_total <- filter_cache$n_data
-            if (identical(filter$get_params("keep_na"), FALSE)) {
+            n_missing <- filter_stats$n_missing
+            n_total <- filter_stats$n_data
+            if (identical(filter@keep_na, FALSE)) {
               n_missing <- 0
             }
 
-            plot_feedback_hist(plot_data, n_missing, n_total)
+            html_feedback_hist(plot_data, n_missing, n_total)
           })
         }
       )
     },
-    server = function(input_id, input, output, session, cohort) {},
-    update = function(session, input_id, cohort, reset = FALSE, ...) {
+    server = function(filter, input_id, input, output, session, cohort) {},
+    update = function(filter, session, input_id, cohort, reset = FALSE, ...) {
       input_params <- append(
         list(session = session),
         range_input_params(filter, input_id, cohort, reset, TRUE, ...)
@@ -268,6 +368,6 @@ is_gui_type <- function(filter, type) {
       .update_keep_na_input(session, input_id, filter, cohort)
     },
     post_stats = FALSE,
-    multi_input = length(filter$get_params("gui_input")) != 1
+    multi_input = length(object@extra$gui_input) != 1
   )
 }

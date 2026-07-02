@@ -46,7 +46,7 @@ if (interactive()) {
         variable = "registered", range = c(as.Date("2010-01-01"), Inf)
       )
     ))
-  ) \%>\% run()
+  ) |> run()
   filter_choices <- .available_filters_choices(coh$get_source(), coh)
 
   ui <- fluidPage(

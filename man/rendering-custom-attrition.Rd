@@ -58,7 +58,7 @@ if (interactive()) {
         variable = "copies", range = c(6, 8)
       )
     )
-  ) \%>\% run()
+  ) |> run()
 
   ui <- fluidPage(
     div(id = "attrition")

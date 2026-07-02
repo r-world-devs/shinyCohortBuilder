@@ -1,24 +1,75 @@
-button <- function(..., icon = NULL, type = getOption("scb_button_type", "btn-default btn-outline-dark")) {
+#' Detect the active Bootstrap major version
+#'
+#' Reads the current (or global) bslib theme to determine the Bootstrap version,
+#' defaulting to `"5"` when no theme is set. Used to emit version-appropriate
+#' `data-*` attributes.
+#'
+#' @return The Bootstrap version as a character string (e.g. `"5"`).
+#' @noRd
+get_bs <- function() {
+  theme <- shiny::getCurrentTheme()
+  if (!bslib::is_bs_theme(theme)) {
+    theme <- bslib::bs_global_get()
+  }
+  if (bslib::is_bs_theme(theme)) {
+    bslib::theme_version(theme)
+  } else {
+    "5"
+  }
+}
+
+#' Build a Bootstrap-version-aware `data-*` attribute
+#'
+#' Bootstrap 5 namespaces JS data attributes as `data-bs-*`; earlier versions use
+#' `data-*`. Produces a named single-element list suitable for splicing into a tag.
+#'
+#' @param attr Attribute name without the `data-`/`data-bs-` prefix (e.g. `"toggle"`).
+#' @param value Attribute value.
+#' @return A named list of length one mapping the resolved attribute name to `value`.
+#' @noRd
+bs_data_attr <- function(attr, value) {
+  bs <- get_bs()
+  name <- if (bs >= "5") paste0("data-bs-", attr) else paste0("data-", attr)
+  stats::setNames(list(value), name)
+}
+
+#' Render a styled toolbar button
+#' @param ... Button label/content passed to `shiny::tags$button`.
+#' @param icon Optional icon tag rendered before the content.
+#' @param type Bootstrap button class (defaults to option `scb_button_type`).
+#' @return A `<button>` `shiny.tag`.
+#' @noRd
+button <- function(..., icon = NULL, type = getOption("scb_button_type", "btn-outline-dark")) {
   shiny::tags$button(type = "button", class = paste("scb_button btn", type), icon, ...)
 }
 
+#' Render a Bootstrap card panel with optional header
+#' @param heading Optional header content; omitted when missing.
+#' @param body Card body content.
+#' @param ... Extra elements appended to the card container.
+#' @return A card `shiny.tag`.
+#' @noRd
 panel <- function(heading, body, ...) {
   shiny::div(
-    class = "panel panel-default card",
+    class = "card",
     if (!missing(heading)) {
       shiny::div(
-        class = "panel-heading card-header",
+        class = "card-header",
         heading
       )
     },
     shiny::div(
-      class = "panel-body card-body",
+      class = "card-body",
       body
     ),
     ...
   )
 }
 
+#' Render a labelled horizontal divider
+#' @param label Text shown between the two rules.
+#' @return A divider `shiny.tag`.
+#' @noRd
 divider <- function(label) {
   shiny::div(
     class = "divider",
@@ -28,6 +79,19 @@ divider <- function(label) {
   )
 }
 
+#' Render a filter's help tooltip icon
+#'
+#' Returns the clickable help icon for a filter, or `NULL` when help is disabled
+#' for the cohort or the filter has no description. Clicking triggers the
+#' `show_help` GUI action.
+#'
+#' @param filter The cohortBuilder filter object.
+#' @param ns Module namespace function.
+#' @param method Filter rendering method (unused; kept for signature symmetry).
+#' @param description Filter description; `NULL` suppresses the icon.
+#' @param cohort The cohort (its `attributes$show_help` gates display).
+#' @return An `<a>` `shiny.tag`, or `NULL`.
+#' @noRd
 filter_help_icon <- function(filter, ns, method, description, cohort) {
   # todo move the check outside
   if (!isTRUE(cohort$attributes$show_help)) return(NULL)
@@ -36,9 +100,9 @@ filter_help_icon <- function(filter, ns, method, description, cohort) {
   shiny::a(
     href = "#",
     class = "filter_tooltip",
-    getOption("scb_icons", scb_icons)$filter_help %>%
+    getOption("scb_icons", scb_icons)$filter_help |>
       shiny::tagAppendAttributes(
-        onclick = .trigger_action_js("show_help", list(step_id = filter$step_id, filter_id = filter$id), ns = ns)
+        onclick = .trigger_action_js("show_help", list(step_id = filter@step_id, filter_id = filter@id), ns = ns)
       )
   )
 }
@@ -64,7 +128,8 @@ scb_labels <- list(
   "filter_discrete_text_bttn_label" = "Set Values",
   "filter_query_bttn_label" = "Set Query",
   "filter_show_query_bttn_label" = "Show Query",
-  "manage_step" = "Manage Last Step"
+  "manage_step" = "Manage Last Step",
+  "show_assistant" = "Open Assistant"
 )
 
 #' Default filtering panel icons
@@ -88,7 +153,8 @@ scb_icons <- list(
   "filter_query_bttn_icon" = shiny::icon("arrow-pointer"),
   "filter_show_query_bttn_icon" = shiny::icon("eye"),
   "dataset_help_icon" = shiny::icon("question-circle"),
-  "manage_step" = shiny::icon("pen-to-square")
+  "manage_step" = shiny::icon("pen-to-square"),
+  "show_assistant" = shiny::icon("user")
 )
 
 #' Default color palette used for filter feedback plots
@@ -134,6 +200,17 @@ cb_changed <- function(session, cohort_id, step_id = NULL) {
 }
 
 
+#' JS snippet to relocate a modal dialog in the DOM
+#'
+#' Generates jQuery that re-parents a modal so it is not clipped by its
+#' originating container (appended to the document body or to the cohort's
+#' `.cb_inputs` container).
+#'
+#' @param dialog_id Id of the modal dialog element to move.
+#' @param container_id Id of the cohort container (used when `where = "container"`).
+#' @param where Either `"body"` (default), `"container"`, or a jQuery selector string.
+#' @return A character string of JavaScript.
+#' @noRd
 move_modal_dialog_js <- function(dialog_id, container_id, where = "body") {
   if (where == "container") {
     return(paste0("$('#", dialog_id, "').appendTo('#", container_id, " .cb_inputs');"))

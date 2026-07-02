@@ -1,7 +1,7 @@
 Package: shinyCohortBuilder
 Type: Package
 Title: Modular Cohort-Building Framework for Analytical Dashboards
-Version: 0.4.0
+Version: 1.0.0
 Authors@R: 
     c(person('Krystian', 'Igras', 
              email = 'krystian8207@gmail.com', 
@@ -25,22 +25,20 @@ Description: You can easily add advanced cohort-building component
     The GUI panel is not only compatible with native shiny
     bookmarking, but also provides reproducible R code.
 License: MIT + file LICENSE
-Depends: 
-    R (>= 3.5.0)
-Imports: 
-    magrittr,
+Depends:
+    R (>= 4.1.0)
+Imports:
     glue,
     bslib,
     jsonlite,
     purrr,
-    ggplot2 (>= 3.4.0),
-    ggiraph (>= 0.9.1),
     htmltools,
+    htmlwidgets,
     shiny (>= 1.7.0),
     shinyWidgets (>= 0.7.0),
-    htmlwidgets,
     dplyr,
-    cohortBuilder (>= 0.4.0),
+    cohortBuilder (>= 1.0.0),
+    S7,
     tryCatchLog,
     highr,
     shinyGizmo (>= 0.4.2),
@@ -50,14 +48,16 @@ Imports:
 Suggests:
     queryBuilder (>= 0.1.0),
     shinyQueryBuilder (>= 0.1.0),
+    shinychat,
+    magrittr,
     pkgload,
-    packer,
     sass,
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    shinytest2,
+    withr
 Encoding: UTF-8
-RoxygenNote: 7.3.3
 VignetteBuilder: knitr
 URL: https://r-world-devs.github.io/shinyCohortBuilder/, https://github.com/r-world-devs/shinyCohortBuilder
 BugReports: https://github.com/r-world-devs/shinyCohortBuilder/issues
@@ -67,6 +67,7 @@ Collate:
     'control_utils.R'
     'actions.R'
     'renders.R'
+    'feedback_html.R'
     'filter_discrete.R'
     'filter_range.R'
     'filter_date_range.R'
@@ -78,4 +79,7 @@ Collate:
     'cb_layer.R'
     'source.R'
     'source_tblist.R'
+    'chat.R'
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0
+RoxygenNote: 7.3.3

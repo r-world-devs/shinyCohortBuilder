@@ -66,7 +66,7 @@ if (interactive()) {
         "date_range", id = "registered", name = "Registered",  dataset = "borrowers",
         variable = "registered", range = c(as.Date("2010-01-01"), Inf)
       )
-    ) \%>\% run()
+    ) |> run()
     coh$attributes$session <- session
     coh$attributes$feedback <- TRUE
 

@@ -59,6 +59,16 @@ const update_filter_class = function(message) {
 };
 Shiny.addCustomMessageHandler('update_filter_class', update_filter_class);
 
+const update_filter_active = function(message) {
+  var $filter = get_filter(message.step_id, message.filter_id, message.ns_prefix);
+  var $checkbox = $filter.find('.cb_activate_filter input[type="checkbox"]');
+  if ($checkbox.length) {
+    exec_event[$checkbox.attr('id')] = '_update-mode_';
+    $checkbox.prop('checked', message.active).trigger('change');
+  }
+};
+Shiny.addCustomMessageHandler('update_filter_active', update_filter_active);
+
 const enable_panel = function(message) {
   $('#' + message.ns_prefix + 'cb_panel').addClass('disabled');
   if (message.enable === true) {

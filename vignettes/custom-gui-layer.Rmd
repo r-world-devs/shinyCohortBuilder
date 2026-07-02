@@ -58,8 +58,8 @@ Examples:
   step <- cohort$get_step(step_id)
   shiny::tagList(
     shiny::htmlOutput(ns(paste0(step_id, "-stats")), class = "scb_data_stats"),
-    step$filters %>%
-      purrr::map(~ .render_filter(.x, step_id, cohort, ns = ns)) %>%
+    step$filters |>
+      purrr::map(~ .render_filter(.x, step_id, cohort, ns = ns)) |>
       shiny::div(class = "cb_filters", `data-step_id` = step_id)
   )
 }
@@ -71,8 +71,8 @@ Examples:
 .render_filters.tblist <- function(source, cohort, step_id, ns, ...) {
   step <- cohort$get_step(step_id)
 
-  group_filters(cohort$get_source(), step$filters) %>%
-    purrr::imap(~ dataset_filters(.x, .y, step_id, cohort, ns = ns)) %>%
+  group_filters(cohort$get_source(), step$filters) |>
+    purrr::imap(~ dataset_filters(.x, .y, step_id, cohort, ns = ns)) |>
     shiny::div(class = "cb_filters", `data-step_id` = step_id)
 }
 ```
@@ -86,8 +86,8 @@ and attach a separate statistics placeholder for each dataset (dataset_filters).
 render_filters.db <- function(source, cohort, step_id, ns) {
   step <- cohort$get_step(step_id)
 
-  group_filters_db(cohort$get_source(), step$filters) %>%
-    purrr::imap(~ dataset_filters_db(.x, .y, step_id, cohort, ns = ns)) %>%
+  group_filters_db(cohort$get_source(), step$filters) |>
+    purrr::imap(~ dataset_filters_db(.x, .y, step_id, cohort, ns = ns)) |>
     div(class = "cb_filters", `data-step_id` = step_id)
 }
 ```
@@ -105,7 +105,7 @@ Required parameters:
 Details:
 
 - The function should define rendering output for consistent with the output placeholder stated within `.render_filters`.
-- It's recommended the statistics are taken from the Cohort cache `cohort$get_cache(step_id, state = "pre")`.
+- It's recommended the statistics are taken from the Cohort statistics `cohort$get_stats(step_id, state = "pre")`.
 - It's recommended the output performs previous step data validation (in terms of data existence) and returns descriptive message to the user.
 - Use `cohort$attributes$stats` to get displayed statistics state chosen by the user ("pre", "post", both or NULL).
 - For printing the statistics use `.pre_post_stats` (or `.pre_post_stats_text`)` which returns formatted statistics output.
@@ -121,11 +121,11 @@ Examples:
   stats <- cohort$attributes$stats
 
   session$output[[paste0(step_id, "-stats")]] <- shiny::renderUI({
-    previous <- cohort$get_cache(step_id, state = "pre")$n_rows
+    previous <- cohort$get_stats(step_id, state = "pre")$n_rows
     if (!previous > 0) {
       return("No data selected in previous step.")
     }
-    current <- cohort$get_cache(step_id, state = "post")$n_rows
+    current <- cohort$get_stats(step_id, state = "post")$n_rows
     .pre_post_stats(current, previous, percent = TRUE, stats = stats)
   })
 }
@@ -142,15 +142,15 @@ Examples:
   data_filters <- purrr::map_chr(step$filters, get_filter_dataset)
   dataset_names <- intersect(dataset_names, data_filters)
 
-  dataset_names %>% purrr::walk(
+  dataset_names |> purrr::walk(
     ~ .sendOutput(
       paste0(step_id, "-stats_", .x),
       shiny::renderUI({
-        previous <- cohort$get_cache(step_id, state = "pre")[[.x]]$n_rows
+        previous <- cohort$get_stats(step_id, state = "pre")[[.x]]$n_rows
         if (!previous > 0) {
           return("No data selected in previous step.")
         }
-        current <- cohort$get_cache(step_id, state = "post")[[.x]]$n_rows
+        current <- cohort$get_stats(step_id, state = "post")[[.x]]$n_rows
         .pre_post_stats(current, previous, percent = TRUE, stats = stats)
       }),
       session
@@ -166,15 +166,15 @@ update_data_stats.db <- function(source, step_id, cohort, session) {
   stats <- cohort$attributes$stats
 
   dataset_names <- source$attributes$tables
-  dataset_names %>% purrr::walk(
+  dataset_names |> purrr::walk(
     ~ shinyCohortBuilder::sendOutput(
       paste0(step_id, "-stats_", .x),
       shiny::renderUI({
-        previous <- cohort$get_cache(step_id, state = "pre")[[.x]]$n_rows
+        previous <- cohort$get_stats(step_id, state = "pre")[[.x]]$n_rows
         if (!previous > 0) {
           return("No data selected in previous step.")
         }
-        current <- cohort$get_cache(step_id, state = "post")[[.x]]$n_rows
+        current <- cohort$get_stats(step_id, state = "post")[[.x]]$n_rows
         shinyCohortBuilder::pre_post_stats(current, previous, percent = TRUE, stats = stats)
       })
     )
@@ -194,7 +194,7 @@ Details:
 
 - Generate filters based on Source data (i.e. column types) using `cohortBuilder::filter`.
 - When `attach_as = "step"` wrap them with `cohortBuilder::step` and attach to the Source using `add_step` method.
-- When `attach_as = "meta"` attach filters to the `available_filters` Source attribute (`source$attributes$available_filters`).
+- When `attach_as = "meta"` attach filters to the `available_filters` Source element (`source$available_filters`).
 - The method should return Source object.
 
 Examples:
@@ -204,16 +204,16 @@ Examples:
 ```{r, eval = FALSE}
 autofilter.tblist <- function(source, attach_as = c("step", "meta"), ...) {
   attach_as <- rlang::arg_match(attach_as)
-  step_rule <- source$dtconn %>%
-    purrr::imap(~filter_rules(.x, .y)) %>%
-    unlist(recursive = FALSE) %>%
-    purrr::map(~do.call(cohortBuilder::filter, .)) %>%
+  step_rule <- source$dtconn |>
+    purrr::imap(~filter_rules(.x, .y)) |>
+    unlist(recursive = FALSE) |>
+    purrr::map(~do.call(cohortBuilder::filter, .)) |>
     unname()
 
   if (identical(attach_as, "meta")) {
-    source$attributes$available_filters <- step_rule
+    source$available_filters <- step_rule
   } else {
-    source %>%
+    source |>
       cohortBuilder::add_step(do.call(cohortBuilder::step, step_rule))
   }
 
@@ -257,7 +257,7 @@ Examples:
       id = x$id,
       dataset = x$get_params("dataset")
     )
-  }) %>% dplyr::bind_rows()
+  }) |> dplyr::bind_rows()
 
   shinyWidgets::prepare_choices(choices, name, id, dataset)
 }

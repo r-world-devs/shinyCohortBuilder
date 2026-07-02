@@ -29,6 +29,15 @@ Default value: `FALSE`.
 
 Similar to `cb_vebose`, enabling the option (`options("scb_verbose" = TRUE)`) results with printing readable logs. Logs are visible as popups in the Shiny application where filtering panel is used.
 
+## scb_verbose_call_stack
+
+Default value: `FALSE`.
+
+Controls whether messages and warnings raised while handling filtering panel actions are logged together with their call stack.
+By default (`FALSE`), messages and warnings are printed as-is, without the call stack, to keep the logs readable.
+Enabling the option (`options("scb_verbose_call_stack" = TRUE)`) makes them pass through to `tryCatchLog`, so the call stack is included in the log output, which is useful when debugging.
+Errors always include their call stack regardless of this option.
+
 ## scb_render_all
 
 Default value: `FALSE`.

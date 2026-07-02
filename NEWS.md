@@ -1,3 +1,27 @@
+# shinyCohortBuilder 1.0.0
+
+## New features
+
+* Added domain-aware rendering via the `render_source` argument of `cb_server()`. With `render_source = "domain"` filter inputs are rendered from each filter's declared `domain` (validated eagerly at mount time), so the panel can render without scanning data. `render_source = "auto"` (default) keeps the previous statistics-based rendering.
+* Added support for filter domains and domain propagation (including custom domains and the `propagate_domains` setting), and rendering refresh on domain changes.
+* Added an LLM-based cohort assistant (`cb_chat_ui()` / `cb_chat_server()`) built on 'shinychat'.
+* Added GUI support for the `datetime_range` filter.
+
+## Improvements
+
+* Feedback plots are now rendered client-side from minimal HTML structure (via `html_feedback_*()` helpers), with built-in rendering methods for each filter type.
+* Rewrote `.gui_filter()` (now S7-based) for a clearer, less confusing filter API, and adapted to the new cohortBuilder filter property structure.
+* Moved most GUI logic to cohortBuilder lifecycle hooks (filter add/remove, pending state, run step, update filter), simplifying action dispatch.
+* Improved programmatic filter (de)activation.
+* Modernized the filtering panel styling for a cleaner, more compact look: refreshed accordion step panels, toolbar and action buttons, filter input controls, and feedback plots, with consistent spacing and typography. Styling now derives from the active 'bslib' Bootstrap theme so panels adapt to custom themes (including dark mode), and disabled buttons are themed accordingly. Fixed several UI issues along the way (date-range input styling, Set/Get State button alignment, filter label/stat overflow).
+* Dropped support for Bootstrap 3 (Bootstrap 4/5 only).
+* Documented all exported and key internal functions.
+
+## Bug fixes
+
+* Fixed data statistics behavior, including showing real "previous step" statistics for the first step instead of a spurious "No data selected in previous step." placeholder.
+* Fixed adding a step when filters propagate their values/domains.
+
 # shinyCohortBuilder 0.4.0
 
 * Fix running flow (and functionality of Run Button) when at least one non-active step is stale.

@@ -5,7 +5,7 @@
 \alias{scb_labels}
 \title{Default filtering panel labels}
 \format{
-An object of class \code{list} of length 16.
+An object of class \code{list} of length 17.
 }
 \usage{
 scb_labels

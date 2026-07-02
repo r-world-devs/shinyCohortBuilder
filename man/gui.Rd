@@ -37,7 +37,7 @@ Three options are available "none" - no button, "local" - button displayed at ea
 
 \item{state}{Set to TRUE (default) to enable get/set state panel.}
 
-\item{bootstrap}{Boostrap version to be used for filtering panel.
+\item{bootstrap}{Bootstrap version to be used for filtering panel.
 See \link[bslib]{bs_theme} version argument.}
 
 \item{enable_bookmarking}{Set to TRUE (default) if panel should be compatible with native shiny bookmarking.}
@@ -69,7 +69,7 @@ if (interactive()) {
   mtcars_cohort <- cohort(
     mtcars_source,
     filter("discrete", id = "am", dataset = "mtcars", variable = "am", value = 1)
-  ) \%>\% run()
+  ) |> run()
   gui(mtcars_cohort)
 }
 

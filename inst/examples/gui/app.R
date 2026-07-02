@@ -11,11 +11,11 @@ coh <- cohort(
       bind_key(data_key("set", "name"), data_key("iris", "Species"))
     )
   )
-) %>%
+) |>
   add_filter(
-    filter("discrete", id = "species", dataset = "iris", variable = "Species", value = c("setosa", "versicolor")),
+    filter("discrete", id = "species", name = "Species", dataset = "iris", variable = "Species", value = c("setosa", "versicolor")),
     step_id = "1"
-  ) %>%
+  ) |>
   add_filter(
     filter("discrete", dataset = "set", variable = "name", value = "setosa"),
     step_id = "2"

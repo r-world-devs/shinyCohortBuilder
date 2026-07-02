@@ -1,15 +1,26 @@
+#' Clamp a selected datetime range to the parent's available range
+#'
+#' Coerces character/POSIXct input, replaces out-of-bounds or missing endpoints
+#' with the parent bounds, and falls back to the full parent range on reset or
+#' when the selection lies entirely outside it.
+#'
+#' @param range The selected `c(from, to)` datetime range (or empty/sentinel).
+#' @param parent_range The parent step's available `c(min, max)` range.
+#' @param reset When `TRUE`, ignore `range` and return `parent_range`.
+#' @return A clamped `c(from, to)` datetime range.
+#' @noRd
 extract_selected_datetime_range <- function(range, parent_range, reset) {
   if (identical(range, c(Inf, -Inf)) || length(range) == 0) {
     return(range)
   }
-  
+
   if (inherits(range, "character") || inherits(range, "POSIXct")) {
     if (length(range) == 1) range <- c(range, Inf)
-    
+
     range <- as.POSIXct(range, origin = "1970-01-01 UTC")
     parent_range <- as.POSIXct(parent_range, origin = "1970-01-01 UTC")
   }
-  
+
   if (reset || identical(range, NA) || !any(dplyr::between(range, parent_range[1], parent_range[2]))) {
     return(parent_range)
   }
@@ -19,15 +30,13 @@ extract_selected_datetime_range <- function(range, parent_range, reset) {
   if (anyNA(range[2]) || range[2] > parent_range[2]) {
     range[2] <- parent_range[2]
   }
-  
+
   return(range)
 }
 
-#' @rdname gui-filter-layer
-#' @export
-.gui_filter.datetime_range <- function(filter, ...) {
+S7::method(.gui_filter, cohortBuilder::CbFilterDatetimeRange) <- function(object, ...) {
   list(
-    input = function(input_id, cohort) {
+    input = function(filter, input_id, cohort) {
       input_params <- range_input_params(filter, input_id, cohort, ...)
       shiny::tagList(
         if (is_gui_type(filter, "datetimepicker")) {
@@ -47,7 +56,7 @@ extract_selected_datetime_range <- function(range, parent_range, reset) {
                 suff_id(input_params, "datetimepicker")
               )
             ),
-            filter$input_param
+            filter@private$input_param
           )
         } else if (is_gui_type(filter, "slider")) {
           .cb_input(
@@ -58,7 +67,7 @@ extract_selected_datetime_range <- function(range, parent_range, reset) {
                 suff_id(input_params, "slider")
               )
             ),
-            filter$input_param
+            filter@private$input_param
           )
         },
         .cb_input(
@@ -67,46 +76,44 @@ extract_selected_datetime_range <- function(range, parent_range, reset) {
         )
       )
     },
-    
-    feedback = function(input_id, cohort, empty = FALSE) {
+
+    feedback = function(filter, input_id, cohort, empty = FALSE) {
       list(
-        plot_id = shiny::NS(input_id, "feedback_plot") ,
-        output_fun = shiny::plotOutput,
+        plot_id = shiny::NS(input_id, "feedback_plot"),
+        output_fun = shiny::uiOutput,
         render_fun = if (!is.null(empty)) {
-          shiny::renderPlot(bg = "transparent", height = 60, {
-            if(empty || is.null(filter$get_params("range"))) { # when no data in parent step
-              return(
-                ggplot2::ggplot()
-              )
+          shiny::renderUI({
+            if (empty || is.null(filter@range)) {
+              return(shiny::div(class = "cb_fb_bar"))
             }
-            step_id <- filter$step_id
-            filter_id <- filter$id
-            
-            filter_cache <- cohort$get_cache(step_id, filter_id, state = "pre")
+            step_id <- filter@step_id
+            filter_id <- filter@id
+
+            filter_stats <- cohort$get_stats(step_id, filter_id, state = "pre")
 
             filter_range <- extract_selected_datetime_range(
-              filter$get_params("range"),
-              freq_range(filter_cache$frequencies),
+              filter@range,
+              freq_range(filter_stats$frequencies),
               FALSE
             )
-            
-            plot_data <- filter_cache$frequencies %>%
-              dplyr::mutate(# we take l_bound to limit upper cause last break have l_bound == u_bound
+
+            plot_data <- filter_stats$frequencies |>
+              dplyr::mutate(
                 count = ifelse(l_bound >= filter_range[1] & l_bound <= filter_range[2], count, 0)
-              ) 
-            n_missing <- filter_cache$n_missing
-            n_total <- filter_cache$n_data
-            if (identical(filter$get_params("keep_na"), FALSE)) {
+              )
+            n_missing <- filter_stats$n_missing
+            n_total <- filter_stats$n_data
+            if (identical(filter@keep_na, FALSE)) {
               n_missing <- 0
             }
-            
-            plot_feedback_hist(plot_data, n_missing, n_total)
+
+            html_feedback_hist(plot_data, n_missing, n_total)
           })
         }
       )
     },
-    server = function(input_id, input, output, session, cohort) {},
-    update = function(session, input_id, cohort, reset = FALSE, ...) {
+    server = function(filter, input_id, input, output, session, cohort) {},
+    update = function(filter, session, input_id, cohort, reset = FALSE, ...) {
       input_params <- append(
         list(session = session),
         range_input_params(filter, input_id, cohort, reset, TRUE, ...)
@@ -124,10 +131,10 @@ extract_selected_datetime_range <- function(range, parent_range, reset) {
           shiny::updateSliderInput,
           suff_id(input_params, "slider")
         )
-      }  
+      }
       .update_keep_na_input(session, input_id, filter, cohort)
     },
-    
+
     post_stats = FALSE,
     multi_input = FALSE
   )

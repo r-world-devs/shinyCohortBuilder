@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm -rf shinyCohortBuilder.Rcheck shinyCohortBuilder_1.0.0.tar.gz)",
+      "Bash(R CMD build shinyCohortBuilder --no-manual)",
+      "Bash(_R_CHECK_FORCE_SUGGESTS_=false R CMD check shinyCohortBuilder_1.0.0.tar.gz --no-manual)",
+      "Bash(Rscript -e 'roxygen2::roxygenise\\(\"\"\"\".\"\"\"\"\\)')",
+      "Bash(R CMD build shinyCohortBuilder --no-manual --no-build-vignettes)",
+      "Bash(SCREENSHOT_TESTS=1 SCREENSHOT_ONLY=1 Rscript -e 'pkgload::load_all\\(\"\"\"\".\"\"\"\"\\); testthat::test_dir\\(\"\"\"\"tests/testthat\"\"\"\"\\)')",
+      "Bash(SCREENSHOT_TESTS=1 SCREENSHOT_ONLY=1 NOT_CRAN=true Rscript -e 'pkgload::load_all\\(\"\"\"\".\"\"\"\"\\); testthat::test_dir\\(\"\"\"\"tests/testthat\"\"\"\"\\)')"
+    ]
+  }
+}

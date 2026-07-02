@@ -13,7 +13,8 @@ cb_ui(
   code = TRUE,
   attrition = TRUE,
   new_step = c("clone", "configure"),
-  manage_step = FALSE
+  manage_step = FALSE,
+  assistant = FALSE
 )
 
 cb_server(
@@ -22,8 +23,10 @@ cb_server(
   run_button = "none",
   stats = c("pre", "post"),
   feedback = FALSE,
+  render_source = "auto",
   enable_bookmarking = shiny::getShinyOption("bookmarkStore", default = "disable"),
   show_help = TRUE,
+  chat = NULL,
   ...
 )
 }
@@ -44,8 +47,11 @@ cb_server(
 Possible options are: "clone" - copy filters from last step,
 "configure" - opening modal and allow to chose filters from available filters.}
 
-\item{manage_step}{When `TRUE`, enables feature, that alows to modify the latest step filters (add/remove them).
-Available list of filters used by the feature should be stores as `source$attributes$available_filters` object.}
+\item{manage_step}{When `TRUE`, enables feature, that allows to modify the latest step filters (add/remove them).
+Available list of filters used by the feature should be stored as `source$available_filters` object (can be
+defined with `available_filters` argument for \link[cohortBuilder]{set_source}).}
+
+\item{assistant}{Set to TRUE to enable the LLM cohort assistant panel.}
 
 \item{cohort}{Cohort object storing filtering steps configuration.}
 
@@ -59,9 +65,20 @@ Possible options are: "pre" - previous step stat, "post" - current step stats,
 
 \item{feedback}{Set to TRUE (default) if feedback plots should be displayed at each filter.}
 
+\item{render_source}{Controls how filter inputs (choices/ranges) are sourced when a
+filter declares a `domain`. Possible options are: "auto" (default) - use cached
+statistics in stats mode, and the filter's domain when stats are disabled
+(`stats = NULL` and `feedback = FALSE`); "domain" - in stats mode, build choices and
+range bounds from the full domain vocabulary and overlay counts from statistics where
+available. A filter without a domain always falls back to statistics. The value can be
+overridden per filter via `filter@extra$render_source`.}
+
 \item{enable_bookmarking}{Set to TRUE (default) if panel should be compatible with native shiny bookmarking.}
 
 \item{show_help}{Set to TRUE (default) to enable help buttons.}
+
+\item{chat}{A chat client object (e.g. from 'ellmer') passed to the assistant;
+`NULL` (default) disables the assistant server logic.}
 }
 \value{
 Nested list of `shiny.tag` objects - html structure of filtering panel module.
@@ -119,27 +136,29 @@ if (interactive()) {
   library(shiny)
   library(shinyCohortBuilder)
 
-  librarian_source <- set_source(as.tblist(librarian))
-  librarian_source$attributes$available_filters <- list(
-    filter(
-      "discrete", id = "author", dataset = "books",
-      variable = "author", value = "Dan Brown",
-      active = FALSE
-    ),
-    filter(
-      "range", id = "copies", dataset = "books",
-      variable = "copies", range = c(5, 10),
-      active = FALSE
-    ),
-    filter(
-      "date_range", id = "registered", dataset = "borrowers",
-      variable = "registered", range = c(as.Date("2010-01-01"), Inf),
-      active = FALSE
-    ),
-    filter(
-      "discrete", id = "program", dataset = "borrowers",
-      variable = "program", value = NA,
-      active = FALSE
+  librarian_source <- set_source(
+    as.tblist(librarian),
+    available_filters = list(
+      filter(
+        "discrete", id = "author", dataset = "books",
+        variable = "author", value = "Dan Brown",
+        active = FALSE
+      ),
+      filter(
+        "range", id = "copies", dataset = "books",
+        variable = "copies", range = c(5, 10),
+        active = FALSE
+      ),
+      filter(
+        "date_range", id = "registered", dataset = "borrowers",
+        variable = "registered", range = c(as.Date("2010-01-01"), Inf),
+        active = FALSE
+      ),
+      filter(
+        "discrete", id = "program", dataset = "borrowers",
+        variable = "program", value = NA,
+        active = FALSE
+      )
     )
   )
   librarian_cohort <- cohort(
