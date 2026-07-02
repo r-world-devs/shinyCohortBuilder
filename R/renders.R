@@ -526,8 +526,29 @@ render_steps <- function(cohort, session, init = TRUE) {
         show_attrition = action_show_attrition,
         show_help = action_show_help
       )
+      # By default, messages and warnings are shown without a call stack: the
+      # inner handlers print them and muffle them before tryCatchLog's own
+      # handler (which attaches the call stack) can see them. Setting
+      # `options(scb_verbose_call_stack = TRUE)` lets them fall through to
+      # tryCatchLog so the call stack is logged. Errors always keep their
+      # call stack regardless of this option.
+      verbose_call_stack <- getOption("scb_verbose_call_stack", default = FALSE)
       tryCatchLog::tryCatchLog(
-        action_method(cohort, action$params, session),
+        withCallingHandlers(
+          action_method(cohort, action$params, session),
+          message = function(m) {
+            if (!verbose_call_stack) {
+              cat(conditionMessage(m), file = stderr())
+              invokeRestart("muffleMessage")
+            }
+          },
+          warning = function(w) {
+            if (!verbose_call_stack) {
+              cat("Warning: ", conditionMessage(w), "\n", sep = "", file = stderr())
+              invokeRestart("muffleWarning")
+            }
+          }
+        ),
         error = function(e) {
           intro_message <- glue::glue("An error occured during execution of {sQuote(action$id)} method.")
           cat(intro_message, sep = "\n")
