@@ -148,17 +148,42 @@ starwars_source <- set_source(
 ) |>
   autofilter(attach_as = "meta")
 
-# Predefined active filters; run() applies them so the app opens pre-filtered.
-starwars_cohort <- cohort(
-  starwars_source,
-  filter("discrete", dataset = "people", name = "Gender",
-         variable = "gender", value = "male"),
-  filter("range", dataset = "people", name = "Height",
-         variable = "height", range = c(150, 220)),
-  filter("discrete", dataset = "species", name = "Species",
-         variable = "classification", value = "mammal")
-) |>
-  run()
+# STARWARS_PREDEFINED_FILTERS toggles whether the app opens pre-filtered.
+# Accepts truthy strings ("1", "true", "yes", "on"); defaults to TRUE.
+use_predefined_filters <- local({
+  raw <- tolower(trimws(Sys.getenv("STARWARS_PREDEFINED_FILTERS", "true")))
+  if (!nzchar(raw)) TRUE else raw %in% c("1", "true", "yes", "on", "t")
+})
+
+# Pull a filter from the source's available_filters (created by autofilter(),
+# so it carries the labels/descriptions defined above) and set its value.
+# Reusing these avoids re-declaring filter ids/variables/names inline.
+predefined_filter <- function(source, id, ...) {
+  f <- purrr::detect(source$available_filters, ~ .x@id == id)
+  if (is.null(f)) {
+    stop(sprintf("No available filter with id '%s'.", id), call. = FALSE)
+  }
+  props <- list(...)
+  for (nm in names(props)) {
+    S7::prop(f, nm) <- props[[nm]]
+  }
+  f
+}
+
+# Predefined active filters (gender, height, species classification), chosen
+# from the source's available_filters; run() applies them on startup.
+starwars_cohort <- if (use_predefined_filters) {
+  cohort(
+    starwars_source,
+    predefined_filter(starwars_source, "people-gender", value = "male"),
+    predefined_filter(starwars_source, "people-height", range = c(150, 220)),
+    predefined_filter(starwars_source, "species-classification", value = "mammal")
+  ) |>
+    run()
+} else {
+  cohort(starwars_source) |>
+    run()
+}
 
 table_panel <- function(title, count_id, table_id) {
   bslib::nav_panel(
