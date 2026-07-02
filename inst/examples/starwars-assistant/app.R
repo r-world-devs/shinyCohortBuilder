@@ -48,37 +48,37 @@ build_chat <- function() {
   if (!nzchar(base_url) || !nzchar(token)) {
     stop("ANTHROPIC_BASE_URL and ANTHROPIC_AUTH_TOKEN must be set.", call. = FALSE)
   }
-  ellmer::chat_azure_openai(
-    endpoint = Sys.getenv("CHAT_ENDPOINT"),
-    model = "gpt-4o",
-    api_version = "2024-08-01-preview",
-    system_prompt = "You are a helpful assistant.",
-    credentials = function() list("api-key" = Sys.getenv("CHAT_KEY")),
-    echo = "all"#,
-    #api_args = list(parallel_tool_calls = FALSE)
-  )
-  # ellmer::chat_anthropic(
-  #   # ellmer appends "/messages"; Anthropic endpoints expect the "/v1" prefix.
-  #   base_url = paste0(sub("/+$", "", base_url), "/v1"),
-  #   credentials = function() token,
-  #   api_headers = c(
-  #     Authorization = paste("Bearer", token),
-  #     parse_custom_headers(Sys.getenv("ANTHROPIC_CUSTOM_HEADERS"))
-  #   ),
-  #   model = Sys.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-5-20250929"),
-  #   system_prompt = paste(
-  #     "You are a data cohort assistant for a Star Wars dataset with four related",
-  #     "tables: people, planets, species and films. Use the provided tools to",
-  #     "inspect available filters and to add/apply/toggle/clear filters on the",
-  #     "user's behalf. Always call cb_get_filters_meta to discover exact filter",
-  #     "ids and domains before applying values, and cb_describe_state to check",
-  #     "current filters. Be concise."
-  #   )
+  # ellmer::chat_azure_openai(
+  #   endpoint = Sys.getenv("CHAT_ENDPOINT"),
+  #   model = "gpt-4o",
+  #   api_version = "2024-08-01-preview",
+  #   system_prompt = "You are a helpful assistant.",
+  #   credentials = function() list("api-key" = Sys.getenv("CHAT_KEY")),
+  #   echo = "all"#,
+  #   #api_args = list(parallel_tool_calls = FALSE)
   # )
+  ellmer::chat_anthropic(
+    # ellmer appends "/messages"; Anthropic endpoints expect the "/v1" prefix.
+    base_url = paste0(sub("/+$", "", base_url), "/v1"),
+    credentials = function() token,
+    api_headers = c(
+      Authorization = paste("Bearer", token),
+      parse_custom_headers(Sys.getenv("ANTHROPIC_CUSTOM_HEADERS"))
+    ),
+    model = Sys.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-5-20250929"),
+    system_prompt = paste(
+      "You are a data cohort assistant for a Star Wars dataset with four related",
+      "tables: people, planets, species and films. Use the provided tools to",
+      "inspect available filters and to add/apply/toggle/clear filters on the",
+      "user's behalf. Always call cb_get_filters_meta to discover exact filter",
+      "ids and domains before applying values, and cb_describe_state to check",
+      "current filters. Be concise."
+    )
+  )
 }
 
 # Named list of four related tibbles (people, planets, species, films).
-starwars <- readRDS("starwars.rds")
+starwars <- readRDS("inst/examples/starwars-assistant/starwars.rds")
 
 starwars_binding_keys <- bind_keys(
   bind_key(update = data_key("people", "homeworld_id"), data_key("planets", "id")),
@@ -151,11 +151,11 @@ starwars_source <- set_source(
 # Predefined active filters; run() applies them so the app opens pre-filtered.
 starwars_cohort <- cohort(
   starwars_source,
-  filter("discrete", id = "people-gender", dataset = "people",
+  filter("discrete", dataset = "people", name = "Gender",
          variable = "gender", value = "male"),
-  filter("range", id = "people-height", dataset = "people",
+  filter("range", dataset = "people", name = "Height",
          variable = "height", range = c(150, 220)),
-  filter("discrete", id = "species-classification", dataset = "species",
+  filter("discrete", dataset = "species", name = "Species",
          variable = "classification", value = "mammal")
 ) |>
   run()
