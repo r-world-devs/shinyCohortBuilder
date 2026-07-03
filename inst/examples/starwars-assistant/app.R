@@ -32,6 +32,8 @@ library(cohortBuilder)
 library(shinyCohortBuilder)
 library(shiny)
 options(shiny.fullstacktrace = TRUE, shiny.trace = FALSE, warn = 1)
+#Sys.setenv("STARWARS_PREDEFINED_FILTERS" = "false")
+options("cb_tool_verbose" = TRUE)
 
 # ANTHROPIC_CUSTOM_HEADERS holds one "Key: value" pair; split on the first colon.
 parse_custom_headers <- function(x) {
@@ -48,37 +50,37 @@ build_chat <- function() {
   if (!nzchar(base_url) || !nzchar(token)) {
     stop("ANTHROPIC_BASE_URL and ANTHROPIC_AUTH_TOKEN must be set.", call. = FALSE)
   }
-  # ellmer::chat_azure_openai(
-  #   endpoint = Sys.getenv("CHAT_ENDPOINT"),
-  #   model = "gpt-4o",
-  #   api_version = "2024-08-01-preview",
-  #   system_prompt = "You are a helpful assistant.",
-  #   credentials = function() list("api-key" = Sys.getenv("CHAT_KEY")),
-  #   echo = "all"#,
-  #   #api_args = list(parallel_tool_calls = FALSE)
-  # )
-  ellmer::chat_anthropic(
-    # ellmer appends "/messages"; Anthropic endpoints expect the "/v1" prefix.
-    base_url = paste0(sub("/+$", "", base_url), "/v1"),
-    credentials = function() token,
-    api_headers = c(
-      Authorization = paste("Bearer", token),
-      parse_custom_headers(Sys.getenv("ANTHROPIC_CUSTOM_HEADERS"))
-    ),
-    model = Sys.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-5-20250929"),
-    system_prompt = paste(
-      "You are a data cohort assistant for a Star Wars dataset with four related",
-      "tables: people, planets, species and films. Use the provided tools to",
-      "inspect available filters and to add/apply/toggle/clear filters on the",
-      "user's behalf. Always call cb_get_filters_meta to discover exact filter",
-      "ids and domains before applying values, and cb_describe_state to check",
-      "current filters. Be concise."
-    )
+  ellmer::chat_azure_openai(
+    endpoint = Sys.getenv("CHAT_ENDPOINT"),
+    model = "gpt-4o",
+    api_version = "2024-08-01-preview",
+    system_prompt = "You are a helpful assistant.",
+    credentials = function() list("api-key" = Sys.getenv("CHAT_KEY")),
+    echo = "all"#,
+    #api_args = list(parallel_tool_calls = FALSE)
   )
+  # ellmer::chat_anthropic(
+  #   # ellmer appends "/messages"; Anthropic endpoints expect the "/v1" prefix.
+  #   base_url = paste0(sub("/+$", "", base_url), "/v1"),
+  #   credentials = function() token,
+  #   api_headers = c(
+  #     Authorization = paste("Bearer", token),
+  #     parse_custom_headers(Sys.getenv("ANTHROPIC_CUSTOM_HEADERS"))
+  #   ),
+  #   model = Sys.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-5-20250929"),
+  #   system_prompt = paste(
+  #     "You are a data cohort assistant for a Star Wars dataset with four related",
+  #     "tables: people, planets, species and films. Use the provided tools to",
+  #     "inspect available filters and to add/apply/toggle/clear filters on the",
+  #     "user's behalf. Always call cb_get_filters_meta to discover exact filter",
+  #     "ids and domains before applying values, and cb_describe_state to check",
+  #     "current filters. Be concise."
+  #   )
+  # )
 }
 
 # Named list of four related tibbles (people, planets, species, films).
-starwars <- readRDS("inst/examples/starwars-assistant/starwars.rds")
+starwars <- readRDS("starwars.rds")
 
 starwars_binding_keys <- bind_keys(
   bind_key(update = data_key("people", "homeworld_id"), data_key("planets", "id")),
@@ -144,7 +146,19 @@ starwars_source <- set_source(
   ),
   binding_keys = starwars_binding_keys,
   description  = starwars_description,
-  compute_meta_stats = FALSE
+  compute_meta_stats = FALSE,
+  source_code = rlang::expr({
+    library(cohortBuilder)
+    source <- list(dtconn = readRDS("starwars.rds"))
+    binding_keys <- bind_keys(
+      bind_key(update = data_key("people", "homeworld_id"), data_key("planets", "id")),
+      bind_key(update = data_key("planets", "id"),          data_key("people", "homeworld_id")),
+      bind_key(update = data_key("people", "species_id"),   data_key("species", "id")),
+      bind_key(update = data_key("species", "id"),          data_key("people", "species_id")),
+      bind_key(update = data_key("species", "homeworld_id"),data_key("planets", "id")),
+      bind_key(update = data_key("planets", "id"),          data_key("species", "homeworld_id"))
+    )
+  })
 ) |>
   autofilter(attach_as = "meta")
 
@@ -259,6 +273,6 @@ server <- function(input, output, session) {
 shiny::runApp(
   shinyApp(ui, server),
   host = "0.0.0.0",
-  port = as.integer(Sys.getenv("STARWARS_APP_PORT", "3838")),
-  launch.browser = FALSE
+  #port = as.integer(Sys.getenv("STARWARS_APP_PORT", "3838")),
+  launch.browser = TRUE
 )

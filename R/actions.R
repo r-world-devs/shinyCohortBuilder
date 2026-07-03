@@ -781,8 +781,9 @@ action_show_state <- function(cohort, changed_input, session) {
   shiny::showModal(shiny::modalDialog(
     size = "l",
     title = "Cohort state",
-    shiny::tags$code(
+    shiny::tags$pre(
       cohort$get_state(json = TRUE) |>
+        jsonlite::prettify() |> 
         shiny::HTML()
     ),
     easyClose = TRUE
@@ -1060,7 +1061,7 @@ action_show_repro_code <- function(cohort, changed_input, session) {
         class = "hl background",
         cohort$get_code(
           width = I(120), output = FALSE,
-          include_methods = character(0), include_action = character(0),
+          include_methods = character(0), include_action = "run_binding",
           mark_step = FALSE
         )$text.tidy |>
           highr::hi_html() |>
