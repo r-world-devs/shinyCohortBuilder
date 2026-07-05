@@ -32,6 +32,16 @@ library(cohortBuilder)
 library(shinyCohortBuilder)
 library(shiny)
 options(shiny.fullstacktrace = TRUE, shiny.trace = FALSE, warn = 1)
+#Sys.setenv("STARWARS_PREDEFINED_FILTERS" = "false")
+options("cb_tool_verbose" = TRUE)
+
+# Control the "Show Reproducible Code" output (passed to cohort$get_code()).
+options(
+  scb_repro_code_include_source  = TRUE,
+  scb_repro_code_include_methods = character(0),
+  scb_repro_code_include_action  = "run_binding",
+  scb_repro_code_mark_step       = FALSE
+)
 
 # ANTHROPIC_CUSTOM_HEADERS holds one "Key: value" pair; split on the first colon.
 parse_custom_headers <- function(x) {
@@ -78,7 +88,7 @@ build_chat <- function() {
 }
 
 # Named list of four related tibbles (people, planets, species, films).
-starwars <- readRDS("inst/examples/starwars-assistant/starwars.rds")
+starwars <- readRDS("starwars.rds")
 
 starwars_binding_keys <- bind_keys(
   bind_key(update = data_key("people", "homeworld_id"), data_key("planets", "id")),
@@ -144,7 +154,19 @@ starwars_source <- set_source(
   ),
   binding_keys = starwars_binding_keys,
   description  = starwars_description,
-  compute_meta_stats = FALSE
+  compute_meta_stats = FALSE,
+  source_code = rlang::expr({
+    library(cohortBuilder)
+    source <- list(dtconn = readRDS("starwars.rds"))
+    binding_keys <- bind_keys(
+      bind_key(update = data_key("people", "homeworld_id"), data_key("planets", "id")),
+      bind_key(update = data_key("planets", "id"),          data_key("people", "homeworld_id")),
+      bind_key(update = data_key("people", "species_id"),   data_key("species", "id")),
+      bind_key(update = data_key("species", "id"),          data_key("people", "species_id")),
+      bind_key(update = data_key("species", "homeworld_id"),data_key("planets", "id")),
+      bind_key(update = data_key("planets", "id"),          data_key("species", "homeworld_id"))
+    )
+  })
 ) |>
   autofilter(attach_as = "meta")
 

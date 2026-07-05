@@ -781,8 +781,9 @@ action_show_state <- function(cohort, changed_input, session) {
   shiny::showModal(shiny::modalDialog(
     size = "l",
     title = "Cohort state",
-    shiny::tags$code(
+    shiny::tags$pre(
       cohort$get_state(json = TRUE) |>
+        jsonlite::prettify() |>
         shiny::HTML()
     ),
     easyClose = TRUE
@@ -1050,6 +1051,21 @@ action_show_repro_code <- function(cohort, changed_input, session) {
   print_state("show_code", changed_input)
   input_state("show_code", changed_input)
 
+  # `cohort$get_code()` arguments can be overridden via `scb_*` options.
+  # Unset options are dropped so `get_code()` applies its own defaults.
+  repro_code_args <- list(
+    include_source  = getOption("scb_repro_code_include_source"),
+    include_methods = getOption("scb_repro_code_include_methods"),
+    include_action  = getOption("scb_repro_code_include_action"),
+    mark_step       = getOption("scb_repro_code_mark_step")
+  )
+  repro_code_args <- repro_code_args[!purrr::map_lgl(repro_code_args, is.null)]
+
+  repro_code_text <- do.call(
+    cohort$get_code,
+    c(list(width = I(120), output = FALSE), repro_code_args)
+  )$text.tidy
+
   shiny::showModal(shiny::modalDialog(
     size = "xl",
     title = "Reproducible code",
@@ -1058,7 +1074,7 @@ action_show_repro_code <- function(cohort, changed_input, session) {
       shiny::tags$code(
         id = "scb-reproducible-code",
         class = "hl background",
-        cohort$get_code(width = I(120), output = FALSE)$text.tidy |>
+        repro_code_text |>
           highr::hi_html() |>
           purrr::map_chr(add_trailing_space) |>
           paste(collapse = "\n") |>

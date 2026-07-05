@@ -74,3 +74,24 @@ Default value: `TRUE`.
 
 Having the options enabled results with using minified version of css and js files used for filtering panel.
 If you want to use original source (i.e. for debugging) please set `options("scb_minified" = FALSE)`.
+
+## scb_repro_code_include_source, scb_repro_code_include_methods, scb_repro_code_include_action, scb_repro_code_mark_step
+
+Default value: unset (the `cohort$get_code()` defaults are used).
+
+These options control the code shown by the "Show Reproducible Code" action.
+Each one, when set, is forwarded as the matching argument of `cohort$get_code()`
+(`include_source`, `include_methods`, `include_action` and `mark_step`
+respectively). Options left unset fall back to the `get_code()` defaults.
+
+For example, to show only the source and binding step (no method definitions,
+no per-step markers):
+
+```r
+options(
+  scb_repro_code_include_source  = TRUE,
+  scb_repro_code_include_methods = character(0),
+  scb_repro_code_include_action  = "run_binding",
+  scb_repro_code_mark_step       = FALSE
+)
+```
