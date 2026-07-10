@@ -16,7 +16,7 @@ output based on the filter state."><meta property="og:image" content="https://gi
     
     <a class="navbar-brand me-2" href="../index.html">shinyCohortBuilder</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -144,8 +144,7 @@ or no value in case of usage 'update' method.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://magrittr.tidyverse.org" class="external-link">magrittr</a></span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-world-devs/cohortBuilder/" class="external-link">cohortBuilder</a></span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-world-devs/cohortBuilder/" class="external-link">cohortBuilder</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">librarian_source</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/set_source.html" class="external-link">set_source</a></span><span class="op">(</span><span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/tblist.html" class="external-link">as.tblist</a></span><span class="op">(</span><span class="va">librarian</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">coh</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/create-cohort.html" class="external-link">cohort</a></span><span class="op">(</span></span></span>
@@ -154,7 +153,7 @@ or no value in case of usage 'update' method.</p>
 <span class="r-in"><span>    <span class="st">"range"</span>, id <span class="op">=</span> <span class="st">"copies"</span>, name <span class="op">=</span> <span class="st">"Copies"</span>, dataset <span class="op">=</span> <span class="st">"books"</span>,</span></span>
 <span class="r-in"><span>    variable <span class="op">=</span> <span class="st">"copies"</span>, range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">12</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/run.html" class="external-link">run</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/run.html" class="external-link">run</a></span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">.keep_na_input</span><span class="op">(</span><span class="st">"keep_na"</span>, <span class="va">coh</span><span class="op">$</span><span class="fu">get_filter</span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"copies"</span><span class="op">)</span>, <span class="va">coh</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;div class="form-group shiny-input-container cb_na_input"&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   &lt;div class="checkbox"&gt;</span>

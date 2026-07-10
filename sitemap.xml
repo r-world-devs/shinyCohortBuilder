@@ -4,6 +4,9 @@
     <loc>https://github.com/r-world-devs/shinyCohortBuilder/404.html</loc>
   </url>
   <url>
+    <loc>https://github.com/r-world-devs/shinyCohortBuilder/CLAUDE.html</loc>
+  </url>
+  <url>
     <loc>https://github.com/r-world-devs/shinyCohortBuilder/LICENSE-text.html</loc>
   </url>
   <url>
@@ -46,6 +49,9 @@
     <loc>https://github.com/r-world-devs/shinyCohortBuilder/reference/cb_changed.html</loc>
   </url>
   <url>
+    <loc>https://github.com/r-world-devs/shinyCohortBuilder/reference/cb_chat.html</loc>
+  </url>
+  <url>
     <loc>https://github.com/r-world-devs/shinyCohortBuilder/reference/cb_ui.html</loc>
   </url>
   <url>
@@ -65,6 +71,9 @@
   </url>
   <url>
     <loc>https://github.com/r-world-devs/shinyCohortBuilder/reference/dot-sendOutput.html</loc>
+  </url>
+  <url>
+    <loc>https://github.com/r-world-devs/shinyCohortBuilder/reference/filter-position.html</loc>
   </url>
   <url>
     <loc>https://github.com/r-world-devs/shinyCohortBuilder/reference/gui-filter-layer.html</loc>

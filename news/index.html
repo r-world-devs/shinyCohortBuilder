@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">shinyCohortBuilder</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -80,7 +80,44 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.3.0" id="shinycohortbuilder-030">shinyCohortBuilder 0.3.0<a class="anchor" aria-label="anchor" href="#shinycohortbuilder-030"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.0.0" id="shinycohortbuilder-100">shinyCohortBuilder 1.0.0<a class="anchor" aria-label="anchor" href="#shinycohortbuilder-100"></a></h2><p class="text-muted">CRAN release: 2026-07-05</p>
+<div class="section level3">
+<h3 id="new-features-1-0-0">New features<a class="anchor" aria-label="anchor" href="#new-features-1-0-0"></a></h3>
+<ul><li>Added domain-aware rendering via the <code>render_source</code> argument of <code><a href="../reference/cb_ui.html">cb_server()</a></code>. With <code>render_source = "domain"</code> filter inputs are rendered from each filter’s declared <code>domain</code> (validated eagerly at mount time), so the panel can render without scanning data. <code>render_source = "auto"</code> (default) keeps the previous statistics-based rendering.</li>
+<li>Added support for filter domains and domain propagation (including custom domains and the <code>propagate_domains</code> setting), and rendering refresh on domain changes.</li>
+<li>Added an LLM-based cohort assistant (<code><a href="../reference/cb_chat.html">cb_chat_ui()</a></code> / <code><a href="../reference/cb_chat.html">cb_chat_server()</a></code>) built on ‘shinychat’.</li>
+<li>Added GUI support for the <code>datetime_range</code> filter.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="improvements-1-0-0">Improvements<a class="anchor" aria-label="anchor" href="#improvements-1-0-0"></a></h3>
+<ul><li>Feedback plots are now rendered client-side from minimal HTML structure (via <code>html_feedback_*()</code> helpers), with built-in rendering methods for each filter type.</li>
+<li>Rewrote <code><a href="../reference/gui-filter-layer.html">.gui_filter()</a></code> (now S7-based) for a clearer, less confusing filter API, and adapted to the new cohortBuilder filter property structure.</li>
+<li>Moved most GUI logic to cohortBuilder lifecycle hooks (filter add/remove, pending state, run step, update filter), simplifying action dispatch.</li>
+<li>Improved programmatic filter (de)activation.</li>
+<li>Modernized the filtering panel styling for a cleaner, more compact look: refreshed accordion step panels, toolbar and action buttons, filter input controls, and feedback plots, with consistent spacing and typography. Styling now derives from the active ‘bslib’ Bootstrap theme so panels adapt to custom themes (including dark mode), and disabled buttons are themed accordingly. Fixed several UI issues along the way (date-range input styling, Set/Get State button alignment, filter label/stat overflow).</li>
+<li>Dropped support for Bootstrap 3 (Bootstrap 4/5 only).</li>
+<li>Documented all exported and key internal functions.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="bug-fixes-1-0-0">Bug fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-1-0-0"></a></h3>
+<ul><li>Fixed data statistics behavior, including showing real “previous step” statistics for the first step instead of a spurious “No data selected in previous step.” placeholder.</li>
+<li>Fixed adding a step when filters propagate their values/domains.</li>
+</ul></div>
+</div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.4.0" id="shinycohortbuilder-040">shinyCohortBuilder 0.4.0<a class="anchor" aria-label="anchor" href="#shinycohortbuilder-040"></a></h2><p class="text-muted">CRAN release: 2026-02-25</p>
+<ul><li>Fix running flow (and functionality of Run Button) when at least one non-active step is stale.</li>
+<li>Add an option to manage (add / remove) last step filters.</li>
+<li>Fix updating discrete filter through its feedback plot when post stats are turned off.</li>
+<li>Add gui support for <code>datatime_filter</code>.</li>
+<li>Update <code>ggplot2</code> version and adjust parameter name.</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.1" id="shinycohortbuilder-031">shinyCohortBuilder 0.3.1<a class="anchor" aria-label="anchor" href="#shinycohortbuilder-031"></a></h2><p class="text-muted">CRAN release: 2024-10-14</p>
+<ul><li>Fix compatibility with latest version of glue package (<a href="https://github.com/r-world-devs/shinyCohortBuilder/issues/61">#61</a>)</li>
+</ul></div>
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="shinycohortbuilder-030">shinyCohortBuilder 0.3.0<a class="anchor" aria-label="anchor" href="#shinycohortbuilder-030"></a></h2><p class="text-muted">CRAN release: 2024-09-27</p>
 <ul><li>Most of the modals have now <code>easyClosed</code> option turned on (<a href="https://github.com/r-world-devs/shinyCohortBuilder/issues/25">#25</a>).</li>
 <li>Fix positioning of filter help modal buttons (<a href="https://github.com/r-world-devs/shinyCohortBuilder/issues/37">#37</a>).</li>
 <li>Fix rendering feedback plots when special character are included in data (<a href="https://github.com/r-world-devs/shinyCohortBuilder/issues/58">#58</a>).</li>

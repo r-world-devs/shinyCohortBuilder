@@ -36,7 +36,7 @@ If you want to learn more about creating filter layers see `vignette("gui-filter
     
     <a class="navbar-brand me-2" href="../index.html">shinyCohortBuilder</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -102,7 +102,7 @@ If you want to learn more about creating filter layers see `vignette("gui-filter
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
       <img src="../logo.png" class="logo" alt=""><h1>Return GUI layer methods for filter of specified type</h1>
-      <small class="dont-index">Source: <a href="https://github.com/r-world-devs/shinyCohortBuilder/blob/HEAD/R/renders.R"><code>R/renders.R</code></a>, <a href="https://github.com/r-world-devs/shinyCohortBuilder/blob/HEAD/R/filter_discrete.R"><code>R/filter_discrete.R</code></a>, <a href="https://github.com/r-world-devs/shinyCohortBuilder/blob/HEAD/R/filter_range.R"><code>R/filter_range.R</code></a>, and 4 more</small>
+      <small class="dont-index">Source: <a href="https://github.com/r-world-devs/shinyCohortBuilder/blob/HEAD/R/renders.R"><code>R/renders.R</code></a></small>
       <div class="d-none name"><code>gui-filter-layer.Rd</code></div>
     </div>
 
@@ -122,31 +122,13 @@ If you want to learn more about creating filter layers see `vignette("gui-filter
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">.gui_filter</span><span class="op">(</span><span class="va">filter</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S3 method for discrete</span></span>
-<span><span class="fu">.gui_filter</span><span class="op">(</span><span class="va">filter</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S3 method for range</span></span>
-<span><span class="fu">.gui_filter</span><span class="op">(</span><span class="va">filter</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S3 method for date_range</span></span>
-<span><span class="fu">.gui_filter</span><span class="op">(</span><span class="va">filter</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S3 method for discrete_text</span></span>
-<span><span class="fu">.gui_filter</span><span class="op">(</span><span class="va">filter</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S3 method for multi_discrete</span></span>
-<span><span class="fu">.gui_filter</span><span class="op">(</span><span class="va">filter</span>, <span class="va">...</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S3 method for query</span></span>
-<span><span class="fu">.gui_filter</span><span class="op">(</span><span class="va">filter</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">.gui_filter</span><span class="op">(</span><span class="va">object</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <dl><dt>filter</dt>
-<dd><p>Filter object.</p></dd>
+    <dl><dt>object</dt>
+<dd><p>Filter object (used for S7 method dispatch).</p></dd>
 
 
 <dt>...</dt>
@@ -168,20 +150,27 @@ If you want to learn more about creating filter layers see `vignette("gui-filter
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-world-devs/cohortBuilder/" class="external-link">cohortBuilder</a></span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Attaching package: ‘cohortBuilder’</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The following objects are masked from ‘package:stats’:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span>     filter, step</span>
 <span class="r-in"><span><span class="va">librarian_source</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/set_source.html" class="external-link">set_source</a></span><span class="op">(</span><span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/tblist.html" class="external-link">as.tblist</a></span><span class="op">(</span><span class="va">librarian</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">copies_filter</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="st">"range"</span>, id <span class="op">=</span> <span class="st">"copies"</span>, name <span class="op">=</span> <span class="st">"Copies"</span>, dataset <span class="op">=</span> <span class="st">"books"</span>,</span></span>
-<span class="r-in"><span>  variable <span class="op">=</span> <span class="st">"copies"</span>, range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">12</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">copies_filter_evaled</span> <span class="op">&lt;-</span> <span class="fu">copies_filter</span><span class="op">(</span><span class="va">librarian_source</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">copies_filter_evaled</span><span class="op">$</span><span class="va">gui</span> <span class="op">&lt;-</span> <span class="fu">.gui_filter</span><span class="op">(</span><span class="va">copies_filter_evaled</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">coh</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/create-cohort.html" class="external-link">cohort</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="va">librarian_source</span>,</span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="st">"range"</span>, id <span class="op">=</span> <span class="st">"copies"</span>, name <span class="op">=</span> <span class="st">"Copies"</span>, dataset <span class="op">=</span> <span class="st">"books"</span>,</span></span>
+<span class="r-in"><span>    variable <span class="op">=</span> <span class="st">"copies"</span>, range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">12</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/run.html" class="external-link">run</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">copies_filter</span> <span class="op">&lt;-</span> <span class="va">coh</span><span class="op">$</span><span class="fu">get_filter</span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"copies"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">copies_filter_evaled</span><span class="op">$</span><span class="va">gui</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="fu">.gui_filter</span><span class="op">(</span><span class="va">copies_filter</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> List of 6</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ input      :function (input_id, cohort)  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ feedback   :function (input_id, cohort, empty = FALSE)  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ server     :function (input_id, input, output, session, cohort)  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  $ update     :function (session, input_id, cohort, reset = FALSE, ...)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ input      :function (filter, input_id, cohort)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ feedback   :function (filter, input_id, cohort, empty = FALSE)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ server     :function (filter, input_id, input, output, session, cohort)  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ update     :function (filter, session, input_id, cohort, reset = FALSE, ...)  </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ post_stats : logi FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  $ multi_input: logi TRUE</span>
 <span class="r-in"><span></span></span>

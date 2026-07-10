@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">shinyCohortBuilder</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -141,24 +141,37 @@ filter you need to precise its type:</p>
 <p>Such filter evaluated on Source (the operation happens within the
 Cohort) becomes an object of class equal to the filter type:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">evaled_filter</span> <span class="op">&lt;-</span> <span class="fu">species_filter</span><span class="op">(</span><span class="va">iris_source</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">iris_cohort</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/create-cohort.html" class="external-link">cohort</a></span><span class="op">(</span><span class="va">iris_source</span>, <span class="va">species_filter</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/run.html" class="external-link">run</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">evaled_filter</span> <span class="op">&lt;-</span> <span class="va">iris_cohort</span><span class="op">$</span><span class="fu">get_filter</span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"species"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/class.html" class="external-link">class</a></span><span class="op">(</span><span class="va">evaled_filter</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] "cb_filter" "discrete"</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] "cohortBuilder::CbFilterDiscrete" "cohortBuilder::CbFilter"        </span></span>
+<span><span class="co">#&gt; [3] "S7_object"</span></span></code></pre></div>
 <p>For the further needs let’s highlight what methods and parameters are
 originally stored withing the evaluated filter object:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">evaled_filter</span>, give.attr <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
-<span><span class="co">#&gt; List of 10</span></span>
-<span><span class="co">#&gt;  $ id          : chr "species"</span></span>
-<span><span class="co">#&gt;  $ type        : 'discrete' chr "discrete"</span></span>
-<span><span class="co">#&gt;  $ name        : chr "species"</span></span>
-<span><span class="co">#&gt;  $ input_param : chr "value"</span></span>
-<span><span class="co">#&gt;  $ filter_data :function (data_object)  </span></span>
-<span><span class="co">#&gt;  $ get_stats   :function (data_object, name)  </span></span>
-<span><span class="co">#&gt;  $ plot_data   :function (data_object)  </span></span>
-<span><span class="co">#&gt;  $ get_params  :function (name)  </span></span>
-<span><span class="co">#&gt;  $ get_data    :function (data_object)  </span></span>
-<span><span class="co">#&gt;  $ get_defaults:function (data_object, cache_object)</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;cohortBuilder::CbFilterDiscrete&gt;</span></span>
+<span><span class="co">#&gt;  @ type       : chr "discrete"</span></span>
+<span><span class="co">#&gt;  @ id         : chr "species"</span></span>
+<span><span class="co">#&gt;  @ name       : chr "Species"</span></span>
+<span><span class="co">#&gt;  @ active     : logi TRUE</span></span>
+<span><span class="co">#&gt;  @ description: NULL</span></span>
+<span><span class="co">#&gt;  @ domain     : NULL</span></span>
+<span><span class="co">#&gt;  @ step_id    : chr "1"</span></span>
+<span><span class="co">#&gt;  @ extra      : list()</span></span>
+<span><span class="co">#&gt;  @ private    :List of 2</span></span>
+<span><span class="co">#&gt;  .. $ input_param: chr "value"</span></span>
+<span><span class="co">#&gt;  .. $ gui        :List of 6</span></span>
+<span><span class="co">#&gt;  ..  ..$ input      :function (filter, input_id, cohort)  </span></span>
+<span><span class="co">#&gt;  ..  ..$ feedback   :function (filter, input_id, cohort, empty = FALSE)  </span></span>
+<span><span class="co">#&gt;  ..  ..$ server     :function (filter, input_id, input, output, session, cohort)  </span></span>
+<span><span class="co">#&gt;  ..  ..$ update     :function (filter, session, input_id, cohort, reset = FALSE, ...)  </span></span>
+<span><span class="co">#&gt;  ..  ..$ post_stats : NULL</span></span>
+<span><span class="co">#&gt;  ..  ..$ multi_input: logi FALSE</span></span>
+<span><span class="co">#&gt;  @ dataset    : chr "iris"</span></span>
+<span><span class="co">#&gt;  @ variable   : chr "Species"</span></span>
+<span><span class="co">#&gt;  @ value      : chr "setosa"</span></span>
+<span><span class="co">#&gt;  @ keep_na    : logi TRUE</span></span></code></pre></div>
 <p><code>shinyCohortBuilder</code> extends the filter attaching
 GUI-specific methods to it using <code>.gui_filter</code> S3 method. The
 methods are available at <code>filter$gui</code> object.</p>
@@ -306,7 +319,7 @@ return an empty input controller.</li>
 <p>For discrete filter (<code>checkboxGroupInput</code>) we achieve this
 with:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="va">cohort</span><span class="op">$</span><span class="fu">get_cache</span><span class="op">(</span><span class="va">step_id</span>, <span class="va">filter_id</span>, state <span class="op">=</span> <span class="st">"pre"</span><span class="op">)</span><span class="op">$</span><span class="va">n_data</span><span class="op">)</span> <span class="op">{</span></span>
+<code class="sourceCode R"><span><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="va">cohort</span><span class="op">$</span><span class="fu">get_stats</span><span class="op">(</span><span class="va">step_id</span>, <span class="va">filter_id</span>, state <span class="op">=</span> <span class="st">"pre"</span><span class="op">)</span><span class="op">$</span><span class="va">n_data</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span></span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>inputId <span class="op">=</span> <span class="va">input_id</span>, choices <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>, selected <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>, label <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span>  <span class="op">)</span></span>
@@ -345,15 +358,15 @@ available options (or range).</li>
 <p>Extracting all the possible options can be done with:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span></span>
-<span>  <span class="va">cohort</span><span class="op">$</span><span class="fu">get_cache</span><span class="op">(</span><span class="va">step_id</span>, <span class="va">filter_id</span>, state <span class="op">=</span> <span class="st">"pre"</span><span class="op">)</span><span class="op">$</span><span class="va">choices</span>  </span>
+<span>  <span class="va">cohort</span><span class="op">$</span><span class="fu">get_stats</span><span class="op">(</span><span class="va">step_id</span>, <span class="va">filter_id</span>, state <span class="op">=</span> <span class="st">"pre"</span><span class="op">)</span><span class="op">$</span><span class="va">choices</span>  </span>
 <span><span class="op">)</span></span></code></pre></div>
 <ol start="3" style="list-style-type: decimal">
 <li>Filter controller choices should be based on the previous step.</li>
 </ol>
-<p>This can be easily extracted using previous step cache:</p>
+<p>This can be easily extracted using previous step statistics:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span></span>
-<span>  <span class="va">cohort</span><span class="op">$</span><span class="fu">get_cache</span><span class="op">(</span><span class="va">step_id</span>, <span class="va">filter_id</span>, state <span class="op">=</span> <span class="st">"pre"</span><span class="op">)</span><span class="op">$</span><span class="va">choices</span>  </span>
+<span>  <span class="va">cohort</span><span class="op">$</span><span class="fu">get_stats</span><span class="op">(</span><span class="va">step_id</span>, <span class="va">filter_id</span>, state <span class="op">=</span> <span class="st">"pre"</span><span class="op">)</span><span class="op">$</span><span class="va">choices</span>  </span>
 <span><span class="op">)</span></span></code></pre></div>
 <ol start="4" style="list-style-type: decimal">
 <li>When <a href="shinyCohortBuilder.html#filter-vs-filter-controller">value
@@ -373,12 +386,12 @@ labels.</li>
 </ol>
 <p>For this case you may use a helper <code>.pre_post_stats</code> (or
 <code>.pre_post_stats_text</code>) function:</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">.pre_post_stats_text</span>(</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">name =</span> <span class="sc">&lt;</span>choices labels names vector<span class="sc">&gt;</span>,</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">current =</span> <span class="sc">&lt;</span>current step statistics vector<span class="sc">&gt;</span>,</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">previous =</span> <span class="sc">&lt;</span>previous step statistics vector<span class="sc">&gt;</span>,</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">stats =</span> <span class="sc">&lt;</span><span class="st">"pre, post"</span>, both or <span class="cn">NULL</span><span class="sc">&gt;</span> <span class="co"># it's recommended to use `stats = cohort$attributes$stats` to inherit the option from Cohort configuration</span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">.pre_post_stats_text</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a>  <span class="at">name =</span> <span class="sc">&lt;</span>choices labels names vector<span class="sc">&gt;</span>,</span>
+<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>  <span class="at">current =</span> <span class="sc">&lt;</span>current step statistics vector<span class="sc">&gt;</span>,</span>
+<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a>  <span class="at">previous =</span> <span class="sc">&lt;</span>previous step statistics vector<span class="sc">&gt;</span>,</span>
+<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a>  <span class="at">stats =</span> <span class="sc">&lt;</span><span class="st">"pre, post"</span>, both or <span class="cn">NULL</span><span class="sc">&gt;</span> <span class="co"># it's recommended to use `stats = cohort$attributes$stats` to inherit the option from Cohort configuration</span></span>
+<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a>)</span></code></pre></div>
 <p>which returns labels with the selected statistics and brackets
 added.</p>
 <p>The function returns labels in an HTML structure attaching proper
@@ -438,12 +451,12 @@ filter):</p>
 <span>    feedback <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">input_id</span>, <span class="va">cohort</span>, <span class="va">empty</span> <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span></span>
 <span>      <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>        plot_id <span class="op">=</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/NS.html" class="external-link">NS</a></span><span class="op">(</span><span class="va">input_id</span>, <span class="st">"feedback_plot"</span><span class="op">)</span> ,</span>
-<span>        output_fun <span class="op">=</span> <span class="fu">ggiraph</span><span class="fu">::</span><span class="va"><a href="https://davidgohel.github.io/ggiraph/reference/girafeOutput.html" class="external-link">girafeOutput</a></span>,</span>
+<span>        output_fun <span class="op">=</span> <span class="fu">ggiraph</span><span class="fu">::</span><span class="va">girafeOutput</span>,</span>
 <span>        render_fun <span class="op">=</span> <span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">empty</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
-<span>          <span class="fu">ggiraph</span><span class="fu">::</span><span class="fu"><a href="https://davidgohel.github.io/ggiraph/reference/renderGirafe.html" class="external-link">renderGirafe</a></span><span class="op">(</span><span class="op">{</span></span>
+<span>          <span class="fu">ggiraph</span><span class="fu">::</span><span class="fu">renderGirafe</span><span class="op">(</span><span class="op">{</span></span>
 <span>            <span class="kw">if</span><span class="op">(</span><span class="va">empty</span><span class="op">)</span> <span class="op">{</span> <span class="co"># when no data in parent step</span></span>
 <span>              <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span></span>
-<span>                <span class="fu">ggiraph</span><span class="fu">::</span><span class="fu"><a href="https://davidgohel.github.io/ggiraph/reference/girafe.html" class="external-link">girafe</a></span><span class="op">(</span></span>
+<span>                <span class="fu">ggiraph</span><span class="fu">::</span><span class="fu">girafe</span><span class="op">(</span></span>
 <span>                  ggobj      <span class="op">=</span> <span class="fu">ggplot2</span><span class="fu">::</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>                  width_svg  <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>                  height_svg <span class="op">=</span> <span class="fl">0.1</span></span>
@@ -453,10 +466,10 @@ filter):</p>
 <span>            <span class="va">step_id</span> <span class="op">&lt;-</span> <span class="va">filter</span><span class="op">$</span><span class="va">step_id</span></span>
 <span>            <span class="va">filter_id</span> <span class="op">&lt;-</span> <span class="va">filter</span><span class="op">$</span><span class="va">id</span></span>
 <span></span>
-<span>            <span class="va">filter_cache</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_cache</span><span class="op">(</span><span class="va">step_id</span>, <span class="va">filter_id</span>, state <span class="op">=</span> <span class="st">"pre"</span><span class="op">)</span></span>
-<span>            <span class="va">filter_value</span> <span class="op">&lt;-</span> <span class="fu">extract_selected_value</span><span class="op">(</span><span class="va">filter</span><span class="op">$</span><span class="fu">get_params</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">value</span>, <span class="va">filter_cache</span><span class="op">$</span><span class="va">choices</span>, <span class="cn">FALSE</span><span class="op">)</span></span>
-<span>            <span class="va">plot_data</span> <span class="op">&lt;-</span> <span class="va">filter_cache</span><span class="op">$</span><span class="va">choices</span><span class="op">[</span><span class="va">filter_value</span><span class="op">]</span></span>
-<span>            <span class="va">n_missing</span> <span class="op">&lt;-</span> <span class="va">filter_cache</span><span class="op">$</span><span class="va">n_missing</span></span>
+<span>            <span class="va">filter_stats</span> <span class="op">&lt;-</span> <span class="va">cohort</span><span class="op">$</span><span class="fu">get_stats</span><span class="op">(</span><span class="va">step_id</span>, <span class="va">filter_id</span>, state <span class="op">=</span> <span class="st">"pre"</span><span class="op">)</span></span>
+<span>            <span class="va">filter_value</span> <span class="op">&lt;-</span> <span class="fu">extract_selected_value</span><span class="op">(</span><span class="va">filter</span><span class="op">$</span><span class="fu">get_params</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">value</span>, <span class="va">filter_stats</span><span class="op">$</span><span class="va">choices</span>, <span class="cn">FALSE</span><span class="op">)</span></span>
+<span>            <span class="va">plot_data</span> <span class="op">&lt;-</span> <span class="va">filter_stats</span><span class="op">$</span><span class="va">choices</span><span class="op">[</span><span class="va">filter_value</span><span class="op">]</span></span>
+<span>            <span class="va">n_missing</span> <span class="op">&lt;-</span> <span class="va">filter_stats</span><span class="op">$</span><span class="va">n_missing</span></span>
 <span>            <span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/identical.html" class="external-link">identical</a></span><span class="op">(</span><span class="va">filter</span><span class="op">$</span><span class="fu">get_params</span><span class="op">(</span><span class="op">)</span><span class="op">$</span><span class="va">keep_na</span>, <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span>
 <span>              <span class="va">n_missing</span> <span class="op">&lt;-</span> <span class="fl">0</span></span>
 <span>            <span class="op">}</span></span>
@@ -477,8 +490,8 @@ filter):</p>
 <li>Inside the rendering function body, return an empty plot when
 <code>empty = TRUE</code>.</li>
 <li>It’s recommended to generate plot based on cached Cohort statistics.
-The filter cache can be accessed with:
-<code>cohort$get_cache(step_id, filter_id, state = "pre")</code>,
+The filter statistics can be accessed with:
+<code>cohort$get_stats(step_id, filter_id, state = "pre")</code>,
 where:</li>
 </ul>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
@@ -510,7 +523,7 @@ triggers accordingly “update_filter” action:</p>
 <span>            run_flow <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span>          <span class="op">)</span><span class="op">)</span></span>
 <span>        <span class="op">}</span></span>
-<span>      <span class="op">}</span>, ignoreInit <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu"><a href="../reference/dot-save_observer.html">.save_observer</a></span><span class="op">(</span><span class="va">input_id</span>, <span class="va">session</span><span class="op">)</span></span>
+<span>      <span class="op">}</span>, ignoreInit <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span> <span class="op">|&gt;</span> <span class="fu"><a href="../reference/dot-save_observer.html">.save_observer</a></span><span class="op">(</span><span class="va">input_id</span>, <span class="va">session</span><span class="op">)</span></span>
 <span>    <span class="op">}</span>,</span>
 <span>    <span class="co"># other methods</span></span>
 <span>  <span class="op">)</span></span>
@@ -597,7 +610,7 @@ available options (or range).</li>
 <p>Again, all the possible options can be extracted with:</p>
 <div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span></span>
-<span>  <span class="va">cohort</span><span class="op">$</span><span class="fu">get_cache</span><span class="op">(</span><span class="va">step_id</span>, <span class="va">filter_id</span>, state <span class="op">=</span> <span class="st">"pre"</span><span class="op">)</span><span class="op">$</span><span class="va">choices</span>  </span>
+<span>  <span class="va">cohort</span><span class="op">$</span><span class="fu">get_stats</span><span class="op">(</span><span class="va">step_id</span>, <span class="va">filter_id</span>, state <span class="op">=</span> <span class="st">"pre"</span><span class="op">)</span><span class="op">$</span><span class="va">choices</span>  </span>
 <span><span class="op">)</span></span></code></pre></div>
 <ol start="2" style="list-style-type: decimal">
 <li>When <code>update = TRUE</code> the filter controller label should

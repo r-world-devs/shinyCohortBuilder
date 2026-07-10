@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">shinyCohortBuilder</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -138,6 +138,19 @@ readable logs. Logs are visible as popups in the Shiny application where
 filtering panel is used.</p>
 </div>
 <div class="section level2">
+<h2 id="scb_verbose_call_stack">scb_verbose_call_stack<a class="anchor" aria-label="anchor" href="#scb_verbose_call_stack"></a>
+</h2>
+<p>Default value: <code>FALSE</code>.</p>
+<p>Controls whether messages and warnings raised while handling
+filtering panel actions are logged together with their call stack. By
+default (<code>FALSE</code>), messages and warnings are printed as-is,
+without the call stack, to keep the logs readable. Enabling the option
+(<code>options("scb_verbose_call_stack" = TRUE)</code>) makes them pass
+through to <code>tryCatchLog</code>, so the call stack is included in
+the log output, which is useful when debugging. Errors always include
+their call stack regardless of this option.</p>
+</div>
+<div class="section level2">
 <h2 id="scb_render_all">scb_render_all<a class="anchor" aria-label="anchor" href="#scb_render_all"></a>
 </h2>
 <p>Default value: <code>FALSE</code>.</p>
@@ -185,6 +198,28 @@ details.</p>
 and js files used for filtering panel. If you want to use original
 source (i.e. for debugging) please set
 <code>options("scb_minified" = FALSE)</code>.</p>
+</div>
+<div class="section level2">
+<h2 id="scb_repro_code_include_source-scb_repro_code_include_methods-scb_repro_code_include_action-scb_repro_code_mark_step">scb_repro_code_include_source, scb_repro_code_include_methods,
+scb_repro_code_include_action, scb_repro_code_mark_step<a class="anchor" aria-label="anchor" href="#scb_repro_code_include_source-scb_repro_code_include_methods-scb_repro_code_include_action-scb_repro_code_mark_step"></a>
+</h2>
+<p>Default value: unset (the <code>cohort$get_code()</code> defaults are
+used).</p>
+<p>These options control the code shown by the “Show Reproducible Code”
+action. Each one, when set, is forwarded as the matching argument of
+<code>cohort$get_code()</code> (<code>include_source</code>,
+<code>include_methods</code>, <code>include_action</code> and
+<code>mark_step</code> respectively). Options left unset fall back to
+the <code>get_code()</code> defaults.</p>
+<p>For example, to show only the source and binding step (no method
+definitions, no per-step markers):</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/options.html" class="external-link">options</a></span><span class="op">(</span></span>
+<span>  scb_repro_code_include_source  <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  scb_repro_code_include_methods <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>,</span>
+<span>  scb_repro_code_include_action  <span class="op">=</span> <span class="st">"run_binding"</span>,</span>
+<span>  scb_repro_code_mark_step       <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>

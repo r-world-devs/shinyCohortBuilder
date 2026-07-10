@@ -33,7 +33,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">shinyCohortBuilder</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -326,63 +326,68 @@ should be then added to Source while its creation using
 </h2>
 <p>If you want to skip configuring filters for all of the tables and
 columns in the source, you may use
-<code><a href="../reference/autofilter.html">shinyCohortBuilder::autofilter</a></code> method.</p>
+<code><a href="https://r-world-devs.github.io/cohortBuilder/reference/autofilter.html" class="external-link">shinyCohortBuilder::autofilter</a></code> method.</p>
 <p>The method applied on Source, will scan all the columns included in
 Source and automatically configure proper filters to them. The filters
 will be stored within a Source, so it’s enough to pass such object to
 Cohort:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">iris_source</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/set_source.html" class="external-link">set_source</a></span><span class="op">(</span><span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/tblist.html" class="external-link">tblist</a></span><span class="op">(</span>iris <span class="op">=</span> <span class="va">iris</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="../reference/autofilter.html">autofilter</a></span><span class="op">(</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">iris_source</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/set_source.html" class="external-link">set_source</a></span><span class="op">(</span><span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/tblist.html" class="external-link">tblist</a></span><span class="op">(</span>iris <span class="op">=</span> <span class="va">iris</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span> </span>
+<span>  <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/autofilter.html" class="external-link">autofilter</a></span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="va">iris_cohort</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/create-cohort.html" class="external-link">cohort</a></span><span class="op">(</span><span class="va">iris_source</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/sum_up.html" class="external-link">sum_up</a></span><span class="op">(</span><span class="va">iris_cohort</span><span class="op">)</span></span>
-<span><span class="co">#&gt; &gt;&gt; Step ID: 1</span></span>
-<span><span class="co">#&gt; -&gt; Filter ID: OSNCJ1727431220830</span></span>
+<span><span class="co">#&gt; &gt;&gt; Step ID: 1 [pending]</span></span>
+<span><span class="co">#&gt; -&gt; Filter ID: iris-SepalLength</span></span>
 <span><span class="co">#&gt;    Filter Type: range</span></span>
 <span><span class="co">#&gt;    Filter Parameters:</span></span>
+<span><span class="co">#&gt;      active: TRUE</span></span>
+<span><span class="co">#&gt;      description: </span></span>
+<span><span class="co">#&gt;      domain: 4.3, 7.9</span></span>
 <span><span class="co">#&gt;      dataset: iris</span></span>
 <span><span class="co">#&gt;      variable: Sepal.Length</span></span>
 <span><span class="co">#&gt;      range: NA</span></span>
 <span><span class="co">#&gt;      keep_na: TRUE</span></span>
-<span><span class="co">#&gt;      description: </span></span>
-<span><span class="co">#&gt;      active: TRUE</span></span>
-<span><span class="co">#&gt; -&gt; Filter ID: RVKET1727431220830</span></span>
+<span><span class="co">#&gt; -&gt; Filter ID: iris-SepalWidth</span></span>
 <span><span class="co">#&gt;    Filter Type: range</span></span>
 <span><span class="co">#&gt;    Filter Parameters:</span></span>
+<span><span class="co">#&gt;      active: TRUE</span></span>
+<span><span class="co">#&gt;      description: </span></span>
+<span><span class="co">#&gt;      domain: 2, 4.4</span></span>
 <span><span class="co">#&gt;      dataset: iris</span></span>
 <span><span class="co">#&gt;      variable: Sepal.Width</span></span>
 <span><span class="co">#&gt;      range: NA</span></span>
 <span><span class="co">#&gt;      keep_na: TRUE</span></span>
-<span><span class="co">#&gt;      description: </span></span>
-<span><span class="co">#&gt;      active: TRUE</span></span>
-<span><span class="co">#&gt; -&gt; Filter ID: NVYZE1727431220830</span></span>
+<span><span class="co">#&gt; -&gt; Filter ID: iris-PetalLength</span></span>
 <span><span class="co">#&gt;    Filter Type: range</span></span>
 <span><span class="co">#&gt;    Filter Parameters:</span></span>
+<span><span class="co">#&gt;      active: TRUE</span></span>
+<span><span class="co">#&gt;      description: </span></span>
+<span><span class="co">#&gt;      domain: 1, 6.9</span></span>
 <span><span class="co">#&gt;      dataset: iris</span></span>
 <span><span class="co">#&gt;      variable: Petal.Length</span></span>
 <span><span class="co">#&gt;      range: NA</span></span>
 <span><span class="co">#&gt;      keep_na: TRUE</span></span>
-<span><span class="co">#&gt;      description: </span></span>
-<span><span class="co">#&gt;      active: TRUE</span></span>
-<span><span class="co">#&gt; -&gt; Filter ID: SYYIC1727431220830</span></span>
+<span><span class="co">#&gt; -&gt; Filter ID: iris-PetalWidth</span></span>
 <span><span class="co">#&gt;    Filter Type: range</span></span>
 <span><span class="co">#&gt;    Filter Parameters:</span></span>
+<span><span class="co">#&gt;      active: TRUE</span></span>
+<span><span class="co">#&gt;      description: </span></span>
+<span><span class="co">#&gt;      domain: 0.1, 2.5</span></span>
 <span><span class="co">#&gt;      dataset: iris</span></span>
 <span><span class="co">#&gt;      variable: Petal.Width</span></span>
 <span><span class="co">#&gt;      range: NA</span></span>
 <span><span class="co">#&gt;      keep_na: TRUE</span></span>
-<span><span class="co">#&gt;      description: </span></span>
-<span><span class="co">#&gt;      active: TRUE</span></span>
-<span><span class="co">#&gt; -&gt; Filter ID: HZGJI1727431220832</span></span>
+<span><span class="co">#&gt; -&gt; Filter ID: iris-Species</span></span>
 <span><span class="co">#&gt;    Filter Type: discrete</span></span>
 <span><span class="co">#&gt;    Filter Parameters:</span></span>
+<span><span class="co">#&gt;      active: TRUE</span></span>
+<span><span class="co">#&gt;      description: </span></span>
+<span><span class="co">#&gt;      domain: setosa, versicolor, virginica</span></span>
 <span><span class="co">#&gt;      dataset: iris</span></span>
 <span><span class="co">#&gt;      variable: Species</span></span>
 <span><span class="co">#&gt;      value: NA</span></span>
-<span><span class="co">#&gt;      keep_na: TRUE</span></span>
-<span><span class="co">#&gt;      description: </span></span>
-<span><span class="co">#&gt;      active: TRUE</span></span></code></pre></div>
+<span><span class="co">#&gt;      keep_na: TRUE</span></span></code></pre></div>
 <p>The <code>autofilter</code> method checks column type and count of
 levels to apply the proper filter:</p>
 <ul>

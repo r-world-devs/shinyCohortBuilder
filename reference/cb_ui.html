@@ -12,7 +12,7 @@ Use in the UI part of your application."><meta property="og:image" content="http
     
     <a class="navbar-brand me-2" href="../index.html">shinyCohortBuilder</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -96,7 +96,9 @@ Use in the UI part of your application.</p>
 <span>  steps <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  code <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  attrition <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  new_step <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"clone"</span>, <span class="st">"configure"</span><span class="op">)</span></span>
+<span>  new_step <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"clone"</span>, <span class="st">"configure"</span><span class="op">)</span>,</span>
+<span>  manage_step <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  assistant <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">cb_server</span><span class="op">(</span></span>
@@ -105,8 +107,10 @@ Use in the UI part of your application.</p>
 <span>  run_button <span class="op">=</span> <span class="st">"none"</span>,</span>
 <span>  stats <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pre"</span>, <span class="st">"post"</span><span class="op">)</span>,</span>
 <span>  feedback <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  render_source <span class="op">=</span> <span class="st">"auto"</span>,</span>
 <span>  enable_bookmarking <span class="op">=</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyOptions.html" class="external-link">getShinyOption</a></span><span class="op">(</span><span class="st">"bookmarkStore"</span>, default <span class="op">=</span> <span class="st">"disable"</span><span class="op">)</span>,</span>
 <span>  show_help <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  chat <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -143,6 +147,16 @@ Possible options are: "clone" - copy filters from last step,
 "configure" - opening modal and allow to chose filters from available filters.</p></dd>
 
 
+<dt>manage_step</dt>
+<dd><p>When `TRUE`, enables feature, that allows to modify the latest step filters (add/remove them).
+Available list of filters used by the feature should be stored as `source$available_filters` object (can be
+defined with `available_filters` argument for <a href="https://r-world-devs.github.io/cohortBuilder/reference/set_source.html" class="external-link">set_source</a>).</p></dd>
+
+
+<dt>assistant</dt>
+<dd><p>Set to TRUE to enable the LLM cohort assistant panel.</p></dd>
+
+
 <dt>cohort</dt>
 <dd><p>Cohort object storing filtering steps configuration.</p></dd>
 
@@ -163,12 +177,27 @@ Possible options are: "pre" - previous step stat, "post" - current step stats,
 <dd><p>Set to TRUE (default) if feedback plots should be displayed at each filter.</p></dd>
 
 
+<dt>render_source</dt>
+<dd><p>Controls how filter inputs (choices/ranges) are sourced when a
+filter declares a `domain`. Possible options are: "auto" (default) - use cached
+statistics in stats mode, and the filter's domain when stats are disabled
+(`stats = NULL` and `feedback = FALSE`); "domain" - in stats mode, build choices and
+range bounds from the full domain vocabulary and overlay counts from statistics where
+available. A filter without a domain always falls back to statistics. The value can be
+overridden per filter via `filter@extra$render_source`.</p></dd>
+
+
 <dt>enable_bookmarking</dt>
 <dd><p>Set to TRUE (default) if panel should be compatible with native shiny bookmarking.</p></dd>
 
 
 <dt>show_help</dt>
 <dd><p>Set to TRUE (default) to enable help buttons.</p></dd>
+
+
+<dt>chat</dt>
+<dd><p>A chat client object (e.g. from 'ellmer') passed to the assistant;
+`NULL` (default) disables the assistant server logic.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -223,7 +252,66 @@ Possible options are: "pre" - previous step stat, "post" - current step stats,
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html" class="external-link">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/interactive.html" class="external-link">interactive</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="co"># enabling latest step filters management</span></span></span>
+<span class="r-in"><span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/r-world-devs/cohortBuilder/" class="external-link">cohortBuilder</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://shiny.posit.co/" class="external-link">shiny</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://r-world-devs.github.io/shinyCohortBuilder/" class="external-link">shinyCohortBuilder</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">librarian_source</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/set_source.html" class="external-link">set_source</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/tblist.html" class="external-link">as.tblist</a></span><span class="op">(</span><span class="va">librarian</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>    available_filters <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="st">"discrete"</span>, id <span class="op">=</span> <span class="st">"author"</span>, dataset <span class="op">=</span> <span class="st">"books"</span>,</span></span>
+<span class="r-in"><span>        variable <span class="op">=</span> <span class="st">"author"</span>, value <span class="op">=</span> <span class="st">"Dan Brown"</span>,</span></span>
+<span class="r-in"><span>        active <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="st">"range"</span>, id <span class="op">=</span> <span class="st">"copies"</span>, dataset <span class="op">=</span> <span class="st">"books"</span>,</span></span>
+<span class="r-in"><span>        variable <span class="op">=</span> <span class="st">"copies"</span>, range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">10</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        active <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="st">"date_range"</span>, id <span class="op">=</span> <span class="st">"registered"</span>, dataset <span class="op">=</span> <span class="st">"borrowers"</span>,</span></span>
+<span class="r-in"><span>        variable <span class="op">=</span> <span class="st">"registered"</span>, range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2010-01-01"</span><span class="op">)</span>, <span class="cn">Inf</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        active <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="st">"discrete"</span>, id <span class="op">=</span> <span class="st">"program"</span>, dataset <span class="op">=</span> <span class="st">"borrowers"</span>,</span></span>
+<span class="r-in"><span>        variable <span class="op">=</span> <span class="st">"program"</span>, value <span class="op">=</span> <span class="cn">NA</span>,</span></span>
+<span class="r-in"><span>        active <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="va">librarian_cohort</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/create-cohort.html" class="external-link">cohort</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="va">librarian_source</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="st">"range"</span>, id <span class="op">=</span> <span class="st">"copies"</span>, dataset <span class="op">=</span> <span class="st">"books"</span>,</span></span>
+<span class="r-in"><span>      variable <span class="op">=</span> <span class="st">"copies"</span>, range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">10</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      active <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span>,</span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://r-world-devs.github.io/cohortBuilder/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="st">"date_range"</span>, id <span class="op">=</span> <span class="st">"registered"</span>, dataset <span class="op">=</span> <span class="st">"borrowers"</span>,</span></span>
+<span class="r-in"><span>      variable <span class="op">=</span> <span class="st">"registered"</span>, range <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="st">"2010-01-01"</span><span class="op">)</span>, <span class="cn">Inf</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      active <span class="op">=</span> <span class="cn">FALSE</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">ui</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/fluidPage.html" class="external-link">fluidPage</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/sidebarLayout.html" class="external-link">sidebarLayout</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/sidebarLayout.html" class="external-link">sidebarPanel</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>        <span class="fu">cb_ui</span><span class="op">(</span><span class="st">"librarian"</span>, manage_step <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>      <span class="op">)</span>,</span></span>
+<span class="r-in"><span>      <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/sidebarLayout.html" class="external-link">mainPanel</a></span><span class="op">(</span><span class="op">)</span></span></span>
+<span class="r-in"><span>    <span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="va">server</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">input</span>, <span class="va">output</span>, <span class="va">session</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>    <span class="fu">cb_server</span><span class="op">(</span><span class="st">"librarian"</span>, <span class="va">librarian_cohort</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/pkg/shiny/man/shinyApp.html" class="external-link">shinyApp</a></span><span class="op">(</span><span class="va">ui</span>, <span class="va">server</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
